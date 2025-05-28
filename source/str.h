@@ -1,0 +1,46 @@
+/**
+ * @file str.h
+ * @brief String utility functions.
+ *
+ * @author Jakob Kastelic
+ */
+
+#ifndef STR_H
+#define STR_H
+
+#include <stddef.h>
+
+/**
+ * @brief Cleans s2 into s1, replacing non-printable characters with spaces, and
+ * converting all letters to lowercase.
+ *
+ * @param s1 Destination buffer (must have space for at least len chars)
+ * @param s2 Source buffer to clean (len chars)
+ * @param len Number of characters to process
+ *
+ * @return Number of characters processed (equal to len)
+ */
+int str_clean(char *s1, const char *s2, size_t len);
+
+/**
+ * @brief Returns the length of a file in bytes.
+ *
+ * @param fname Path to the file.
+ * @return Length of file in bytes, or -1 on error.
+ */
+int str_file_len(const char *fname);
+
+/**
+ * @brief Reads up to max_len - 1 bytes from a file into a buffer and null-terminates it.
+ *
+ * @param buf Destination buffer (must be at least max_len bytes).
+ * @param fname Path to the file.
+ * @param max_len Maximum number of bytes including null terminator.
+ * @return Number of bytes read, or -1 on error.
+ */
+int str_read_file(char *buf, const char *fname, const size_t max_len);
+
+#endif // STR_H
+
+// end file str.h
+
