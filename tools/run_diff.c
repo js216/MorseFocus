@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
    int weights[NUM_CHARS] = {0};
    float result[NUM_CHARS] = {0};
 
-   lev_diff(weights, clean1, clean2);
+   const int diff = lev_diff(weights, clean1, clean2);
 
    for (int i = 0; i < NUM_CHARS; ++i) {
       result[i] = (float)weights[i];
@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
          return 1;
       }
    } else {
+      printf("Distance: %d\n", diff);
       weights_printout(result, NUM_CHARS);
    }
 

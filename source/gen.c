@@ -26,7 +26,8 @@ static float gen_rand()
       srand((unsigned)time(NULL));
       seeded = 1;
    }
-   return rand() / (RAND_MAX + 1.0f);
+   const float r = rand() / (RAND_MAX + 1.0f);
+   return r;
 }
 
 /**
@@ -49,7 +50,7 @@ static int gen_check_weights(const float *weights, const char *charset)
 
    for (int i = 0; i < 95; ++i)
    {
-      if (weights[i] != 1.0f && !found[i])
+      if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i])
       {
          fprintf(stderr,
                  "error: character '%c' (ASCII %d) has weight %f but "
@@ -124,14 +125,15 @@ int gen_chars(char *s, const size_t num_char,
 
    size_t written = 0;
    while (written < num_char - 1) {
-      int wlen = min_word + rand() % (max_word - min_word + 1);
+      int wlen = min_word + (int)(gen_rand() * (max_word - min_word + 1));
       if (wlen > (int)(num_char - 1 - written))
          wlen = (int)(num_char - 1 - written);
 
       for (int i = 0; i < wlen && written < num_char - 2; ++i) {
          char ch;
          if (!weights) {
-            ch = charset[rand() % charset_len];
+            int idx = (int)(gen_rand() * charset_len);
+            ch = charset[idx];
          } else {
             float r = gen_rand();
             size_t lo = 0, hi = charset_len - 1;

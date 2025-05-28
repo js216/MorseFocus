@@ -98,7 +98,6 @@ void weights_printout(const float *weights, const int num)
          printf("'%c' : %f\n", i + 33, weights[i]);
       }
    }
-   printf("\n");
 }
 
 // end file weights.c

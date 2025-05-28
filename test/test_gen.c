@@ -9,6 +9,8 @@
 #include <string.h>
 #include "gen.h"
 
+#define NUM_CHARS 95
+
 static const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
 int main(void)
@@ -31,13 +33,13 @@ int main(void)
    printf("\n");
 
    // set nonzero weights only for chars in default_charset
-   float weights[95] = {0.0f};
+   float weights[NUM_CHARS] = {0.0f};
    size_t charset_len = strlen(default_charset);
    for (size_t i = 0; i < charset_len; ++i)
    {
       unsigned char ch = default_charset[i];
       if (ch >= 33 && ch <= 126)
-         weights[ch - 33] = 1.0f; // or some custom weight
+         weights[ch - 33] = 1.0f;
    }
 
    // test with weighted chars favoring '!' (ASCII 33) heavily
