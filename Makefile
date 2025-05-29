@@ -27,5 +27,8 @@ clean:
 %.exe:
 	$(CC) -o $@ $^ $(CFLAGS)
 
-%.o:
+%.o: | build
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+build:
+		mkdir -p build
