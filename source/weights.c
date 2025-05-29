@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #define MAX_LINE 2048
 
@@ -59,6 +60,21 @@ int weights_load_last(float *weights, const char *fname, const int max_num)
 }
 
 
+/**
+ * @brief Check if a floating-point weight has no fractional part.
+ *
+ * This function determines whether the given float value represents
+ * an integer (i.e., its fractional part is zero).
+ *
+ * @param weight The float value to check.
+ * @return int Returns 1 if the fractional part of the weight is 0, otherwise 0.
+ */
+static int weights_is_integer(const float weight)
+{
+    return floorf(weight) == weight;
+}
+
+
 int weights_append(const char *fname, const float *weights, const int nw)
 {
    FILE *fp = fopen(fname, "a");
@@ -66,7 +82,12 @@ int weights_append(const char *fname, const float *weights, const int nw)
       return -1;
 
    for (int i = 0; i < nw; ++i) {
-      if (fprintf(fp, "%.6f", weights[i]) < 0) {
+      int ret = -1;
+      if (weights_is_integer(weights[i]))
+         ret = fprintf(fp, "%.0f", weights[i]);
+      else
+         ret = fprintf(fp, "%.6f", weights[i]);
+      if (ret < 0) {
          fclose(fp);
          return -1;
       }

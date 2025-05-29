@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS := -std=c99 -Wall -Wextra -pedantic -Isource
+CFLAGS := -std=c99 -Wall -Wextra -pedantic -Isource -lm
 
 tests = test_diff test_str test_gen test_weights
 tools = run_diff run_gen
