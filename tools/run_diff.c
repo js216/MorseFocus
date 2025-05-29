@@ -33,9 +33,6 @@
 #include "weights.h"
 #include "diff.h"
 
-#define MAX_LEN 8192
-#define NUM_CHARS 95
-
 static void print_usage(const char *prog)
 {
    fprintf(stderr,
@@ -86,19 +83,19 @@ int main(int argc, char *argv[])
    str_clean(clean1, buf1, len1);
    str_clean(clean2, buf2, len2);
 
-   int weights[NUM_CHARS] = {0};
-   float result[NUM_CHARS] = {0};
+   int weights[MAX_CHARS] = {0};
+   float result[MAX_CHARS] = {0};
 
    const int diff = lev_diff(weights, clean1, clean2);
 
-   for (int i = 0; i < NUM_CHARS; ++i) {
+   for (int i = 0; i < MAX_CHARS; ++i) {
       result[i] = (float)weights[i];
    }
 
    if (wfile) {
-      float loaded[NUM_CHARS] = {0};
-      if (weights_load_last(loaded, wfile, NUM_CHARS) > 0) {
-         for (int i = 0; i < NUM_CHARS; ++i) {
+      float loaded[MAX_CHARS] = {0};
+      if (weights_load_last(loaded, wfile, MAX_CHARS) > 0) {
+         for (int i = 0; i < MAX_CHARS; ++i) {
             result[i] += loaded[i];
          }
       } else {
@@ -106,19 +103,19 @@ int main(int argc, char *argv[])
       }
    }
 
-   for (int i = 0; i < NUM_CHARS; ++i) {
+   for (int i = 0; i < MAX_CHARS; ++i) {
       result[i] *= decay;
    }
 
    if (ofile) {
       fprintf(stderr, "Distance: %d\n", diff);
-      if (weights_append(ofile, result, NUM_CHARS) != 0) {
+      if (weights_append(ofile, result, MAX_CHARS) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return 1;
       }
    } else {
       printf("Distance: %d\n", diff);
-      weights_printout(result, NUM_CHARS);
+      weights_printout(result, MAX_CHARS);
    }
 
    return 0;

@@ -9,12 +9,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "str.h"
 
 #define TEST_FILE "test_file.txt"
-#define MAX_LEN 256
 
-static const char *test_content = "This is a test file.\nIt has multiple lines.\n";
+static const char *test_content =
+   "This is a test file.\nIt has multiple lines.\n";
 
 static int test_str_clean(void)
 {
@@ -114,7 +115,8 @@ static int prepare_test_file(void)
       return -1;
    }
 
-   if (fwrite(test_content, 1, strlen(test_content), f) != strlen(test_content)) {
+   const size_t ret = fwrite(test_content, 1, strlen(test_content), f);
+   if (ret != strlen(test_content)) {
       perror("failed to write to test file");
       fclose(f);
       return -1;

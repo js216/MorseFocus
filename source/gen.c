@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
+
+#include "str.h"
 
 /**
  * @brief generate a pseudo-random float in the range [0, 1)
@@ -63,6 +66,35 @@ static int gen_check_weights(const float *weights, const char *charset)
 }
 
 
+int gen_char_supported(const char ch)
+{
+    return (ch >= 'a' && ch <= 'z') ||
+           (ch >= '0' && ch <= '9') ||
+           ch == '.' || ch == '=' || ch == ',' || ch == '/' || ch == '?';
+}
+
+
+int gen_clean_charset(char *c1, const char* c2)
+{
+    int i = 0;
+    while (c2[i] != '\0' && i < MAX_CHARS) {
+        char ch = tolower((unsigned char)c2[i]);
+        if (!gen_char_supported(ch)) {
+            fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
+            return -1;
+        }
+        c1[i] = ch;
+        i++;
+    }
+    if (i < MAX_CHARS) {
+        c1[i] = '\0';
+    } else {
+        c1[MAX_CHARS - 1] = '\0';  // ensure null-termination
+    }
+    return 0;
+}
+
+
 int gen_chars(char *s, const size_t num_char,
               const int min_word, const int max_word,
               const float *weights, const char *charset)
@@ -78,10 +110,17 @@ int gen_chars(char *s, const size_t num_char,
    if (!charset)
       charset = default_charset;
 
-   if (weights && gen_check_weights(weights, charset) != 0)
+   char clean_charset[MAX_CHARS];
+   int ret = gen_clean_charset(clean_charset, charset);
+   if (ret != 0) {
+      fprintf(stderr, "error: failed to clean charset\n");
+      return -1;
+   }
+
+   if (weights && gen_check_weights(weights, clean_charset) != 0)
       return -1;
 
-   size_t charset_len = strlen(charset);
+   size_t charset_len = strlen(clean_charset);
    if (charset_len == 0 || num_char < 2)
       return -1;
 
@@ -93,7 +132,7 @@ int gen_chars(char *s, const size_t num_char,
 
       float sum = 0.0f;
       for (size_t j = 0; j < charset_len; ++j) {
-         unsigned char ch = charset[j];
+         unsigned char ch = clean_charset[j];
          if (ch < 33 || ch > 126) {
             free(tmp_weights);
             return -1;
@@ -133,7 +172,7 @@ int gen_chars(char *s, const size_t num_char,
          char ch;
          if (!weights) {
             int idx = (int)(gen_rand() * charset_len);
-            ch = charset[idx];
+            ch = clean_charset[idx];
          } else {
             float r = gen_rand();
             size_t lo = 0, hi = charset_len - 1;
@@ -144,7 +183,7 @@ int gen_chars(char *s, const size_t num_char,
                else
                   hi = mid;
             }
-            ch = charset[lo];
+            ch = clean_charset[lo];
          }
          s[written++] = ch;
       }
@@ -161,6 +200,7 @@ int gen_chars(char *s, const size_t num_char,
       free(cdf);
    return 0;
 }
+
 
 // end file gen.c
 

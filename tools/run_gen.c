@@ -30,9 +30,9 @@
 #include <ctype.h>
 
 #include "gen.h"
+#include "str.h"
 #include "weights.h"
 
-#define NUM_CHARS 95
 #define DEFAULT_MIN_WORD 2
 #define DEFAULT_MAX_WORD 7
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 {
    if (argc < 2) {
       usage(argv[0]);
-      return 1;
+      return -1;
    }
 
    size_t num_char = (size_t)atoi(argv[1]);
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
    const char *wfile = NULL;
    const char *charset = NULL;
    const char *out_file = NULL;
-   float weights[NUM_CHARS] = {0};
+   float weights[MAX_CHARS] = {0};
    float *wptr = NULL;
    float scale = 1.0f;
 
@@ -82,16 +82,16 @@ int main(int argc, char **argv)
          scale = strtof(argv[++i], NULL);
       } else {
          usage(argv[0]);
-         return 1;
+         return -1;
       }
    }
 
    if (wfile) {
-      if (weights_load_last(weights, wfile, NUM_CHARS) < 0) {
+      if (weights_load_last(weights, wfile, MAX_CHARS) < 0) {
          fprintf(stderr, "error: failed to load weights from %s\n", wfile);
-         return 1;
+         return -1;
       }
-      for (int i = 0; i < NUM_CHARS; i++) {
+      for (int i = 0; i < MAX_CHARS; i++) {
          weights[i] *= scale;
          weights[i] += 1.0f;
       }
@@ -101,13 +101,13 @@ int main(int argc, char **argv)
    char *buffer = malloc(num_char + 1);
    if (!buffer) {
       fprintf(stderr, "error: out of memory\n");
-      return 1;
+      return -1;
    }
 
    if (gen_chars(buffer, num_char, min_word, max_word, wptr, charset) != 0) {
       fprintf(stderr, "error: gen_chars() failed\n");
       free(buffer);
-      return 1;
+      return -1;
    }
 
    if (out_file) {
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
       if (!f) {
          fprintf(stderr, "error: cannot open %s for writing\n", out_file);
          free(buffer);
-         return 1;
+         return -1;
       }
       fputs(buffer, f);
       fclose(f);
