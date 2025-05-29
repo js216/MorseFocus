@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "str.h"
 #include "weights.h"
 
 #define TEST_FILE "test_weights.txt"
@@ -17,15 +19,14 @@
 static int create_test_file(const char *filename)
 {
    FILE *fp = fopen(filename, "w");
-   if (!fp)
-   {
+   if (!fp) {
       perror("fopen");
       return -1;
    }
 
-   fprintf(fp, "1.0 2.0 3.0\n");
-   fprintf(fp, "4.0 5.0 6.0 7.0\n");
-   fprintf(fp, "8.5 9.25 10.75 11.125 12.625\n");  // last line
+   fprintf(fp, "date time 1.0 2.0 3.0\n");
+   fprintf(fp, "date time 4.0 5.0 6.0 7.0\n");
+   fprintf(fp, "date time 8.5 9.25 10.75 11.125 12.625\n");  // last line
 
    fclose(fp);
    return 0;
@@ -38,17 +39,14 @@ static int test_weights_load_last(const char *filename)
    float weights[MAX_WEIGHTS] = {0.0f};
    int count = weights_load_last(weights, filename, MAX_WEIGHTS);
 
-   if (count != 5)
-   {
+   if (count != 5) {
       fprintf(stderr, "error: unexpected weight count: %d\n", count);
       return -1;
    }
 
    float expected[] = {8.5f, 9.25f, 10.75f, 11.125f, 12.625f};
-   for (int i = 0; i < count; ++i)
-   {
-      if (weights[i] != expected[i])
-      {
+   for (int i = 0; i < count; ++i) {
+      if (weights[i] != expected[i]) {
          fprintf(stderr, "error: mismatch at index %d: got %.3f, expected %.3f\n",
                  i, weights[i], expected[i]);
          return -1;
@@ -76,8 +74,7 @@ static int read_last_line(char *buf, size_t size, const char *fname)
    while (fgets(line, sizeof(line), fp))
       last = line;
 
-   if (!last)
-   {
+   if (!last) {
       fclose(fp);
       return -1;
    }
@@ -99,16 +96,14 @@ static int test_weights_append(const char *fname)
    remove(fname);
 
    // append weights to file
-   if (weights_append(fname, weights, count) != 0)
-   {
+   if (weights_append(fname, weights, count) != 0) {
       printf("test failed: could not append weights\n");
       return -1;
    }
 
    // read back the last line
    char buf[256];
-   if (read_last_line(buf, sizeof(buf), fname) != 0)
-   {
+   if (read_last_line(buf, sizeof(buf), fname) != 0) {
       printf("test failed: could not read back weights\n");
       return -1;
    }
@@ -118,10 +113,13 @@ static int test_weights_append(const char *fname)
    snprintf(expected, sizeof(expected), "%.6f %.6f %.6f\n",
             weights[0], weights[1], weights[2]);
 
+   // skip ahead to where weights begin
+   const char *buf_weights = str_skip_fields(buf, WEIGHTS_SKIP);
+
    // compare
-   if (strcmp(buf, expected) != 0)
-   {
-      printf("test failed: expected \"%s\" but got \"%s\"\n", expected, buf);
+   if (strcmp(buf_weights, expected) != 0) {
+      printf("test failed: expected \"%s\" but got \"%s\"\n", expected,
+            buf_weights);
       return -1;
    }
 

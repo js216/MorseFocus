@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "str.h"
+#include "diff.h"
 
 int lev_diff(int *warr, const char *s1, const char *s2)
 {

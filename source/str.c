@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "str.h"
-
 #include <ctype.h>
+#include <time.h>
+
+#include "str.h"
 
 int str_clean(char *s1, const char *s2, size_t len)
 {
@@ -66,39 +67,92 @@ int str_read_file(char *buf, const char *fname, const size_t max_len)
 
 int str_char_to_int(const char ch)
 {
-    if (ch >= '0' && ch <= '9') {
-        return ch - '0';
-    }
-    if (ch >= 'a' && ch <= 'z') {
-        return 10 + (ch - 'a');
-    }
-    switch (ch) {
-        case '.': return 36;
-        case '=': return 37;
-        case ',': return 38;
-        case '/': return 39;
-        case '?': return 40;
-        default: return -1;
-    }
+   if (ch >= '0' && ch <= '9') {
+      return ch - '0';
+   }
+   if (ch >= 'a' && ch <= 'z') {
+      return 10 + (ch - 'a');
+   }
+   switch (ch) {
+      case '.': return 36;
+      case '=': return 37;
+      case ',': return 38;
+      case '/': return 39;
+      case '?': return 40;
+      default: return -1;
+   }
 }
 
 
 char str_int_to_char(const int i)
 {
-    if (i >= 0 && i <= 9) {
-        return '0' + i;
+   if (i >= 0 && i <= 9) {
+      return '0' + i;
+   }
+   if (i >= 10 && i <= 35) {
+      return 'a' + (i - 10);
+   }
+   switch (i) {
+      case 36: return '.';
+      case 37: return '=';
+      case 38: return ',';
+      case 39: return '/';
+      case 40: return '?';
+      default: return '\0';
+   }
+}
+
+
+int str_write_time(FILE *fp)
+{
+   time_t now = time(NULL);
+   struct tm *tm_info = localtime(&now);
+   char buffer[64];
+
+   if (tm_info == NULL) {
+      fprintf(stderr, "error: Unable to get local time\n");
+      return -1;
+   }
+
+   if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info)) {
+      fprintf(fp, "%s ", buffer);
+   } else {
+      fprintf(stderr, "error: Failed to format time\n");
+      return -1;
+   }
+
+   return 0;
+}
+
+
+char* str_skip_fields(const char *s, const int n)
+{
+    int fields_skipped = 0;
+
+    if (s == NULL || n < 0) {
+        return NULL;
     }
-    if (i >= 10 && i <= 35) {
-        return 'a' + (i - 10);
+
+    while (*s && fields_skipped < n) {
+        // Skip leading spaces
+        while (*s && isspace((unsigned char)*s)) {
+            s++;
+        }
+
+        // Skip non-space characters (the field itself)
+        while (*s && !isspace((unsigned char)*s)) {
+            s++;
+        }
+
+        fields_skipped++;
     }
-    switch (i) {
-        case 36: return '.';
-        case 37: return '=';
-        case 38: return ',';
-        case 39: return '/';
-        case 40: return '?';
-        default: return '\0';
+
+    // Skip any trailing spaces after the last field
+    while (*s && isspace((unsigned char)*s)) {
+        s++;
     }
+
+    return (char *)s;
 }
 
 // end file str.c

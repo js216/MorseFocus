@@ -64,6 +64,34 @@ int str_char_to_int(const char ch);
  */
 char str_int_to_char(const int i);
 
+/**
+ * @brief Write the current local date and time to an open file.
+ *
+ * The function writes the current date and time in the format
+ * "YYYY-MM-DD HH:MM:SS" followed by a newline to the specified file.
+ *
+ * If the local time cannot be obtained or formatted, an error message
+ * is printed to the standard error.
+ *
+ * @param fp Pointer to an open FILE stream for writing.
+ * @return 0 on success and -1 on failure.
+ */
+int str_write_time(FILE *fp);
+
+/**
+ * @brief Skip a given number of space-delimited fields in a string.
+ *
+ * A "field" is defined as a sequence of non-space characters separated by
+ * one or more spaces. This function returns a pointer to the first character
+ * after skipping `n` fields.
+ *
+ * @param s The input C string (must not be NULL).
+ * @param n The number of fields to skip.
+ * @return char* Pointer to the character after `n` fields,
+ *               or to the null terminator if fewer fields exist.
+ */
+char* str_skip_fields(const char *s, const int n);
+
 #endif // STR_H
 
 // end file str.h

@@ -12,6 +12,7 @@
 #include <ctype.h>
 
 #include "str.h"
+#include "gen.h"
 
 /**
  * @brief generate a pseudo-random float in the range [0, 1)

@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "str.h"
+#include "weights.h"
 
 #define MAX_LINE 2048
 
@@ -44,6 +45,12 @@ int weights_load_last(float *weights, const char *fname, const int max_num)
       last_line[len - 1] = '\0';
       len--;
    }
+
+   // skip ahead to where weights begin
+   last_line = str_skip_fields(last_line, WEIGHTS_SKIP);
+
+   if (!last_line)
+      return -1;
 
    // parse floats from last_line into weights array
    int count = 0;
@@ -79,10 +86,17 @@ static int weights_is_integer(const float weight)
 
 int weights_append(const char *fname, const float *weights, const int nw)
 {
+   // open file for writing
    FILE *fp = fopen(fname, "a");
    if (!fp)
       return -1;
 
+   // write date and time
+   if (str_write_time(fp) != 0) {
+      return -1;
+   }
+
+   // write weights
    for (int i = 0; i < nw; ++i) {
       int ret = -1;
       if (weights_is_integer(weights[i]))
@@ -98,6 +112,7 @@ int weights_append(const char *fname, const float *weights, const int nw)
          fputc(' ', fp);
    }
 
+   // terminating newline
    fputc('\n', fp);
    fclose(fp);
    return 0;
