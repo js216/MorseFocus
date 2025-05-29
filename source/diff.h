@@ -23,10 +23,9 @@
  * distinct character involved in the transformation (excluding substitutions)
  * into the `warr` array.
  *
- * @param warr A pointer to an array of 95 integers. Each element corresponds to
- * a printable ASCII character from '!' (ASCII 33) to '~' (ASCII 126), indexed
- * as `warr[ch - 33]`. This array is updated to count the number of insertions
- * or deletions for each character.
+ * @param warr A pointer to an array of at most 95 integers. Each element
+ * corresponds to a subset of printable ASCII characters. This array is updated
+ * to count the number of insertions or deletions for each character.
  *
  * @param s1 A pointer to the first null-terminated input string.
  *

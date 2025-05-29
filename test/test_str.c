@@ -127,6 +127,110 @@ static int prepare_test_file(void)
 }
 
 
+static int test_str_char_to_int(void)
+{
+    int failures = 0;
+
+    for (char ch = '0'; ch <= '9'; ch++) {
+        int expected = ch - '0';
+        int result = str_char_to_int(ch);
+        if (result != expected) {
+            printf("  FAIL: '%c' -> %d, expected %d\n",
+                   ch, result, expected);
+            failures++;
+        }
+    }
+
+    for (char ch = 'a'; ch <= 'z'; ch++) {
+        int expected = 10 + (ch - 'a');
+        int result = str_char_to_int(ch);
+        if (result != expected) {
+            printf("  FAIL: '%c' -> %d, expected %d\n",
+                   ch, result, expected);
+            failures++;
+        }
+    }
+
+    struct {
+        char ch;
+        int expected;
+    } symbols[] = {
+        { '.', 36 }, { '=', 37 }, { ',', 38 },
+        { '/', 39 }, { '?', 40 }
+    };
+
+    for (int i = 0; i < 5; i++) {
+        int result = str_char_to_int(symbols[i].ch);
+        if (result != symbols[i].expected) {
+            printf("  FAIL: '%c' -> %d, expected %d\n",
+                   symbols[i].ch, result, symbols[i].expected);
+            failures++;
+        }
+    }
+
+    if (str_char_to_int('!') != -1) {
+        printf("  FAIL: '!' -> expected -1\n");
+        failures++;
+    }
+
+    if (failures) {
+       return -1;
+    } else {
+       printf("test_str_char_to_int() passed\n");
+       return 0;
+    }
+}
+
+
+static int test_str_int_to_char(void)
+{
+    int failures = 0;
+
+    for (int i = 0; i <= 9; i++) {
+        char expected = '0' + i;
+        char result = str_int_to_char(i);
+        if (result != expected) {
+            printf("  FAIL: %d -> '%c', expected '%c'\n",
+                   i, result, expected);
+            failures++;
+        }
+    }
+
+    for (int i = 10; i <= 35; i++) {
+        char expected = 'a' + (i - 10);
+        char result = str_int_to_char(i);
+        if (result != expected) {
+            printf("  FAIL: %d -> '%c', expected '%c'\n",
+                   i, result, expected);
+            failures++;
+        }
+    }
+
+    const char expected_symbols[] = { '.', '=', ',', '/', '?' };
+    for (int i = 0; i < 5; i++) {
+        int index = 36 + i;
+        char result = str_int_to_char(index);
+        if (result != expected_symbols[i]) {
+            printf("  FAIL: %d -> '%c', expected '%c'\n",
+                   index, result, expected_symbols[i]);
+            failures++;
+        }
+    }
+
+    if (str_int_to_char(41) != '\0') {
+        printf("  FAIL: 41 -> expected '\\0'\n");
+        failures++;
+    }
+
+    if (failures) {
+       return -1;
+    } else {
+       printf("test_str_int_to_char() passed\n");
+       return 0;
+    }
+}
+
+
 int main(void)
 {
    int result = 0;
@@ -134,6 +238,8 @@ int main(void)
    result |= prepare_test_file();
    result |= test_str_file_len(test_content);
    result |= test_str_read_file(test_content);
+   result |= test_str_char_to_int();
+   result |= test_str_int_to_char();
 
    remove(TEST_FILE);
    return result;

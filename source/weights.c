@@ -11,6 +11,8 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "str.h"
+
 #define MAX_LINE 2048
 
 int weights_load_last(float *weights, const char *fname, const int max_num)
@@ -116,7 +118,12 @@ void weights_printout(const float *weights, const int num)
 {
    for (int i = 0; i < num; i++) {
       if (weights[i] > 0) {
-         printf("'%c' : %f\n", i + 33, weights[i]);
+         char ch = str_int_to_char(i);
+         if (ch == '\0') {
+            fprintf(stderr, "error: invalid character number %d\n", i);
+            return;
+         }
+         printf("'%c' : %f\n", ch, weights[i]);
       }
    }
 }

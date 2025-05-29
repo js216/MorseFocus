@@ -17,24 +17,13 @@
  * @param num_char  total number of characters to generate (excluding null)
  * @param min_word  minimum length of each word (>=1)
  * @param max_word  maximum length of each word (>=min_word)
- * @param weights   array of 95 floats weights for ASCII 33..127, or NULL
+ * @param weights   array of at most MAX_CHARS floats weights
  * @param charset   string of characters to draw from, or NULL for default
  *
  * @return 0 on success, -1 on error
  */
 int gen_chars(char *s, const size_t num_char, const int min_word,
               const int max_word, const float *warr, const char *charset);
-
-/**
- * @brief Check if a character is supported.
- *
- * Supported characters include lowercase letters, digits,
- * and the symbols . = , / ?
- *
- * @param ch The character to check.
- * @return int Returns 1 if supported, 0 otherwise.
- */
-int gen_char_supported(const char ch);
 
 /**
  * @brief Clean a string by converting to lowercase and validating characters.

@@ -57,42 +57,6 @@ static int test_gen_chars(void)
 }
 
 
-static int test_gen_char_supported(void)
-{
-    struct {
-        char ch;
-        int expected;
-    } tests[] = {
-        { 'a', 1 },
-        { 'z', 1 },
-        { 'A', 0 },
-        { '9', 1 },
-        { '=', 1 },
-        { '.', 1 },
-        { '?', 1 },
-        { '/', 1 },
-        { ',', 1 },
-        { '@', 0 },
-        { '^', 0 },
-        { '\n', 0 },
-    };
-
-    int failures = 0;
-    printf("Testing gen_char_supported:\n");
-
-    for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {
-        int result = gen_char_supported(tests[i].ch);
-        if (result != tests[i].expected) {
-            printf("  FAIL: '%c' -> expected %d, got %d\n", tests[i].ch,
-                  tests[i].expected, result);
-            failures++;
-        }
-    }
-
-    return failures ? -1 : 0;
-}
-
-
 static int test_gen_clean_charset(void)
 {
     struct {
@@ -142,7 +106,6 @@ int main(void)
 {
    int result = 0;
    result |= test_gen_chars();
-   result |= test_gen_char_supported();
    result |= test_gen_clean_charset();
 
    remove(TEST_FILE);

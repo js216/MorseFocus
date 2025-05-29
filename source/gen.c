@@ -33,6 +33,7 @@ static float gen_rand()
    return r;
 }
 
+
 /**
  * Check that all characters with non-unity weights exist in the charset.
  *
@@ -42,22 +43,33 @@ static float gen_rand()
  */
 static int gen_check_weights(const float *weights, const char *charset)
 {
-   int found[95] = {0};
+   int found[MAX_CHARS] = {0};
 
    for (size_t i = 0; charset[i] != '\0'; ++i)
    {
       unsigned char ch = charset[i];
-      if (ch >= 33 && ch <= 126)
-         found[ch - 33] = 1;
+      if (str_char_to_int(ch) > 0) {
+         const int j = str_char_to_int(ch);
+         if (j < 0) {
+            fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
+                  ch, ch);
+            return -1;
+         }
+         found[j] = 1;
+      }
    }
 
-   for (int i = 0; i < 95; ++i)
+   for (int i = 0; i < MAX_CHARS; ++i)
    {
       if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i])
       {
+         char ch = str_int_to_char(i);
+         if (ch == '\0')
+            ch = ' ';
+
          fprintf(stderr,
-                 "error: character '%c' (ASCII %d) has weight %f but "
-                 "is not in charset\n", i + 33, i + 33, weights[i]);
+               "error: character '%c' (ASCII %d) has weight %f but "
+               "is not in charset\n", ch, ch,  weights[i]);
          return -1;
       }
    }
@@ -66,44 +78,36 @@ static int gen_check_weights(const float *weights, const char *charset)
 }
 
 
-int gen_char_supported(const char ch)
-{
-    return (ch >= 'a' && ch <= 'z') ||
-           (ch >= '0' && ch <= '9') ||
-           ch == '.' || ch == '=' || ch == ',' || ch == '/' || ch == '?';
-}
-
-
 int gen_clean_charset(char *c1, const char* c2)
 {
-    int i = 0;
-    while (c2[i] != '\0' && i < MAX_CHARS) {
-        char ch = tolower((unsigned char)c2[i]);
-        if (!gen_char_supported(ch)) {
-            fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
-            return -1;
-        }
-        c1[i] = ch;
-        i++;
-    }
-    if (i < MAX_CHARS) {
-        c1[i] = '\0';
-    } else {
-        c1[MAX_CHARS - 1] = '\0';  // ensure null-termination
-    }
-    return 0;
+   int i = 0;
+   while (c2[i] != '\0' && i < MAX_CHARS) {
+      char ch = tolower((unsigned char)c2[i]);
+      if (str_char_to_int(ch) < 0) {
+         fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
+         return -1;
+      }
+      c1[i] = ch;
+      i++;
+   }
+   if (i < MAX_CHARS) {
+      c1[i] = '\0';
+   } else {
+      c1[MAX_CHARS - 1] = '\0';  // ensure null-termination
+   }
+   return 0;
 }
 
 
 int gen_chars(char *s, const size_t num_char,
-              const int min_word, const int max_word,
-              const float *weights, const char *charset)
+      const int min_word, const int max_word,
+      const float *weights, const char *charset)
 {
    if (min_word < 1 || max_word < 1 || min_word > max_word)
    {
-         fprintf(stderr, "error: invalid word size range: min=%d, max=%d\n",
-                          min_word, max_word);
-            return 1;
+      fprintf(stderr, "error: invalid word size range: min=%d, max=%d\n",
+            min_word, max_word);
+      return 1;
    }
 
    const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
@@ -133,11 +137,17 @@ int gen_chars(char *s, const size_t num_char,
       float sum = 0.0f;
       for (size_t j = 0; j < charset_len; ++j) {
          unsigned char ch = clean_charset[j];
-         if (ch < 33 || ch > 126) {
+         if (str_char_to_int(ch) < 0) {
             free(tmp_weights);
             return -1;
          }
-         float w = weights[ch - 33];
+         const int k = str_char_to_int(ch);
+         if (k < 0) {
+            fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
+                  ch, ch);
+            return -1;
+         }
+         float w = weights[k];
          tmp_weights[j] = w;
          sum += w;
       }

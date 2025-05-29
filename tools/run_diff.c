@@ -84,10 +84,10 @@ int main(int argc, char *argv[])
    str_clean(clean2, buf2, len2);
 
    int weights[MAX_CHARS] = {0};
-   float result[MAX_CHARS] = {0};
 
    const int diff = lev_diff(weights, clean1, clean2);
 
+   float result[MAX_CHARS] = {0};
    for (int i = 0; i < MAX_CHARS; ++i) {
       result[i] = (float)weights[i];
    }

@@ -9,15 +9,15 @@ all: $(patsubst %,build/%.exe,$(tests) $(tools))
 build/run_diff.exe: tools/run_diff.c build/diff.o build/str.o build/weights.o
 build/run_gen.exe: tools/run_gen.c build/gen.o build/weights.o build/str.o
 
-build/test_diff.exe: test/test_diff.c build/diff.o
+build/test_diff.exe: test/test_diff.c build/diff.o build/str.o build/weights.o
 build/test_str.exe: test/test_str.c build/str.o
-build/test_gen.exe: test/test_gen.c build/gen.o source/str.h
-build/test_weights.exe: test/test_weights.c build/weights.o
+build/test_gen.exe: test/test_gen.c build/gen.o build/str.o
+build/test_weights.exe: test/test_weights.c build/weights.o build/str.o
 
 build/diff.o: source/diff.c source/diff.h
 build/str.o: source/str.c source/str.h
 build/gen.o: source/gen.c source/gen.h
-build/weights.o: source/weights.c source/weights.h
+build/weights.o: source/weights.c source/weights.h source/str.h
 
 .PHONY: clean all tests
 

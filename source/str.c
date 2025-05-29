@@ -63,5 +63,43 @@ int str_read_file(char *buf, const char *fname, const size_t max_len)
    return (int)read_len;
 }
 
+
+int str_char_to_int(const char ch)
+{
+    if (ch >= '0' && ch <= '9') {
+        return ch - '0';
+    }
+    if (ch >= 'a' && ch <= 'z') {
+        return 10 + (ch - 'a');
+    }
+    switch (ch) {
+        case '.': return 36;
+        case '=': return 37;
+        case ',': return 38;
+        case '/': return 39;
+        case '?': return 40;
+        default: return -1;
+    }
+}
+
+
+char str_int_to_char(const int i)
+{
+    if (i >= 0 && i <= 9) {
+        return '0' + i;
+    }
+    if (i >= 10 && i <= 35) {
+        return 'a' + (i - 10);
+    }
+    switch (i) {
+        case 36: return '.';
+        case 37: return '=';
+        case 38: return ',';
+        case 39: return '/';
+        case 40: return '?';
+        default: return '\0';
+    }
+}
+
 // end file str.c
 

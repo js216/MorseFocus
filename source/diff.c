@@ -7,6 +7,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+#include "str.h"
 
 int lev_diff(int *warr, const char *s1, const char *s2)
 {
@@ -44,24 +47,24 @@ int lev_diff(int *warr, const char *s1, const char *s2)
    }
 
    // backtrack to count edits per character
-   size_t i = len1;
-   size_t j = len2;
+   size_t i = len1 - 1;
+   size_t j = len2 - 1;
    while (i > 0 || j > 0) {
       if (i > 0 && j > 0 && dp[i][j] == dp[i - 1][j - 1] + ((s1[i - 1] != s2[j - 1]) ? 1 : 0)) {
          if (s1[i - 1] != s2[j - 1]) {
             // substitution: count both characters
-            warr[s1[i - 1] - 33]++;
-            warr[s2[j - 1] - 33]++;
+            warr[str_char_to_int(s1[i-1])]++;
+            warr[str_char_to_int(s2[j-1])]++;
          }
          --i;
          --j;
       } else if (i > 0 && dp[i][j] == dp[i - 1][j] + 1) {
          // deletion from s1
-         warr[s1[i - 1] - 33]++;
+         warr[str_char_to_int(s1[i-1])]++;
          --i;
       } else {
          // insertion into s1 (from s2)
-         warr[s2[j - 1] - 33]++;
+         warr[str_char_to_int(s2[j-1])]++;
          --j;
       }
    }
