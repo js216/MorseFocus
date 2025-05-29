@@ -38,7 +38,7 @@
 static void usage(const char *prog)
 {
    fprintf(stderr,
-      "usage: %s num_char [options]\n"
+      "Usage: %s num_char [options]\n"
       "options:\n"
       "  -s MIN     set minimum word length (default %d)\n"
       "  -x MAX     set maximum word length (default %d)\n"
