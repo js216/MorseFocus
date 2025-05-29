@@ -111,6 +111,7 @@ int main(int argc, char *argv[])
    }
 
    if (ofile) {
+      fprintf(stderr, "Distance: %d\n", diff);
       if (weights_append(ofile, result, NUM_CHARS) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return 1;
