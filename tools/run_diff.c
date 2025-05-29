@@ -108,15 +108,14 @@ int main(int argc, char *argv[])
    }
 
    if (ofile) {
-      fprintf(stderr, "Distance: %d\n", diff);
       if (weights_append(ofile, result, MAX_CHARS) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return 1;
       }
-   } else {
-      printf("Distance: %d\n", diff);
-      weights_printout(result, MAX_CHARS);
    }
+
+   printf("Distance: %d\n", diff);
+   weights_printout(result, MAX_CHARS);
 
    return 0;
 }

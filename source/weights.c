@@ -102,7 +102,7 @@ int weights_append(const char *fname, const float *weights, const int nw)
       if (weights_is_integer(weights[i]))
          ret = fprintf(fp, "%.0f", weights[i]);
       else
-         ret = fprintf(fp, "%.6f", weights[i]);
+         ret = fprintf(fp, "%.3f", weights[i]);
       if (ret < 0) {
          fclose(fp);
          return -1;
@@ -138,7 +138,10 @@ void weights_printout(const float *weights, const int num)
             fprintf(stderr, "error: invalid character number %d\n", i);
             return;
          }
-         printf("'%c' : %f\n", ch, weights[i]);
+         if (weights_is_integer(weights[i]))
+            printf("'%c' : %.0f\n", ch, weights[i]);
+         else
+            printf("'%c' : %.3f\n", ch, weights[i]);
       }
    }
 }
