@@ -48,7 +48,7 @@ frequently:
 
     $ ./run_diff.exe sent.txt recvd.txt -o weights.csv -w weights.csv
 
-Use the `-s scale` optional argument to `run_diff` to make sure the weights
+Use the `-d decay` optional argument to `run_diff` to make sure the weights
 don't grow forever, monopolizing the text generation with just a few difficult
 characters. For example, setting `scale` to `0.9` will decrease all weight
 factors by 10% each run.
@@ -58,17 +58,19 @@ Running the utilities without any arguments will print usage information:
     $ ./run_gen.exe
     Usage: ./run_gen.exe num_char [options]
     options:
-      -s MIN     set minimum word length (default 2)
+      -i MIN     set minimum word length (default 2)
       -x MAX     set maximum word length (default 7)
       -w FILE    load weights from last line of FILE
       -c CHARS   use custom charset (printable, no space)
       -o FILE    write output to FILE instead of stdout
+      -s scale   multiply all weights by scale factor
+      -s scale   multiply all weights by scale (default 1.0)
     
     $ ./run_diff.exe
     Usage: ./run_diff.exe f1 f2 [options]
     Options:
       -w file   load weights from file
-      -s scale  scale output weights (default: 1.0)
+      -d decay  scale output weights (default: 1.0)
       -o file   append output weights to file
 
 

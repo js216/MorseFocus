@@ -14,11 +14,12 @@
  *
  * Options:
  *
- *   -s MIN      set minimum word length (default: 2)
+ *   -i MIN      set minimum word length (default: 2)
  *   -x MAX      set maximum word length (default: 7)
  *   -w FILE     load character weights from the last line of FILE
  *   -c CHARS    specify a custom character set (printable, no spaces)
  *   -o FILE     write output to FILE instead of printing to standard output
+ *   -s scale    multiply all weights by scale factor (default 1.0)
  *
  * @author Jakob Kastelic
  */
@@ -40,11 +41,12 @@ static void usage(const char *prog)
    fprintf(stderr,
       "Usage: %s num_char [options]\n"
       "options:\n"
-      "  -s MIN     set minimum word length (default %d)\n"
+      "  -i MIN     set minimum word length (default %d)\n"
       "  -x MAX     set maximum word length (default %d)\n"
       "  -w FILE    load weights from last line of FILE\n"
       "  -c CHARS   use custom charset (printable, no space)\n"
-      "  -o FILE    write output to FILE instead of stdout\n",
+      "  -o FILE    write output to FILE instead of stdout\n"
+      "  -s scale   multiply all weights by scale (default 1.0)\n",
       prog, DEFAULT_MIN_WORD, DEFAULT_MAX_WORD);
 }
 
@@ -63,9 +65,10 @@ int main(int argc, char **argv)
    const char *out_file = NULL;
    float weights[NUM_CHARS] = {0};
    float *wptr = NULL;
+   float scale = 1.0f;
 
    for (int i = 2; i < argc; ++i) {
-      if (!strcmp(argv[i], "-s") && i + 1 < argc) {
+      if (!strcmp(argv[i], "-i") && i + 1 < argc) {
          min_word = atoi(argv[++i]);
       } else if (!strcmp(argv[i], "-x") && i + 1 < argc) {
          max_word = atoi(argv[++i]);
@@ -75,6 +78,8 @@ int main(int argc, char **argv)
          charset = argv[++i];
       } else if (!strcmp(argv[i], "-o") && i + 1 < argc) {
          out_file = argv[++i];
+      } else if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
+         scale = strtof(argv[++i], NULL);
       } else {
          usage(argv[0]);
          return 1;
@@ -86,8 +91,10 @@ int main(int argc, char **argv)
          fprintf(stderr, "error: failed to load weights from %s\n", wfile);
          return 1;
       }
-      for (int i = 0; i < NUM_CHARS; i++)
+      for (int i = 0; i < NUM_CHARS; i++) {
+         weights[i] *= scale;
          weights[i] += 1.0f;
+      }
       wptr = weights;
    }
 

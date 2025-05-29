@@ -19,7 +19,7 @@
  * Optional Flags:
  *
  * -w f3: path to file containing stored weights (default: none)
- * -s scale: floating-point scaling factor (default: 1.0)
+ * -d decay: floating-point decay factor (default: 1.0)
  * -o f4: append the resulting weights to file f4 (default: print only)
  *
  * @author Jakob Kastelic
@@ -42,7 +42,7 @@ static void print_usage(const char *prog)
       "Usage: %s f1 f2 [options]\n"
       "Options:\n"
       "  -w file   load weights from file\n"
-      "  -s scale  scale output weights (default: 1.0)\n"
+      "  -d decay  scale output weights (default: 1.0)\n"
       "  -o file   append output weights to file\n", prog);
 }
 
@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
    const char *file2 = argv[2];
    const char *wfile = NULL;
    const char *ofile = NULL;
-   float scale = 1.0f;
+   float decay = 1.0f;
 
    // parse optional arguments
    for (int i = 3; i < argc; ++i) {
       if (strcmp(argv[i], "-w") == 0 && i + 1 < argc) {
          wfile = argv[++i];
-      } else if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
-         scale = strtof(argv[++i], NULL);
+      } else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
+         decay = strtof(argv[++i], NULL);
       } else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
          ofile = argv[++i];
       } else {
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
    }
 
    for (int i = 0; i < NUM_CHARS; ++i) {
-      result[i] *= scale;
+      result[i] *= decay;
    }
 
    if (ofile) {
