@@ -9,6 +9,7 @@
 #define STR_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 #define MAX_CHARS 95
 #define MAX_LEN 8192

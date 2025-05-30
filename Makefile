@@ -1,34 +1,37 @@
 CC = gcc
-CFLAGS := -std=c99 -Wall -Wextra -pedantic -Isource -lm
+CFLAGS := -std=c99 -Wall -Wextra -pedantic -Imodules -MMD -MP
+LDFLAGS = -lm 
 
+modules = diff str gen weights
 tests = test_diff test_str test_gen test_weights
-tools = run_diff run_gen
+tools = run_tests run_diff run_gen
 
-all: $(patsubst %,build/%.exe,$(tests) $(tools))
+all: $(addprefix build/, $(tools))
+module_objs = $(addprefix build/, $(addsuffix .o, $(modules)))
+test_objs = $(addprefix build/, $(addsuffix .o, $(tests)))
 
-build/run_diff.exe: tools/run_diff.c build/diff.o build/str.o build/weights.o
-build/run_gen.exe: tools/run_gen.c build/gen.o build/weights.o build/str.o
+.PHONY: clean all
 
-build/test_diff.exe: test/test_diff.c build/diff.o build/str.o build/weights.o
-build/test_str.exe: test/test_str.c build/str.o
-build/test_gen.exe: test/test_gen.c build/gen.o build/str.o
-build/test_weights.exe: test/test_weights.c build/weights.o build/str.o
+# Main program files
 
-build/diff.o: source/diff.c source/diff.h
-build/str.o: source/str.c source/str.h
-build/gen.o: source/gen.c source/gen.h
-build/weights.o: source/weights.c source/weights.h source/str.h
+build/%.o: modules/%.c | build
+	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
-.PHONY: clean all tests
+build/%: tools/%.c $(module_objs)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Test files
+
+build/%.o: tests/%.c | build
+	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+
+build/run_tests: tests/run_tests.c $(module_objs) $(test_objs)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
 	rm -f build/*
 
-%.exe:
-	$(CC) -o $@ $^ $(CFLAGS)
-
-%.o: | build
-	$(CC) -c -o $@ $< $(CFLAGS)
-
 build:
-		mkdir -p build
+	mkdir -p build
+
+-include $(wildcard build/*.d)

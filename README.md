@@ -1,8 +1,8 @@
 # MorseFocus
 
 Morse (CW) trainer with character sequence weighted by past performance. Each
-time a mistake is made with a given character, it is recorded, so that in the
-next session this character will appear more frequently.
+time a mistake is made with a given character, it can be recorded, so that in
+the next session this character will appear more frequently.
 
 ### Building
 
@@ -38,7 +38,7 @@ To write these stats to a file for use in the future as weights:
     $ ./run_diff.exe sent.txt recvd.txt -o weights.csv
 
 Note that `weight.csv` will contain the information in a different format,
-in a one record per line manner.
+one record per line.
 
 To use the weights to influence future text generation:
 
@@ -79,12 +79,8 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- simplify Makefile: all source objects should be compiled with a single rule,
-  and linked against the final programs
-- combine all tests into a single program, so that testing is
-  completely automated; in fact, the Makefile should run tests after each
-  compile, so that running the final test program is a prerequisite of each
-  program in the makefile
+- Makefile should run tests after each compile, so that running the final test
+  program is a prerequisite of each program in the makefile
 - introduce `struct record` to keep track of date/time, weights, speed, &c.,
   rather than ad hoc string manipulation
 - make sure header inclusions, and function calls, form a DAG
@@ -124,7 +120,3 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-### Author
-
-Jakob Kastelic

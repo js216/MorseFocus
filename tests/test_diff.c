@@ -12,7 +12,7 @@
 #include "weights.h"
 #include "str.h"
 
-int main(void)
+int test_diff(void)
 {
    const char *s1 = "abc test hey";
    const char *s2 = "abd tests hey";

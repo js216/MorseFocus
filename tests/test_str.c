@@ -12,12 +12,10 @@
 
 #include "str.h"
 
-#define TEST_FILE "test_file.txt"
-
 static const char *test_content =
    "This is a test file.\nIt has multiple lines.\n";
 
-static int test_str_clean(void)
+int test_str_clean(void)
 {
    const char input[] = "Hello\x08bWorld!\x07Goodye\x01";
    size_t len = strlen(input);
@@ -69,10 +67,10 @@ static int test_str_clean(void)
 }
 
 
-static int test_str_file_len(const char *expected_content)
+int test_str_file_len(const char *test_file)
 {
-   int len = str_file_len(TEST_FILE);
-   size_t expected_len = strlen(expected_content);
+   int len = str_file_len(test_file);
+   size_t expected_len = strlen(test_content);
 
    if (len != (int)expected_len) {
       printf("str_file_len() test failed: expected %zu, got %d\n",
@@ -85,11 +83,11 @@ static int test_str_file_len(const char *expected_content)
 }
 
 
-static int test_str_read_file(const char *expected_content)
+int test_str_read_file(const char *test_file)
 {
    char buf[MAX_LEN] = {0};
-   int read_len = str_read_file(buf, TEST_FILE, MAX_LEN);
-   size_t expected_len = strlen(expected_content);
+   int read_len = str_read_file(buf, test_file, MAX_LEN);
+   size_t expected_len = strlen(test_content);
 
    if (read_len != (int)expected_len) {
       printf("str_read_file() test failed: expected %zu, got %d\n",
@@ -97,7 +95,7 @@ static int test_str_read_file(const char *expected_content)
       return -1;
    }
 
-   if (strcmp(buf, expected_content) != 0) {
+   if (strcmp(buf, test_content) != 0) {
       printf("str_read_file() test failed: contents do not match\n");
       return -1;
    }
@@ -107,9 +105,9 @@ static int test_str_read_file(const char *expected_content)
 }
 
 
-static int prepare_test_file(void)
+int test_str_prepare_test_file(const char *test_file)
 {
-   FILE *f = fopen(TEST_FILE, "wb");
+   FILE *f = fopen(test_file, "wb");
    if (!f) {
       perror("failed to create test file");
       return -1;
@@ -127,7 +125,7 @@ static int prepare_test_file(void)
 }
 
 
-static int test_str_char_to_int(void)
+int test_str_char_to_int(void)
 {
     int failures = 0;
 
@@ -182,7 +180,7 @@ static int test_str_char_to_int(void)
 }
 
 
-static int test_str_int_to_char(void)
+int test_str_int_to_char(void)
 {
     int failures = 0;
 
@@ -228,21 +226,6 @@ static int test_str_int_to_char(void)
        printf("test_str_int_to_char() passed\n");
        return 0;
     }
-}
-
-
-int main(void)
-{
-   int result = 0;
-   result |= test_str_clean();
-   result |= prepare_test_file();
-   result |= test_str_file_len(test_content);
-   result |= test_str_read_file(test_content);
-   result |= test_str_char_to_int();
-   result |= test_str_int_to_char();
-
-   remove(TEST_FILE);
-   return result;
 }
 
 // end file test_str.c

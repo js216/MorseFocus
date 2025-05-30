@@ -11,11 +11,9 @@
 #include "gen.h"
 #include "str.h"
 
-#define TEST_FILE "test_file.txt"
-
 static const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
-static int test_gen_chars(void)
+int test_gen_chars(void)
 {
    char buf[101];
    int ret;
@@ -57,7 +55,7 @@ static int test_gen_chars(void)
 }
 
 
-static int test_gen_clean_charset(void)
+int test_gen_clean_charset(void)
 {
     struct {
         const char *input;
@@ -101,17 +99,6 @@ static int test_gen_clean_charset(void)
 
     return failures ? -1 : 0;
 }
-
-int main(void)
-{
-   int result = 0;
-   result |= test_gen_chars();
-   result |= test_gen_clean_charset();
-
-   remove(TEST_FILE);
-   return result;
-}
-
 
 // end file test_gen.c
 

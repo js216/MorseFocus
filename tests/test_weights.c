@@ -12,11 +12,10 @@
 #include "str.h"
 #include "weights.h"
 
-#define TEST_FILE "test_weights.txt"
 #define MAX_WEIGHTS 32
 
 // writes known floating point data to the test file
-static int create_test_file(const char *filename)
+int create_test_file(const char *filename)
 {
    FILE *fp = fopen(filename, "w");
    if (!fp) {
@@ -34,7 +33,7 @@ static int create_test_file(const char *filename)
 
 
 // loads weights from last line and verifies expected values
-static int test_weights_load_last(const char *filename)
+int test_weights_load_last(const char *filename)
 {
    float weights[MAX_WEIGHTS] = {0.0f};
    int count = weights_load_last(weights, filename, MAX_WEIGHTS);
@@ -62,7 +61,7 @@ static int test_weights_load_last(const char *filename)
 }
 
 
-static int read_last_line(char *buf, size_t size, const char *fname)
+int read_last_line(char *buf, size_t size, const char *fname)
 {
    FILE *fp = fopen(fname, "r");
    if (!fp)
@@ -87,7 +86,7 @@ static int read_last_line(char *buf, size_t size, const char *fname)
 }
 
 
-static int test_weights_append(const char *fname)
+int test_weights_append(const char *fname)
 {
    float weights[] = {1.23f, 4.56f, 7.89f};
    const int count = sizeof(weights) / sizeof(weights[0]);
@@ -130,7 +129,7 @@ static int test_weights_append(const char *fname)
 }
 
 
-static int test_weights_add(void)
+int test_weights_add(void)
 {
    float w1[] = {1.0f, 2.5f, 3.3f, 4.4f};
    float w2[] = {0.5f, 1.5f, -1.3f, 2.6f};
@@ -153,24 +152,6 @@ static int test_weights_add(void)
 
    // success message
    printf("test_weights_add success\n");
-   return 0;
-}
-
-
-int main(void)
-{
-   if (create_test_file(TEST_FILE) != 0)
-      return 1;
-
-   if (test_weights_load_last(TEST_FILE) != 0)
-      return 1;
-
-   if (test_weights_append(TEST_FILE) != 0)
-      return 1;
-
-   if (test_weights_add() != 0)
-      return 1;
-
    return 0;
 }
 
