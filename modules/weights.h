@@ -11,7 +11,7 @@
 #define WEIGHTS_SKIP 2
 
 /**
- * @brief Load weights from the last line of a text file
+ * @brief Load weights from the last line of a text file.
  *
  * @param weights pointer to output array of floats
  * @param fname path to file
@@ -35,7 +35,9 @@ int weights_load_last(float *weights, const char *fname, const int max_num);
 int weights_append(const char *fname, const float *weights, const int nw);
 
 /**
- * @brief Adds two arrays of weights element-wise into a third array
+ * @brief Adds two arrays of weights element-wise into a third array.
+ *
+ * The output array can be the same as either (or both) of the input arrays.
  *
  * @param w output array where sums are stored
  * @param w1 first input weights array

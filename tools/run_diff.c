@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 {
    if (argc < 3) {
       print_usage(argv[0]);
-      return 1;
+      return -1;
    }
 
    const char *file1 = argv[1];
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
          ofile = argv[++i];
       } else {
          print_usage(argv[0]);
-         return 1;
+         return -1;
       }
    }
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
    int len2 = str_read_file(buf2, file2, MAX_LEN);
    if (len1 <= 0 || len2 <= 0) {
       fprintf(stderr, "error reading input files\n");
-      return 1;
+      return -1;
    }
 
    str_clean(clean1, buf1, len1);
@@ -92,15 +92,17 @@ int main(int argc, char *argv[])
       result[i] = (float)weights[i];
    }
 
+   printf("Distance: %d\n", diff);
+   weights_printout(result, MAX_CHARS);
+
    if (wfile) {
       float loaded[MAX_CHARS] = {0};
-      if (weights_load_last(loaded, wfile, MAX_CHARS) > 0) {
-         for (int i = 0; i < MAX_CHARS; ++i) {
-            result[i] += loaded[i];
-         }
-      } else {
+      if (weights_load_last(loaded, wfile, MAX_CHARS) < 0) {
          fprintf(stderr, "warning: failed to load weights from %s\n", wfile);
+         return -1;
       }
+
+      weights_add(result, result, loaded, MAX_CHARS);
    }
 
    for (int i = 0; i < MAX_CHARS; ++i) {
@@ -110,12 +112,9 @@ int main(int argc, char *argv[])
    if (ofile) {
       if (weights_append(ofile, result, MAX_CHARS) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
-         return 1;
+         return -1;
       }
    }
-
-   printf("Distance: %d\n", diff);
-   weights_printout(result, MAX_CHARS);
 
    return 0;
 }
