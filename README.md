@@ -6,6 +6,9 @@ next session this character will appear more frequently.
 
 ### Building
 
+Pre-requisites: only `gcc` and `make` are required to build this project. The
+code is written entirely in standard C99.
+
 Clone the repository and run
 
     $ cd MorseFocus
@@ -73,6 +76,54 @@ Running the utilities without any arguments will print usage information:
       -d decay  scale output weights (default: 1.0)
       -o file   append output weights to file
 
+
+### To do
+
+- simplify Makefile: all source objects should be compiled with a single rule,
+  and linked against the final programs
+- combine all tests into a single program, so that testing is
+  completely automated; in fact, the Makefile should run tests after each
+  compile, so that running the final test program is a prerequisite of each
+  program in the makefile
+- introduce `struct record` to keep track of date/time, weights, speed, &c.,
+  rather than ad hoc string manipulation
+- make sure header inclusions, and function calls, form a DAG
+- make test cases a lot more comprehensive, including edge cases and malformed
+  input
+- centralized error handling
+- integer to character lookup table should be just a static const array 
+- find and use a linter
+- also save total length, distance, scale factor, decay
+  factor, charset, and both speeds, and when reading ignore these fields
+- GUI using Nuklear
+- speed PID for constant accuracy
+
+### License
+
+BSD 2-Clause License
+
+Copyright (c) 2025, Jakob Kastelic
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ### Author
 
