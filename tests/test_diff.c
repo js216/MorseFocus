@@ -17,18 +17,13 @@ int test_diff(void)
    const char *s1 = "abc test hey";
    const char *s2 = "abd tests hey";
 
-   int weights[MAX_CHARS] = {0};
+   float weights[MAX_CHARS] = {0};
    int distance = lev_diff(weights, s1, s2);
-
-   float result[MAX_CHARS] = {0};
-   for (int i = 0; i < MAX_CHARS; ++i) {
-      result[i] = (float)weights[i];
-   }
 
    printf("Levenshtein distance: %d\n", distance);
    printf("Character edit frequencies (insertions/deletions):\n");
 
-   weights_printout(result, MAX_CHARS);
+   weights_printout(weights, MAX_CHARS);
 
    return 0;
 }

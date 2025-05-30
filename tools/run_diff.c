@@ -83,17 +83,12 @@ int main(int argc, char *argv[])
    str_clean(clean1, buf1, len1);
    str_clean(clean2, buf2, len2);
 
-   int weights[MAX_CHARS] = {0};
+   float weights[MAX_CHARS] = {0};
 
    const int diff = lev_diff(weights, clean1, clean2);
 
-   float result[MAX_CHARS] = {0};
-   for (int i = 0; i < MAX_CHARS; ++i) {
-      result[i] = (float)weights[i];
-   }
-
    printf("Distance: %d\n", diff);
-   weights_printout(result, MAX_CHARS);
+   weights_printout(weights, MAX_CHARS);
 
    if (wfile) {
       float loaded[MAX_CHARS] = {0};
@@ -102,15 +97,15 @@ int main(int argc, char *argv[])
          return -1;
       }
 
-      weights_add(result, result, loaded, MAX_CHARS);
+      weights_add(weights, weights, loaded, MAX_CHARS);
    }
 
    for (int i = 0; i < MAX_CHARS; ++i) {
-      result[i] *= decay;
+      weights[i] *= decay;
    }
 
    if (ofile) {
-      if (weights_append(ofile, result, MAX_CHARS) != 0) {
+      if (weights_append(ofile, weights, MAX_CHARS) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return -1;
       }
