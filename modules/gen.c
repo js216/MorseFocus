@@ -46,31 +46,25 @@ static int gen_check_weights(const float *weights, const char *charset)
 {
    int found[MAX_CHARS] = {0};
 
-   for (size_t i = 0; charset[i] != '\0'; ++i)
+   for (size_t i = 0; charset[i] != '\0'; i++)
    {
-      unsigned char ch = charset[i];
-      if (str_char_to_int(ch) > 0) {
-         const int j = str_char_to_int(ch);
-         if (j < 0) {
-            fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
-                  ch, ch);
-            return -1;
-         }
-         found[j] = 1;
+      const int ch_i = str_char_to_int(charset[i]);
+      if (ch_i < 0) {
+         fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
+               charset[i], charset[i]);
+         return -1;
       }
+
+      found[ch_i] = 1;
    }
 
-   for (int i = 0; i < MAX_CHARS; ++i)
+   for (int i = 0; i < MAX_CHARS; i++)
    {
-      if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i])
-      {
+      if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i]) {
          char ch = str_int_to_char(i);
-         if (ch == '\0')
-            ch = ' ';
-
          fprintf(stderr,
                "error: character '%c' (ASCII %d) has weight %f but "
-               "is not in charset\n", ch, ch,  weights[i]);
+               "is not in charset\n", ch=='\0' ? ' ' : ch, ch,  weights[i]);
          return -1;
       }
    }
@@ -136,7 +130,7 @@ int gen_chars(char *s, const size_t num_char,
          return -1;
 
       float sum = 0.0f;
-      for (size_t j = 0; j < charset_len; ++j) {
+      for (size_t j = 0; j < charset_len; j++) {
          unsigned char ch = clean_charset[j];
          if (str_char_to_int(ch) < 0) {
             free(tmp_weights);
@@ -165,7 +159,7 @@ int gen_chars(char *s, const size_t num_char,
       }
 
       float accum = 0.0f;
-      for (size_t j = 0; j < charset_len; ++j) {
+      for (size_t j = 0; j < charset_len; j++) {
          accum += tmp_weights[j];
          cdf[j] = accum / sum;
       }
@@ -179,7 +173,7 @@ int gen_chars(char *s, const size_t num_char,
       if (wlen > (int)(num_char - 1 - written))
          wlen = (int)(num_char - 1 - written);
 
-      for (int i = 0; i < wlen && written < num_char - 2; ++i) {
+      for (int i = 0; i < wlen && written < num_char - 2; i++) {
          char ch;
          if (!weights) {
             int idx = (int)(gen_rand() * charset_len);
