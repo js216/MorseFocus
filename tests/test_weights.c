@@ -95,7 +95,7 @@ int test_weights_append(const char *fname)
    remove(fname);
 
    // append weights to file
-   if (weights_append(fname, weights, count) != 0) {
+   if (weights_append(fname, weights, count, 1.0) != 0) {
       printf("test failed: could not append weights\n");
       return -1;
    }

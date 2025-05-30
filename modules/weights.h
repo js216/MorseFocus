@@ -8,7 +8,7 @@
 #ifndef WEIGHTS_H
 #define WEIGHTS_H
 
-#define WEIGHTS_SKIP 2
+#define WEIGHTS_SKIP 3
 
 /**
  * @brief Load weights from the last line of a text file.
@@ -26,13 +26,14 @@ int weights_load_last(float *weights, const char *fname, const int max_num);
  * This function writes `num_weights` floating point values from the `weights`
  * array to a new line at the end of the file specified by `fname`.
  *
- * @param fname Path to the output file.
- * @param weights Array of floating point values to append.
+ * @param f Path to the output file.
+ * @param w Array of floating point values to append.
  * @param nw Number of weights to write.
+ * @param d Number with which all weights are multiplied before writing.
  *
  * @return 0 on success, -1 on error (e.g., file open failure).
  */
-int weights_append(const char *fname, const float *weights, const int nw);
+int weights_append(const char *f, const float *w, const int nw, const float d);
 
 /**
  * @brief Adds two arrays of weights element-wise into a third array.

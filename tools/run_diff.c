@@ -100,12 +100,8 @@ int main(int argc, char *argv[])
       weights_add(weights, weights, loaded, MAX_CHARS);
    }
 
-   for (int i = 0; i < MAX_CHARS; ++i) {
-      weights[i] *= decay;
-   }
-
    if (ofile) {
-      if (weights_append(ofile, weights, MAX_CHARS) != 0) {
+      if (weights_append(ofile, weights, MAX_CHARS, decay) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return -1;
       }

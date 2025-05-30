@@ -84,27 +84,40 @@ static int weights_is_integer(const float weight)
 }
 
 
-int weights_append(const char *fname, const float *weights, const int nw)
+int weights_append(const char *f, const float *w, const int nw, const float d)
 {
    // open file for writing
-   FILE *fp = fopen(fname, "a");
-   if (!fp)
+   FILE *fp = fopen(f, "a");
+   if (!fp) {
+      fprintf(stderr, "error: cannot open file\n");
       return -1;
+   }
 
    // write date and time
    if (str_write_time(fp) != 0) {
+      fprintf(stderr, "error: cannot write date/time\n");
+      return -1;
+   }
+
+   // write decay factor
+   if (fprintf(fp, "%.3f ", d) < 0) {
+      fclose(fp);
+      fprintf(stderr, "error: cannot write decay factor\n");
       return -1;
    }
 
    // write weights
    for (int i = 0; i < nw; ++i) {
       int ret = -1;
-      if (weights_is_integer(weights[i]))
-         ret = fprintf(fp, "%.0f", weights[i]);
+      float wd = d * w[i];
+      if (weights_is_integer(wd))
+         ret = fprintf(fp, "%.0f", wd);
       else
-         ret = fprintf(fp, "%.3f", weights[i]);
+         ret = fprintf(fp, "%.3f", wd);
+
       if (ret < 0) {
          fclose(fp);
+         fprintf(stderr, "error: cannot write weights\n");
          return -1;
       }
 
