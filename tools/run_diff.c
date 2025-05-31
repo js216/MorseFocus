@@ -21,6 +21,10 @@
  * -w f3: path to file containing stored weights (default: none)
  * -d decay: floating-point decay factor (default: 1.0)
  * -o f4: append the resulting weights to file f4 (default: print only)
+ * -s: scale to record to file (default: 0)
+ * -1: first speed to record to file (default: 0)
+ * -2: second speed to record to file (default: 0)
+ * -c: charset to record to file (default: "~")
  *
  * @author Jakob Kastelic
  */
@@ -40,9 +44,13 @@ static void print_usage(const char *prog)
    fprintf(stderr,
       "Usage: %s f1 f2 [options]\n"
       "Options:\n"
-      "  -w file   load weights from file\n"
-      "  -d decay  scale output weights (default: 1.0)\n"
-      "  -o file   append output weights to file\n", prog);
+      "  -w file    load weights from file\n"
+      "  -d decay   scale output weights (default: 1.0)\n"
+      "  -o file    append output weights to file\n"
+      "  -s scale   scale to record to file (default: 0)\n"
+      "  -1 speed1  first speed to record to file (default: 0)\n"
+      "  -2 speed2  second speed to record to file (default: 0)\n"
+      "  -c charset charset to record to file (default: \"~\")\n", prog);
 }
 
 int main(int argc, char *argv[])
@@ -72,6 +80,14 @@ int main(int argc, char *argv[])
          decay = strtof(argv[++i], NULL);
       } else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
          ofile = argv[++i];
+      } else if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
+         scale = strtof(argv[++i], NULL);
+      } else if (strcmp(argv[i], "-1") == 0 && i + 1 < argc) {
+         speed1 = strtof(argv[++i], NULL);
+      } else if (strcmp(argv[i], "-2") == 0 && i + 1 < argc) {
+         speed2 = strtof(argv[++i], NULL);
+      } else if (strcmp(argv[i], "-c") == 0 && i + 1 < argc) {
+         charset = argv[++i];
       } else {
          print_usage(argv[0]);
          return -1;
@@ -112,6 +128,7 @@ int main(int argc, char *argv[])
    if (ofile) {
       // current time
       time_t now = time(NULL);
+      r.valid = 1;
       r.datetime = *localtime(&now);
       r.len = len1;
       r.dist = dist;

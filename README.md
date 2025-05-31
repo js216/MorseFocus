@@ -78,7 +78,6 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- optional flags to `run_diff` to store extra data: scale, charset, speeds
 - make sure tests don't print anything except a SUCCESS message at the end
 - get rid of most unnecessary `#define` statements
 - make test cases a lot more comprehensive, including edge cases and malformed

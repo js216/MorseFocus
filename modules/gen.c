@@ -65,7 +65,12 @@ int gen_chars(char *s, const size_t num_char,
    {
       fprintf(stderr, "error: invalid word size range: min=%d, max=%d\n",
             min_word, max_word);
-      return 1;
+      return -1;
+   }
+
+   if (num_char < 2) {
+      fprintf(stderr, "error: refuse to generate < 2 characters\n");
+      return -1;
    }
 
    const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
@@ -80,26 +85,27 @@ int gen_chars(char *s, const size_t num_char,
    }
 
    size_t charset_len = strlen(clean_charset);
-   if (charset_len == 0 || num_char < 2)
+   if (charset_len == 0) {
+      fprintf(stderr, "error: empty charset\n");
       return -1;
+   }
 
    float *cdf = NULL;
    if (weights) {
       float *tmp_weights = malloc(sizeof(float) * charset_len);
-      if (!tmp_weights)
+      if (!tmp_weights) {
+         fprintf(stderr, "error: cannot allocate temp weights array\n");
          return -1;
+      }
 
       float sum = 0.0f;
       for (size_t j = 0; j < charset_len; j++) {
          unsigned char ch = clean_charset[j];
-         if (str_char_to_int(ch) < 0) {
-            free(tmp_weights);
-            return -1;
-         }
          const int k = str_char_to_int(ch);
          if (k < 0) {
             fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
-                  ch, ch);
+                  ch=='\0' ? ' ' : ch, ch);
+            free(tmp_weights);
             return -1;
          }
          float w = weights[k];
@@ -108,12 +114,14 @@ int gen_chars(char *s, const size_t num_char,
       }
 
       if (sum == 0.0f) {
+         fprintf(stderr, "error: weights sum to zero\n");
          free(tmp_weights);
          return -1;
       }
 
       cdf = malloc(sizeof(float) * charset_len);
       if (!cdf) {
+         fprintf(stderr, "error: cannot allocate cdf\n");
          free(tmp_weights);
          return -1;
       }

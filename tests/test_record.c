@@ -19,7 +19,7 @@ int test_record_load_last(const char *test_file)
    FILE *fp = fopen(test_file, "w");
    if (!fp) {
       printf("FAIL: cannot create test file");
-      return 1;
+      return -1;
    }
 
    fprintf(fp, "2025-05-28 12:00:00 1.0 1.0 0.0 0.0 3 1 abc 0.1 0.2 0.3\n");

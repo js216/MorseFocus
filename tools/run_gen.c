@@ -64,6 +64,7 @@ int main(int argc, char **argv)
    const char *charset = NULL;
    const char *out_file = NULL;
    float scale = 1.0f;
+   float *wptr = NULL;
 
    for (int i = 2; i < argc; ++i) {
       if (!strcmp(argv[i], "-i") && i + 1 < argc) {
@@ -96,6 +97,8 @@ int main(int argc, char **argv)
          l.weights[i] *= scale;
          l.weights[i] += 1.0f;
       }
+
+      wptr = l.weights;
    }
 
    char *buffer = malloc(num_char + 1);
@@ -104,7 +107,7 @@ int main(int argc, char **argv)
       return -1;
    }
 
-   if (gen_chars(buffer, num_char, min_word, max_word, l.weights, charset) != 0) {
+   if (gen_chars(buffer, num_char, min_word, max_word, wptr, charset) != 0) {
       fprintf(stderr, "error: gen_chars() failed\n");
       free(buffer);
       return -1;
