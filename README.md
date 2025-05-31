@@ -78,16 +78,16 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- introduce `struct record` to keep track of date/time, weights, speed, &c.,
-  rather than ad hoc string manipulation
-- make sure header inclusions, and function calls, form a DAG
+- replace all weights by the `struct record`, and delete weight.c/.h
 - centralized error handling
+- also save total length, distance, scale factor, charset, and both speeds
 - integer to character lookup table should be just a static const array 
-- find and use a linter
-- also save total length, distance, scale factor, decay
-  factor, charset, and both speeds, and when reading ignore these fields
+- make sure tests don't print anything except a SUCCESS message at the end
+- get rid of most unnecessary `#define` statements
 - make test cases a lot more comprehensive, including edge cases and malformed
   input
+- make sure header inclusions, and function calls, form a DAG
+- find and use a linter
 - GUI using Nuklear
 - speed PID for constant accuracy
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS := -std=c99 -Wall -Wextra -pedantic -Imodules -MMD -MP
+CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -Imodules -MMD -MP
 LDFLAGS = -lm 
 
 modules = diff str gen weights record
@@ -27,7 +27,7 @@ build/%.o: tests/%.c | build
 
 build/run_tests: tests/run_tests.c $(module_objs) $(test_objs)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-	$@
+	cd build && ./run_tests
 
 clean:
 	rm -f build/*

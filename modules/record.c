@@ -35,7 +35,12 @@ struct record record_read_last(const char *filename)
    fclose(fp);
 
    if (last_line[0] == '\0') {
-      fprintf(stderr, "File '%s' is empty or unreadable.\n", filename);
+      fprintf(stderr, "error: file '%s' is empty or unreadable.\n", filename);
+      return rec;
+   }
+
+   if (!strchr(last_line, '\n')) {
+      fprintf(stderr, "error: could not read entire line.\n");
       return rec;
    }
 
@@ -117,42 +122,50 @@ struct record record_read_last(const char *filename)
 
 int record_append(const char *path, const struct record *r)
 {
-    FILE *fp = fopen(path, "a");
-    if (!fp) {
-        fprintf(stderr, "error: cannot open file '%s'\n", path);
-        return -1;
-    }
+   FILE *fp = fopen(path, "a");
+   if (!fp) {
+      fprintf(stderr, "error: cannot open file '%s'\n", path);
+      return -1;
+   }
 
-    // format timestamp
-    char timestr[32];
-    if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S",
-                 &r->datetime) == 0) {
-        fprintf(stderr, "error: cannot format datetime\n");
-        fclose(fp);
-        return -1;
-    }
+   // format timestamp
+   char timestr[32];
+   if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S",
+            &r->datetime) == 0) {
+      fprintf(stderr, "error: cannot format datetime\n");
+      fclose(fp);
+      return -1;
+   }
 
-    // write fixed fields
-    if (fprintf(fp, "%s %.3f %.3f %.3f %.3f %s",
-                timestr, r->decay, r->scale, r->speed1,
-                r->speed2, r->charset) < 0) {
-        fprintf(stderr, "error: cannot write to file\n");
-        fclose(fp);
-        return -1;
-    }
+   // write fixed fields
+   int num_pr = fprintf(fp, "%s %.3f %.3f %.3f %.3f %s", timestr, r->decay,
+         r->scale, r->speed1, r->speed2, r->charset);
+   if (num_pr < 0) {
+      fprintf(stderr, "error: cannot write to file\n");
+      fclose(fp);
+      return -1;
+   }
 
-    // write weights
-    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
-        if (fprintf(fp, " %.3f", r->weights[i]) < 0) {
-            fprintf(stderr, "error: cannot write weights\n");
-            fclose(fp);
-            return -1;
-        }
-    }
+   // write weights
+   for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
+      const int ret = fprintf(fp, " %.3f", r->weights[i]);
+      if (ret < 0) {
+         fprintf(stderr, "error: cannot write weights\n");
+         fclose(fp);
+         return -1;
+      }
 
-    fputc('\n', fp);
-    fclose(fp);
-    return 0;
+      num_pr += ret;
+      if (num_pr > MAX_LINE_LEN) {
+         fprintf(stderr, "error: wrote more than MAX_LINE_LEN\n");
+         fclose(fp);
+         return -1;
+      }
+   }
+
+   fputc('\n', fp);
+   fclose(fp);
+   return 0;
 }
 
 
