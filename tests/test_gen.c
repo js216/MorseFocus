@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "gen.h"
-#include "str.h"
+#include "weights.h"
 
 static const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
@@ -33,7 +33,7 @@ int test_gen_chars(void)
    printf("\n");
 
    // set nonzero weights only for chars in default_charset
-   float weights[MAX_CHARS] = {0.0f};
+   float weights[NUM_WEIGHTS] = {0.0f};
    size_t charset_len = strlen(default_charset);
    for (size_t i = 0; i < charset_len; ++i)
    {
@@ -70,7 +70,7 @@ int test_gen_clean_charset(void)
     };
 
     int failures = 0;
-    char cleaned[MAX_CHARS];
+    char cleaned[NUM_WEIGHTS];
     printf("\nTesting gen_clean_charset:\n");
 
     for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {

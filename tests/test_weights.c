@@ -8,11 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "str.h"
 #include "weights.h"
 
-#define MAX_WEIGHTS 32
+#define TEST_NUM_WEIGHTS 32
 
 // writes known floating point data to the test file
 static int test_weights_create_test_file(const char *filename)
@@ -40,8 +39,8 @@ int test_weights_load_last(const char *filename)
       return -1;
    }
 
-   float weights[MAX_WEIGHTS] = {0.0f};
-   int count = weights_load_last(weights, filename, MAX_WEIGHTS);
+   float weights[TEST_NUM_WEIGHTS] = {0.0f};
+   int count = weights_load_last(weights, filename, TEST_NUM_WEIGHTS);
 
    if (count != 5) {
       fprintf(stderr, "error: unexpected weight count: %d\n", count);

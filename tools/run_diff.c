@@ -33,6 +33,8 @@
 #include "weights.h"
 #include "diff.h"
 
+#define MAX_LEN 8192
+
 static void print_usage(const char *prog)
 {
    fprintf(stderr,
@@ -83,25 +85,25 @@ int main(int argc, char *argv[])
    str_clean(clean1, buf1, len1);
    str_clean(clean2, buf2, len2);
 
-   float weights[MAX_CHARS] = {0};
+   float weights[NUM_WEIGHTS] = {0};
 
    const int diff = lev_diff(weights, clean1, clean2);
 
    printf("Distance: %d\n", diff);
-   weights_printout(weights, MAX_CHARS);
+   weights_printout(weights, NUM_WEIGHTS);
 
    if (wfile) {
-      float loaded[MAX_CHARS] = {0};
-      if (weights_load_last(loaded, wfile, MAX_CHARS) < 0) {
+      float loaded[NUM_WEIGHTS] = {0};
+      if (weights_load_last(loaded, wfile, NUM_WEIGHTS) < 0) {
          fprintf(stderr, "warning: failed to load weights from %s\n", wfile);
          return -1;
       }
 
-      weights_add(weights, weights, loaded, MAX_CHARS);
+      weights_add(weights, weights, loaded, NUM_WEIGHTS);
    }
 
    if (ofile) {
-      if (weights_append(ofile, weights, MAX_CHARS, decay) != 0) {
+      if (weights_append(ofile, weights, NUM_WEIGHTS, decay) != 0) {
          fprintf(stderr, "error writing to file: %s\n", ofile);
          return -1;
       }

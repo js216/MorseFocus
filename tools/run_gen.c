@@ -63,7 +63,7 @@ int main(int argc, char **argv)
    const char *wfile = NULL;
    const char *charset = NULL;
    const char *out_file = NULL;
-   float weights[MAX_CHARS] = {0};
+   float weights[NUM_WEIGHTS] = {0};
    float *wptr = NULL;
    float scale = 1.0f;
 
@@ -87,11 +87,11 @@ int main(int argc, char **argv)
    }
 
    if (wfile) {
-      if (weights_load_last(weights, wfile, MAX_CHARS) < 0) {
+      if (weights_load_last(weights, wfile, NUM_WEIGHTS) < 0) {
          fprintf(stderr, "error: failed to load weights from %s\n", wfile);
          return -1;
       }
-      for (int i = 0; i < MAX_CHARS; i++) {
+      for (int i = 0; i < NUM_WEIGHTS; i++) {
          weights[i] *= scale;
          weights[i] += 1.0f;
       }

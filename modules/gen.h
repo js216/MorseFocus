@@ -17,7 +17,7 @@
  * @param num_char  total number of characters to generate (excluding null)
  * @param min_word  minimum length of each word (>=1)
  * @param max_word  maximum length of each word (>=min_word)
- * @param weights   array of at most MAX_CHARS floats weights
+ * @param weights   array of at most NUM_WEIGHTS floats weights
  * @param charset   string of characters to draw from, or NULL for default
  *
  * @return 0 on success, -1 on error
@@ -29,7 +29,7 @@ int gen_chars(char *s, const size_t num_char, const int min_word,
  * @brief Clean a string by converting to lowercase and validating characters.
  *
  * Converts uppercase letters to lowercase and copies to c1, while ensuring
- * that all characters are supported. Copies at most MAX_CHARS characters.
+ * that all characters are supported. Copies at most NUM_WEIGHTS characters.
  *
  * @param c1 Output buffer for the cleaned string.
  * @param c2 Input null-terminated string.

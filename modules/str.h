@@ -11,9 +11,6 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define MAX_CHARS 95
-#define MAX_LEN 8192
-
 /**
  * @brief Cleans s2 into s1, replacing non-printable characters with spaces, and
  * converting all letters to lowercase.

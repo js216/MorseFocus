@@ -82,13 +82,13 @@ Running the utilities without any arguments will print usage information:
 - introduce `struct record` to keep track of date/time, weights, speed, &c.,
   rather than ad hoc string manipulation
 - make sure header inclusions, and function calls, form a DAG
-- make test cases a lot more comprehensive, including edge cases and malformed
-  input
 - centralized error handling
 - integer to character lookup table should be just a static const array 
 - find and use a linter
 - also save total length, distance, scale factor, decay
   factor, charset, and both speeds, and when reading ignore these fields
+- make test cases a lot more comprehensive, including edge cases and malformed
+  input
 - GUI using Nuklear
 - speed PID for constant accuracy
 

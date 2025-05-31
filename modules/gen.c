@@ -12,6 +12,7 @@
 #include <ctype.h>
 
 #include "str.h"
+#include "weights.h"
 #include "gen.h"
 
 /**
@@ -44,7 +45,7 @@ static float gen_rand()
  */
 static int gen_check_weights(const float *weights, const char *charset)
 {
-   int found[MAX_CHARS] = {0};
+   int found[NUM_WEIGHTS] = {0};
 
    for (size_t i = 0; charset[i] != '\0'; i++)
    {
@@ -58,7 +59,7 @@ static int gen_check_weights(const float *weights, const char *charset)
       found[ch_i] = 1;
    }
 
-   for (int i = 0; i < MAX_CHARS; i++)
+   for (int i = 0; i < NUM_WEIGHTS; i++)
    {
       if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i]) {
          char ch = str_int_to_char(i);
@@ -76,7 +77,7 @@ static int gen_check_weights(const float *weights, const char *charset)
 int gen_clean_charset(char *c1, const char* c2)
 {
    int i = 0;
-   while (c2[i] != '\0' && i < MAX_CHARS) {
+   while (c2[i] != '\0' && i < NUM_WEIGHTS) {
       char ch = tolower((unsigned char)c2[i]);
       if (str_char_to_int(ch) < 0) {
          fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
@@ -85,10 +86,10 @@ int gen_clean_charset(char *c1, const char* c2)
       c1[i] = ch;
       i++;
    }
-   if (i < MAX_CHARS) {
+   if (i < NUM_WEIGHTS) {
       c1[i] = '\0';
    } else {
-      c1[MAX_CHARS - 1] = '\0';  // ensure null-termination
+      c1[NUM_WEIGHTS - 1] = '\0';  // ensure null-termination
    }
    return 0;
 }
@@ -109,7 +110,7 @@ int gen_chars(char *s, const size_t num_char,
    if (!charset)
       charset = default_charset;
 
-   char clean_charset[MAX_CHARS];
+   char clean_charset[NUM_WEIGHTS];
    int ret = gen_clean_charset(clean_charset, charset);
    if (ret != 0) {
       fprintf(stderr, "error: failed to clean charset\n");

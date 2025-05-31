@@ -8,6 +8,7 @@
 #ifndef WEIGHTS_H
 #define WEIGHTS_H
 
+#define NUM_WEIGHTS 41
 #define WEIGHTS_SKIP 3
 
 /**

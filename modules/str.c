@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
-
 #include "str.h"
 
 int str_clean(char *s1, const char *s2, size_t len)

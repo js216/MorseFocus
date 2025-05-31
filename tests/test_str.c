@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "str.h"
+
+#define TEST_MAX_LEN 100
 
 static const char *test_content =
    "This is a test file.\nIt has multiple lines.\n";
@@ -85,8 +86,8 @@ int test_str_file_len(const char *test_file)
 
 int test_str_read_file(const char *test_file)
 {
-   char buf[MAX_LEN] = {0};
-   int read_len = str_read_file(buf, test_file, MAX_LEN);
+   char buf[TEST_MAX_LEN] = {0};
+   int read_len = str_read_file(buf, test_file, TEST_MAX_LEN);
    size_t expected_len = strlen(test_content);
 
    if (read_len != (int)expected_len) {

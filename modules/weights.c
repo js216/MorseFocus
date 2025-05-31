@@ -10,7 +10,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-
 #include "str.h"
 #include "weights.h"
 
