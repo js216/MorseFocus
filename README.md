@@ -78,16 +78,17 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- replace all weights by the `struct record`, and delete weight.c/.h
 - centralized error handling
 - also save total length, distance, scale factor, charset, and both speeds
 - integer to character lookup table should be just a static const array 
+- optional flags to `run_diff` to store extra data: charset, speeds, etc.
 - make sure tests don't print anything except a SUCCESS message at the end
 - get rid of most unnecessary `#define` statements
 - make test cases a lot more comprehensive, including edge cases and malformed
   input
 - make sure header inclusions, and function calls, form a DAG
-- find and use a linter
+- find and use a linter: Cppcheck, Clang Analyzer, Frama-C, Infer, Splint,
+  GCC -fanalyzer
 - GUI using Nuklear
 - speed PID for constant accuracy
 

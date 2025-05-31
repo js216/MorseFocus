@@ -9,12 +9,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include "str.h"
 #include "record.h"
 
 #define MAX_LINE_LEN 4096
 
-struct record record_read_last(const char *filename)
+struct record record_load_last(const char *filename)
 {
    struct record rec;
    memset(&rec, 0, sizeof(rec));
@@ -122,6 +123,13 @@ struct record record_read_last(const char *filename)
 
 int record_append(const char *path, const struct record *r)
 {
+   // check record is valid
+   if (!(r->valid)) {
+      fprintf(stderr, "error: invalid record given\n");
+      return -1;
+   }
+
+   // open output file for appending
    FILE *fp = fopen(path, "a");
    if (!fp) {
       fprintf(stderr, "error: cannot open file '%s'\n", path);
@@ -166,6 +174,39 @@ int record_append(const char *path, const struct record *r)
    fputc('\n', fp);
    fclose(fp);
    return 0;
+}
+
+
+/**
+ * @brief Check if a floating-point weight has no fractional part.
+ *
+ * This function determines whether the given float value represents
+ * an integer (i.e., its fractional part is zero).
+ *
+ * @param weight The float value to check.
+ * @return int Returns 1 if the fractional part of the weight is 0, otherwise 0.
+ */
+static int record_is_integer(const float weight)
+{
+    return floorf(weight) == weight;
+}
+
+
+void record_printout(const struct record *r)
+{
+   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
+      if (r->weights[i] > 0) {
+         char ch = str_int_to_char(i);
+         if (ch == '\0') {
+            fprintf(stderr, "error: invalid character number %d\n", i);
+            return;
+         }
+         if (record_is_integer(r->weights[i]))
+            printf("'%c' : %.0f\n", ch, r->weights[i]);
+         else
+            printf("'%c' : %.3f\n", ch, r->weights[i]);
+      }
+   }
 }
 
 

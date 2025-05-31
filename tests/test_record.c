@@ -12,7 +12,7 @@
 #include "record.h"
 #include "test_record.h"
 
-int test_record_read_last(const char *test_file)
+int test_record_load_last(const char *test_file)
 {
    // make a test file
 
@@ -32,7 +32,7 @@ int test_record_read_last(const char *test_file)
 
    // call function under test
 
-   struct record r = record_read_last(test_file);
+   struct record r = record_load_last(test_file);
 
    // check the parsing worked
 
@@ -69,7 +69,7 @@ int test_record_read_last(const char *test_file)
       }
    }
 
-   printf("SUCCESS: test_record_read_last\n");
+   printf("SUCCESS: test_record_load_last\n");
    return 0;
 }
 
@@ -82,6 +82,7 @@ int test_record_append(const char *test_file)
 
     // fill in known values
     str_ptime("2025-05-31 12:34:56", "%Y-%m-%d %H:%M:%S", &r.datetime);
+    r.valid = 1;
     r.decay = 1.0f;
     r.scale = 2.0f;
     r.speed1 = 3.0f;

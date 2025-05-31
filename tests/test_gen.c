@@ -8,8 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "str.h"
+#include "record.h"
 #include "gen.h"
-#include "weights.h"
 
 static const char *default_charset = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
@@ -33,13 +34,13 @@ int test_gen_chars(void)
    printf("\n");
 
    // set nonzero weights only for chars in default_charset
-   float weights[NUM_WEIGHTS] = {0.0f};
+   float weights[MAX_CHARSET_LEN] = {0.0f};
    size_t charset_len = strlen(default_charset);
-   for (size_t i = 0; i < charset_len; ++i)
-   {
+   for (size_t i = 0; i < charset_len; i++) {
       unsigned char ch = default_charset[i];
-      if (ch >= 33 && ch <= 126)
-         weights[ch - 33] = 1.0f;
+      const int ch_i = str_char_to_int(ch);
+      if (ch_i >= 0)
+         weights[ch_i] = 1.0f;
    }
 
    // test with weighted chars favoring '!' (ASCII 33) heavily
@@ -70,7 +71,7 @@ int test_gen_clean_charset(void)
     };
 
     int failures = 0;
-    char cleaned[NUM_WEIGHTS];
+    char cleaned[MAX_CHARSET_LEN];
     printf("\nTesting gen_clean_charset:\n");
 
     for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {

@@ -31,7 +31,7 @@
 
 #include "gen.h"
 #include "str.h"
-#include "weights.h"
+#include "record.h"
 
 #define DEFAULT_MIN_WORD 2
 #define DEFAULT_MAX_WORD 7
@@ -63,8 +63,6 @@ int main(int argc, char **argv)
    const char *wfile = NULL;
    const char *charset = NULL;
    const char *out_file = NULL;
-   float weights[NUM_WEIGHTS] = {0};
-   float *wptr = NULL;
    float scale = 1.0f;
 
    for (int i = 2; i < argc; ++i) {
@@ -86,16 +84,18 @@ int main(int argc, char **argv)
       }
    }
 
+   struct record l = {0};
    if (wfile) {
-      if (weights_load_last(weights, wfile, NUM_WEIGHTS) < 0) {
-         fprintf(stderr, "error: failed to load weights from %s\n", wfile);
+      l = record_load_last(wfile);
+      if (l.valid == 0) {
+         fprintf(stderr, "warning: invalid record obtained from %s\n", wfile);
          return -1;
       }
-      for (int i = 0; i < NUM_WEIGHTS; i++) {
-         weights[i] *= scale;
-         weights[i] += 1.0f;
+
+      for (int i = 0; i < MAX_CHARSET_LEN; i++) {
+         l.weights[i] *= scale;
+         l.weights[i] += 1.0f;
       }
-      wptr = weights;
    }
 
    char *buffer = malloc(num_char + 1);
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
       return -1;
    }
 
-   if (gen_chars(buffer, num_char, min_word, max_word, wptr, charset) != 0) {
+   if (gen_chars(buffer, num_char, min_word, max_word, l.weights, charset) != 0) {
       fprintf(stderr, "error: gen_chars() failed\n");
       free(buffer);
       return -1;

@@ -12,7 +12,7 @@
 #include <ctype.h>
 
 #include "str.h"
-#include "weights.h"
+#include "record.h"
 #include "gen.h"
 
 /**
@@ -36,48 +36,10 @@ static float gen_rand()
 }
 
 
-/**
- * Check that all characters with non-unity weights exist in the charset.
- *
- * @param weights  Array of 95 weights for printable ASCII (33 to 126).
- * @param charset  String of characters to be used for generation.
- * @return         0 if all non-unity weights are in charset, -1 otherwise.
- */
-static int gen_check_weights(const float *weights, const char *charset)
-{
-   int found[NUM_WEIGHTS] = {0};
-
-   for (size_t i = 0; charset[i] != '\0'; i++)
-   {
-      const int ch_i = str_char_to_int(charset[i]);
-      if (ch_i < 0) {
-         fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
-               charset[i], charset[i]);
-         return -1;
-      }
-
-      found[ch_i] = 1;
-   }
-
-   for (int i = 0; i < NUM_WEIGHTS; i++)
-   {
-      if ((weights[i] != 0.0f) && (weights[i] != 1.0f) && !found[i]) {
-         char ch = str_int_to_char(i);
-         fprintf(stderr,
-               "error: character '%c' (ASCII %d) has weight %f but "
-               "is not in charset\n", ch=='\0' ? ' ' : ch, ch,  weights[i]);
-         return -1;
-      }
-   }
-
-   return 0;
-}
-
-
 int gen_clean_charset(char *c1, const char* c2)
 {
    int i = 0;
-   while (c2[i] != '\0' && i < NUM_WEIGHTS) {
+   while (c2[i] != '\0' && i < MAX_CHARSET_LEN) {
       char ch = tolower((unsigned char)c2[i]);
       if (str_char_to_int(ch) < 0) {
          fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
@@ -86,10 +48,10 @@ int gen_clean_charset(char *c1, const char* c2)
       c1[i] = ch;
       i++;
    }
-   if (i < NUM_WEIGHTS) {
+   if (i < MAX_CHARSET_LEN) {
       c1[i] = '\0';
    } else {
-      c1[NUM_WEIGHTS - 1] = '\0';  // ensure null-termination
+      c1[MAX_CHARSET_LEN - 1] = '\0';  // ensure null-termination
    }
    return 0;
 }
@@ -110,15 +72,12 @@ int gen_chars(char *s, const size_t num_char,
    if (!charset)
       charset = default_charset;
 
-   char clean_charset[NUM_WEIGHTS];
+   char clean_charset[MAX_CHARSET_LEN];
    int ret = gen_clean_charset(clean_charset, charset);
    if (ret != 0) {
       fprintf(stderr, "error: failed to clean charset\n");
       return -1;
    }
-
-   if (weights && gen_check_weights(weights, clean_charset) != 0)
-      return -1;
 
    size_t charset_len = strlen(clean_charset);
    if (charset_len == 0 || num_char < 2)

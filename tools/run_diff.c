@@ -30,7 +30,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "str.h"
-#include "weights.h"
+#include "record.h"
 #include "diff.h"
 
 #define MAX_LEN 8192
@@ -57,6 +57,12 @@ int main(int argc, char *argv[])
    const char *wfile = NULL;
    const char *ofile = NULL;
    float decay = 1.0f;
+
+   // optional data to store in the file
+   float scale = 0.000;
+   float speed1 = 0.0;
+   float speed2 = 0.0;
+   char *charset = "~";
 
    // parse optional arguments
    for (int i = 3; i < argc; ++i) {
@@ -85,26 +91,45 @@ int main(int argc, char *argv[])
    str_clean(clean1, buf1, len1);
    str_clean(clean2, buf2, len2);
 
-   float weights[NUM_WEIGHTS] = {0};
+   struct record r = {0};
 
-   const int diff = lev_diff(weights, clean1, clean2);
+   const int diff = lev_diff(&r, clean1, clean2);
 
    printf("Distance: %d\n", diff);
-   weights_printout(weights, NUM_WEIGHTS);
+   record_printout(&r);
 
    if (wfile) {
-      float loaded[NUM_WEIGHTS] = {0};
-      if (weights_load_last(loaded, wfile, NUM_WEIGHTS) < 0) {
-         fprintf(stderr, "warning: failed to load weights from %s\n", wfile);
+      struct record l = record_load_last(wfile);
+      if (l.valid == 0) {
+         fprintf(stderr, "warning: invalid record obtained from %s\n", wfile);
          return -1;
       }
 
-      weights_add(weights, weights, loaded, NUM_WEIGHTS);
+      for (int i = 0; i < MAX_CHARSET_LEN; i++)
+         r.weights[i] = r.weights[i] + l.weights[i];
    }
 
    if (ofile) {
-      if (weights_append(ofile, weights, NUM_WEIGHTS, decay) != 0) {
-         fprintf(stderr, "error writing to file: %s\n", ofile);
+      // current time
+      time_t now = time(NULL);
+      r.datetime = *localtime(&now);
+      r.decay = decay;
+      r.scale = scale;
+      r.speed1 = speed1;
+      r.speed2 = speed2;
+
+      // copy charset, making sure it's not too long to fit
+      const size_t len = strlen(charset);
+      if (len >= MAX_CHARSET_LEN) {
+         fprintf(stderr, "error: charset too long (max %d characters)\n",
+               MAX_CHARSET_LEN - 1);
+         return -1;
+      }
+      memcpy(r.charset, charset, len);
+
+      // write record to file
+      if (record_append(ofile, &r) != 0) {
+         fprintf(stderr, "error writing record to file: %s\n", ofile);
          return -1;
       }
    }

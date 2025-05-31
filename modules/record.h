@@ -44,7 +44,7 @@ struct record {
  *
  * @return A struct record parsed from the last line of the file.
  */
-struct record record_read_last(const char *filename);
+struct record record_load_last(const char *filename);
 
 /**
  * @brief Appends a record to the given file in text format.
@@ -56,6 +56,12 @@ struct record record_read_last(const char *filename);
  * @return 0 on success, -1 on error (with error message to stderr).
  */
 int record_append(const char *path, const struct record *r);
+
+/**
+ * @brief Print the record to stdout.
+ * @param r Record to print.
+ */
+void record_printout(const struct record *r);
 
 #endif // RECORD_H
 

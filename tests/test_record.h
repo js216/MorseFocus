@@ -8,7 +8,7 @@
 #ifndef TEST_RECORD_H
 #define TEST_RECORD_H
 
-int test_record_read_last(const char *test_file);
+int test_record_load_last(const char *test_file);
 int test_record_append(const char *test_file);
 
 #endif // TEST_RECORD_H

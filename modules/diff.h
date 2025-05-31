@@ -9,6 +9,7 @@
 #define LEV_DIFF_H
 
 #include <stddef.h>
+#include "record.h"
 
 /**
  * @brief Computes the Levenshtein distance between two strings and records
@@ -23,9 +24,7 @@
  * distinct character involved in the transformation (excluding substitutions)
  * into the `weights` array.
  *
- * @param weights A pointer to an array of at most 95 integers. Each element
- * corresponds to a subset of printable ASCII characters. This array is updated
- * to count the number of insertions or deletions for each character.
+ * @param r Pointer to the record, into which the weights will be recorded.
  *
  * @param s1 A pointer to the first null-terminated input string.
  *
@@ -37,7 +36,7 @@
  * (codes 32 through 126). The character `' '` (ASCII 32) is not tracked in the
  * `weights` array.
  */
-int lev_diff(float *weights, const char *s1, const char *s2);
+int lev_diff(struct record *r, const char *s1, const char *s2);
 
 #endif /* LEV_DIFF_H */
 

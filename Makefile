@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -Imodules -MMD -MP
 LDFLAGS = -lm 
 
-modules = diff str gen weights record
-tests = test_diff test_str test_gen test_weights test_record
+modules = diff str gen record
+tests = test_diff test_str test_gen test_record
 tools = run_tests run_diff run_gen
 
 all: $(addprefix build/, $(tools))
