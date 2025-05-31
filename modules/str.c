@@ -206,5 +206,20 @@ char *str_ptime(const char *s, const char *format, struct tm *tm)
 }
 
 
+int str_is_clean(const char *s)
+{
+   for (int i = 0; i<MAX_CHARSET_LEN; i++) {
+      if (s[i] == '\0')
+         return 0;
+
+      if (str_char_to_int(s[i]) < 0) {
+         fprintf(stderr, "error: invalid character %d (ASCII '%c')\n",
+               s[i], s[i]);
+         return -1;
+      }
+   }
+   return 0;
+}
+
 // end file str.c
 

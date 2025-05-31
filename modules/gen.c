@@ -10,7 +10,6 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-
 #include "str.h"
 #include "record.h"
 #include "gen.h"
@@ -36,27 +35,6 @@ static float gen_rand()
 }
 
 
-int gen_clean_charset(char *c1, const char* c2)
-{
-   int i = 0;
-   while (c2[i] != '\0' && i < MAX_CHARSET_LEN) {
-      char ch = tolower((unsigned char)c2[i]);
-      if (str_char_to_int(ch) < 0) {
-         fprintf(stderr, "error: unsupported character: '%c'\n", c2[i]);
-         return -1;
-      }
-      c1[i] = ch;
-      i++;
-   }
-   if (i < MAX_CHARSET_LEN) {
-      c1[i] = '\0';
-   } else {
-      c1[MAX_CHARSET_LEN - 1] = '\0';  // ensure null-termination
-   }
-   return 0;
-}
-
-
 int gen_chars(char *s, const size_t num_char,
       const int min_word, const int max_word,
       const float *weights, const char *charset)
@@ -77,14 +55,13 @@ int gen_chars(char *s, const size_t num_char,
    if (!charset)
       charset = default_charset;
 
-   char clean_charset[MAX_CHARSET_LEN];
-   int ret = gen_clean_charset(clean_charset, charset);
+   int ret = str_is_clean(charset);
    if (ret != 0) {
-      fprintf(stderr, "error: failed to clean charset\n");
+      fprintf(stderr, "error: charset contains unsupported characters\n");
       return -1;
    }
 
-   size_t charset_len = strlen(clean_charset);
+   size_t charset_len = strlen(charset);
    if (charset_len == 0) {
       fprintf(stderr, "error: empty charset\n");
       return -1;
@@ -100,7 +77,7 @@ int gen_chars(char *s, const size_t num_char,
 
       float sum = 0.0f;
       for (size_t j = 0; j < charset_len; j++) {
-         unsigned char ch = clean_charset[j];
+         unsigned char ch = charset[j];
          const int k = str_char_to_int(ch);
          if (k < 0) {
             fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
@@ -145,7 +122,7 @@ int gen_chars(char *s, const size_t num_char,
          char ch;
          if (!weights) {
             int idx = (int)(gen_rand() * charset_len);
-            ch = clean_charset[idx];
+            ch = charset[idx];
          } else {
             float r = gen_rand();
             size_t lo = 0, hi = charset_len - 1;
@@ -156,7 +133,7 @@ int gen_chars(char *s, const size_t num_char,
                else
                   hi = mid;
             }
-            ch = clean_charset[lo];
+            ch = charset[lo];
          }
          s[written++] = ch;
       }

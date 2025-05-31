@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#define MAX_CHARSET_LEN 50
+
 /**
  * @brief Cleans s2 into s1, replacing non-printable characters with spaces, and
  * converting all letters to lowercase.
@@ -121,6 +123,14 @@ char* str_tok(char *str, const char *delim, char **saveptr);
  * failure.
  */
 char *str_ptime(const char *s, const char *format, struct tm *tm);
+
+/**
+ * @brief Check if string contains only allowed characters.
+ *
+ * @param s String to check.
+ * @return 0 on success, -1 if unsupported characters are found
+ */
+int str_is_clean(const char *s);
 
 #endif // STR_H
 

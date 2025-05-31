@@ -78,7 +78,7 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- make sure tests don't print anything except a SUCCESS message at the end
+- print SUCCESS in green and FAIL in red
 - get rid of most unnecessary `#define` statements
 - make test cases a lot more comprehensive, including edge cases and malformed
   input

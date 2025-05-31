@@ -9,8 +9,7 @@
 #define RECORD_H
 
 #include <time.h>
-
-#define MAX_CHARSET_LEN 50
+#include "str.h"
 
 struct record {
    int valid;

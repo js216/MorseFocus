@@ -20,7 +20,6 @@ int main(void)
    ret |= test_diff();
 
    ret |= test_gen_chars();
-   ret |= test_gen_clean_charset();
 
    ret |= test_str_clean();
    ret |= test_str_prepare_test_file(TEST_FILE);
