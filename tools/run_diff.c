@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "debug.h"
 #include "str.h"
 #include "record.h"
 #include "diff.h"
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
    int len1 = str_read_file(buf1, file1, MAX_LEN);
    int len2 = str_read_file(buf2, file2, MAX_LEN);
    if (len1 <= 0 || len2 <= 0) {
-      fprintf(stderr, "error reading input files\n");
+      ERROR("cannot read input files");
       return -1;
    }
 
@@ -117,7 +118,7 @@ int main(int argc, char *argv[])
    if (wfile) {
       struct record l = record_load_last(wfile);
       if (l.valid == 0) {
-         fprintf(stderr, "warning: invalid record obtained from %s\n", wfile);
+         ERROR("invalid record obtained from %s", wfile);
          return -1;
       }
 
@@ -140,15 +141,14 @@ int main(int argc, char *argv[])
       // copy charset, making sure it's not too long to fit
       const size_t len = strlen(charset);
       if (len >= MAX_CHARSET_LEN) {
-         fprintf(stderr, "error: charset too long (max %d characters)\n",
-               MAX_CHARSET_LEN - 1);
+         ERROR("charset too long (max %d characters)", MAX_CHARSET_LEN - 1);
          return -1;
       }
       memcpy(r.charset, charset, len);
 
       // write record to file
       if (record_append(ofile, &r) != 0) {
-         fprintf(stderr, "error writing record to file: %s\n", ofile);
+         ERROR("writing record to file: %s\n", ofile);
          return -1;
       }
    }

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include "debug.h"
 #include "str.h"
 #include "record.h"
 #include "gen.h"
@@ -82,15 +83,15 @@ static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
 
         if (avg == 0.0f) {
             if (v1 != 0.0f || v2 != 0.0f) {
-                printf("FAIL: index %d (ASCII '%c'), one is zero, one is not "
-                       "(%.6f vs %.6f)\n", i, str_int_to_char(i), v1, v2);
+                TEST_FAIL("index %d (ASCII '%c'), one is zero, one is not "
+                       "(%.6f vs %.6f)", i, str_int_to_char(i), v1, v2);
                 return -1;
             }
         } else {
             float diff = fabsf(v1 - v2);
             if (diff > ep * avg) {
-                printf("FAIL: index %d (ASCII '%c'): diff %.2f%% exceeds "
-                       "%.2f%% (%.6f vs %.6f)\n", i, str_int_to_char(i),
+                TEST_FAIL("index %d (ASCII '%c'): diff %.2f%% exceeds "
+                       "%.2f%% (%.6f vs %.6f)", i, str_int_to_char(i),
                        100*diff/avg, 100*ep, v1, v2);
                 return -1;
             }
@@ -187,7 +188,7 @@ int test_gen_create_weights(float *w, const char *charset)
    size_t len = strlen(charset);
 
    if (len >= MAX_CHARSET_LEN) {
-      printf("FAIL: charset too long (max %d characters)\n",
+      TEST_FAIL("charset too long (max %d characters)",
             MAX_CHARSET_LEN - 1);
       return -1;
    }
@@ -199,7 +200,7 @@ int test_gen_create_weights(float *w, const char *charset)
       int offset = str_char_to_int(charset[i]);
 
       if (offset == -1 || offset >= MAX_CHARSET_LEN) {
-         printf("FAIL: invalid character '%c' in charset\n",
+         TEST_FAIL("invalid character '%c' in charset",
                charset[i]);
          return -1;
       }
@@ -219,7 +220,7 @@ int test_gen_chars(void)
 
    // make sure charset_def is not too long
    if (strlen(charset_def) > MAX_CHARSET_LEN) {
-      printf("FAIL: charset_def is too long (longer than MAX_CHARSET_LEN)");
+      TEST_FAIL("charset_def is too long (longer than MAX_CHARSET_LEN)");
       return -1;
    }
 
@@ -228,7 +229,7 @@ int test_gen_chars(void)
    ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 3, 6, NULL, NULL);
    ret |= test_gen_analyze(buf, weights, 3, 6);
    if (ret != 0) {
-      printf("FAIL: test with default charset and uniform weights\n");
+      TEST_FAIL("test with default charset and uniform weights");
       return -1;
    }
 
@@ -237,7 +238,7 @@ int test_gen_chars(void)
    ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 2, 4, NULL, "abcde");
    ret |= test_gen_analyze(buf, weights, 2, 4);
    if (ret != 0) {
-      printf("FAIL: test with custom charset and uniform weights\n");
+      TEST_FAIL("test with custom charset and uniform weights");
       return -1;
    }
 
@@ -247,11 +248,11 @@ int test_gen_chars(void)
    ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 4, 8, weights, NULL);
    ret |= test_gen_analyze(buf, weights, 4, 8);
    if (ret != 0) {
-      printf("FAIL: uniform weights, except favor '?' heavily\n");
+      TEST_FAIL("uniform weights, except favor '?' heavily");
       return -1;
    }
 
-   printf("SUCCESS: test_gen_chars\n");
+   TEST_SUCCESS();
    return 0;
 }
 

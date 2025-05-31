@@ -9,7 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "debug.h"
 #include "str.h"
+#include "test_str.h"
 
 #define TEST_MAX_LEN 100
 
@@ -33,18 +35,18 @@ int test_str_clean(void)
 
       if (c_in < 32 || c_in > 126) {
          if (c_out != ' ') {
-            printf("FAIL: non-alphanum character is not a space\n");
+            TEST_FAIL("non-alphanum character is not a space");
             return -1;
          }
       } else {
          if (c_out != (char)tolower(c_in)) {
-            printf("FAIL: non-alphanum character is not a space\n");
+            TEST_FAIL("non-alphanum character is not a space");
             return -1;
          }
       }
    }
 
-   printf("SUCCESS: test_str_clean\n");
+   TEST_SUCCESS();
    return 0;
 }
 
@@ -55,11 +57,11 @@ int test_str_file_len(const char *test_file)
    size_t expected_len = strlen(test_content);
 
    if (len != (int)expected_len) {
-      printf("FAIL: expected %zu, got %d\n", expected_len, len);
+      TEST_FAIL("expected %zu, got %d", expected_len, len);
       return -1;
    }
 
-   printf("SUCCESS: test_str_file_len\n");
+   TEST_SUCCESS();
    return 0;
 }
 
@@ -71,16 +73,16 @@ int test_str_read_file(const char *test_file)
    size_t expected_len = strlen(test_content);
 
    if (read_len != (int)expected_len) {
-      printf("FAIL: expected %zu, got %d\n", expected_len, read_len);
+      TEST_FAIL("expected %zu, got %d", expected_len, read_len);
       return -1;
    }
 
    if (strcmp(buf, test_content) != 0) {
-      printf("FAIL: contents do not match\n");
+      TEST_FAIL("contents do not match");
       return -1;
    }
 
-   printf("SUCCESS: str_read_file\n");
+   TEST_SUCCESS();
    return 0;
 }
 
@@ -89,18 +91,18 @@ int test_str_prepare_test_file(const char *test_file)
 {
    FILE *f = fopen(test_file, "wb");
    if (!f) {
-      printf("FAIL: failed to create test file\n");
+      TEST_FAIL("failed to create test file");
       return -1;
    }
 
    const size_t ret = fwrite(test_content, 1, strlen(test_content), f);
    if (ret != strlen(test_content)) {
-      printf("FAIL: failed to write to test file\n");
+      TEST_FAIL("failed to write to test file");
       fclose(f);
       return -1;
    }
 
-   printf("SUCCESS: test_str_prepare_test_file\n");
+   TEST_SUCCESS();
    fclose(f);
    return 0;
 }
@@ -112,7 +114,7 @@ int test_str_char_to_int(void)
         int expected = ch - '0';
         int result = str_char_to_int(ch);
         if (result != expected) {
-            printf("FAIL: '%c' -> %d, expected %d\n", ch, result, expected);
+            TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
             return -1;
         }
     }
@@ -121,7 +123,7 @@ int test_str_char_to_int(void)
         int expected = 10 + (ch - 'a');
         int result = str_char_to_int(ch);
         if (result != expected) {
-            printf("FAIL: '%c' -> %d, expected %d\n", ch, result, expected);
+            TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
             return -1;
         }
     }
@@ -137,18 +139,18 @@ int test_str_char_to_int(void)
     for (int i = 0; i < 5; i++) {
         int result = str_char_to_int(symbols[i].ch);
         if (result != symbols[i].expected) {
-            printf("FAIL: '%c' -> %d, expected %d\n",
+            TEST_FAIL("'%c' -> %d, expected %d",
                    symbols[i].ch, result, symbols[i].expected);
             return -1;
         }
     }
 
     if (str_char_to_int('!') != -1) {
-        printf("FAIL: '!' -> expected -1\n");
+        TEST_FAIL("'!' -> expected -1");
         return -1;
     }
 
-    printf("SUCCESS: test_str_char_to_int\n");
+    TEST_SUCCESS();
     return 0;
 }
 
@@ -159,7 +161,7 @@ int test_str_int_to_char(void)
         char expected = '0' + i;
         char result = str_int_to_char(i);
         if (result != expected) {
-            printf("FAIL: %d -> '%c', expected '%c'\n",
+            TEST_FAIL("%d -> '%c', expected '%c'",
                    i, result, expected);
             return -1;
         }
@@ -169,7 +171,7 @@ int test_str_int_to_char(void)
         char expected = 'a' + (i - 10);
         char result = str_int_to_char(i);
         if (result != expected) {
-            printf("FAIL: %d -> '%c', expected '%c'\n",
+            TEST_FAIL("%d -> '%c', expected '%c'",
                    i, result, expected);
             return -1;
         }
@@ -180,18 +182,18 @@ int test_str_int_to_char(void)
         int index = 36 + i;
         char result = str_int_to_char(index);
         if (result != expected_symbols[i]) {
-            printf("FAIL: %d -> '%c', expected '%c'\n",
+            TEST_FAIL("%d -> '%c', expected '%c'",
                    index, result, expected_symbols[i]);
             return -1;
         }
     }
 
     if (str_int_to_char(41) != '\0') {
-        printf("FAIL: 41 -> expected '\\0'\n");
+        TEST_FAIL("41 -> expected '0'");
         return -1;
     }
 
-    printf("SUCCESS: test_str_int_to_char\n");
+    TEST_SUCCESS();
     return 0;
 }
 

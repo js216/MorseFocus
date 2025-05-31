@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include "debug.h"
 #include "diff.h"
 #include "record.h"
 #include "str.h"
@@ -22,7 +22,7 @@ int test_diff(void)
 
    // check distance
    if (distance != 2) {
-       printf("FAIL: incorrect distance %d calculated\n", distance);
+       TEST_FAIL("incorrect distance %d calculated", distance);
        return -1;
    }
 
@@ -35,12 +35,12 @@ int test_diff(void)
    // compare actual and expected weights
    for (int i=0; i<MAX_CHARSET_LEN; i++) {
       if (r.weights[i] != w_corr[i]) {
-         printf("FAIL: incorrect weight for '%c'\n", str_int_to_char(i));
+         TEST_FAIL("incorrect weight for '%c'", str_int_to_char(i));
          return -1;
       }
    }
 
-   printf("SUCCESS: test_diff\n");
+   TEST_SUCCESS();
    return 0;
 }
 

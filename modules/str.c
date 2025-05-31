@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <string.h>
+#include "debug.h"
 #include "str.h"
 
 int str_clean(char *s1, const char *s2, size_t len)
@@ -102,14 +103,14 @@ int str_write_time(FILE *fp)
    char buffer[64];
 
    if (tm_info == NULL) {
-      fprintf(stderr, "error: Unable to get local time\n");
+      ERROR("unable to get local time");
       return -1;
    }
 
    if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info)) {
       fprintf(fp, "%s ", buffer);
    } else {
-      fprintf(stderr, "error: Failed to format time\n");
+      ERROR("failed to format time");
       return -1;
    }
 
@@ -213,8 +214,7 @@ int str_is_clean(const char *s)
          return 0;
 
       if (str_char_to_int(s[i]) < 0) {
-         fprintf(stderr, "error: invalid character %d (ASCII '%c')\n",
-               s[i], s[i]);
+         ERROR("invalid character %d (ASCII '%c')", s[i], s[i]);
          return -1;
       }
    }

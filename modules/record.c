@@ -12,6 +12,7 @@
 #include <math.h>
 #include <limits.h>
 #include "str.h"
+#include "debug.h"
 #include "record.h"
 
 #define MAX_LINE_LEN 4096
@@ -23,7 +24,7 @@ struct record record_load_last(const char *filename)
 
    FILE *fp = fopen(filename, "r");
    if (!fp) {
-      fprintf(stderr, "error: cannot open file '%s'\n", filename);
+      ERROR("cannot open file '%s'", filename);
       return rec;
    }
 
@@ -37,12 +38,12 @@ struct record record_load_last(const char *filename)
    fclose(fp);
 
    if (last_line[0] == '\0') {
-      fprintf(stderr, "error: file '%s' is empty or unreadable.\n", filename);
+      ERROR("file '%s' is empty or unreadable", filename);
       return rec;
    }
 
    if (!strchr(last_line, '\n')) {
-      fprintf(stderr, "error: could not read entire line.\n");
+      ERROR("could not read entire line");
       return rec;
    }
 
@@ -55,7 +56,7 @@ struct record record_load_last(const char *filename)
    char *time = str_tok(NULL, " \t\n", &saveptr);
 
    if (!date || !time) {
-      fprintf(stderr, "error: missing date or time field.\n");
+      ERROR("missing date or time field");
       return rec;
    }
 
@@ -63,7 +64,7 @@ struct record record_load_last(const char *filename)
    snprintf(datetime_str, sizeof(datetime_str), "%s %s", date, time);
 
    if (!str_ptime(datetime_str, "%Y-%m-%d %H:%M:%S", &rec.datetime)) {
-      fprintf(stderr, "error: cannot parse datetime '%s'.\n", datetime_str);
+      ERROR("cannot parse datetime '%s'", datetime_str);
       return rec;
    }
 
@@ -72,7 +73,7 @@ struct record record_load_last(const char *filename)
    for (int i = 0; i < 4; ++i) {
       floats[i] = str_tok(NULL, " \t\n", &saveptr);
       if (!floats[i]) {
-         fprintf(stderr, "error: missing float field #%d.\n", i + 1);
+         ERROR("missing float field #%d", i + 1);
          return rec;
       }
    }
@@ -87,7 +88,7 @@ struct record record_load_last(const char *filename)
    for (int i = 0; i < 2; ++i) {
       ints[i] = str_tok(NULL, " \t\n", &saveptr);
       if (!ints[i]) {
-         fprintf(stderr, "error: missing int field #%d.\n", i + 1);
+         ERROR("missing int field #%d", i + 1);
          return rec;
       }
    }
@@ -98,14 +99,14 @@ struct record record_load_last(const char *filename)
    // parse charset
    char *charset_str = str_tok(NULL, " \t\n", &saveptr);
    if (!charset_str) {
-      fprintf(stderr, "error: missing charset field.\n");
+      ERROR("missing charset field");
       return rec;
    }
 
    size_t charset_len = strlen(charset_str);
 
    if (charset_len == 0 || charset_len > MAX_CHARSET_LEN) {
-      fprintf(stderr, "error: charset length must be 1–%d characters.\n",
+      ERROR("charset length must be 1–%d characters",
             MAX_CHARSET_LEN);
       return rec;
    }
@@ -121,12 +122,12 @@ struct record record_load_last(const char *filename)
    }
 
    if (weight_count == 0) {
-      fprintf(stderr, "error: At least one weight must be provided.\n");
+      ERROR("at least one weight must be provided");
       return rec;
    }
 
    if (str_tok(NULL, " \t\n", &saveptr)) {
-      fprintf(stderr, "error: Too many weights (max %d).\n", MAX_CHARSET_LEN);
+      ERROR("too many weights (max %d)", MAX_CHARSET_LEN);
       return rec;
    }
 
@@ -139,14 +140,14 @@ int record_append(const char *path, const struct record *r)
 {
    // check record is valid
    if (!(r->valid)) {
-      fprintf(stderr, "error: invalid record given\n");
+      ERROR("invalid record given");
       return -1;
    }
 
    // open output file for appending
    FILE *fp = fopen(path, "a");
    if (!fp) {
-      fprintf(stderr, "error: cannot open file '%s'\n", path);
+      ERROR("cannot open file '%s'", path);
       return -1;
    }
 
@@ -154,7 +155,7 @@ int record_append(const char *path, const struct record *r)
    char timestr[32];
    if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S",
             &r->datetime) == 0) {
-      fprintf(stderr, "error: cannot format datetime\n");
+      ERROR("cannot format datetime");
       fclose(fp);
       return -1;
    }
@@ -163,7 +164,7 @@ int record_append(const char *path, const struct record *r)
    int num_pr = fprintf(fp, "%s %.3f %.3f %.3f %.3f %d %d %s", timestr,
          r->decay, r->scale, r->speed1, r->speed2, r->len, r->dist, r->charset);
    if (num_pr < 0) {
-      fprintf(stderr, "error: cannot write to file\n");
+      ERROR("cannot write to file");
       fclose(fp);
       return -1;
    }
@@ -172,14 +173,14 @@ int record_append(const char *path, const struct record *r)
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
       const int ret = fprintf(fp, " %.3f", r->weights[i]);
       if (ret < 0) {
-         fprintf(stderr, "error: cannot write weights\n");
+         ERROR("cannot write weights");
          fclose(fp);
          return -1;
       }
 
       num_pr += ret;
       if (num_pr > MAX_LINE_LEN) {
-         fprintf(stderr, "error: wrote more than MAX_LINE_LEN\n");
+         ERROR("wrote more than MAX_LINE_LEN");
          fclose(fp);
          return -1;
       }
@@ -212,7 +213,7 @@ void record_printout(const struct record *r)
       if (r->weights[i] > 0) {
          char ch = str_int_to_char(i);
          if (ch == '\0') {
-            fprintf(stderr, "error: invalid character number %d\n", i);
+            ERROR("invalid character number %d", i);
             return;
          }
          if (record_is_integer(r->weights[i]))

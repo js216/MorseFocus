@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include "debug.h"
 #include "gen.h"
 #include "str.h"
 #include "record.h"
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
    if (wfile) {
       l = record_load_last(wfile);
       if (l.valid == 0) {
-         fprintf(stderr, "warning: invalid record obtained from %s\n", wfile);
+         ERROR("invalid record obtained from %s", wfile);
          return -1;
       }
 
@@ -103,12 +103,12 @@ int main(int argc, char **argv)
 
    char *buffer = malloc(num_char + 1);
    if (!buffer) {
-      fprintf(stderr, "error: out of memory\n");
+      ERROR("out of memory");
       return -1;
    }
 
    if (gen_chars(buffer, num_char, min_word, max_word, wptr, charset) != 0) {
-      fprintf(stderr, "error: gen_chars() failed\n");
+      ERROR("gen_chars() failed");
       free(buffer);
       return -1;
    }
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
    if (out_file) {
       FILE *f = fopen(out_file, "w");
       if (!f) {
-         fprintf(stderr, "error: cannot open %s for writing\n", out_file);
+         ERROR("cannot open %s for writing", out_file);
          free(buffer);
          return -1;
       }

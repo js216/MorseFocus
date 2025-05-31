@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include "debug.h"
 #include "str.h"
 #include "record.h"
 #include "gen.h"
@@ -41,13 +42,13 @@ int gen_chars(char *s, const size_t num_char,
 {
    if (min_word < 1 || max_word < 1 || min_word > max_word)
    {
-      fprintf(stderr, "error: invalid word size range: min=%d, max=%d\n",
+      ERROR("invalid word size range: min=%d, max=%d",
             min_word, max_word);
       return -1;
    }
 
    if (num_char < 2) {
-      fprintf(stderr, "error: refuse to generate < 2 characters\n");
+      ERROR("refuse to generate < 2 characters");
       return -1;
    }
 
@@ -57,13 +58,13 @@ int gen_chars(char *s, const size_t num_char,
 
    int ret = str_is_clean(charset);
    if (ret != 0) {
-      fprintf(stderr, "error: charset contains unsupported characters\n");
+      ERROR("charset contains unsupported characters");
       return -1;
    }
 
    size_t charset_len = strlen(charset);
    if (charset_len == 0) {
-      fprintf(stderr, "error: empty charset\n");
+      ERROR("empty charset");
       return -1;
    }
 
@@ -71,7 +72,7 @@ int gen_chars(char *s, const size_t num_char,
    if (weights) {
       float *tmp_weights = malloc(sizeof(float) * charset_len);
       if (!tmp_weights) {
-         fprintf(stderr, "error: cannot allocate temp weights array\n");
+         ERROR("cannot allocate temp weights array");
          return -1;
       }
 
@@ -80,7 +81,7 @@ int gen_chars(char *s, const size_t num_char,
          unsigned char ch = charset[j];
          const int k = str_char_to_int(ch);
          if (k < 0) {
-            fprintf(stderr, "error: character '%c' (ASCII %d) is invalid\n",
+            ERROR("character '%c' (ASCII %d) is invalid",
                   ch=='\0' ? ' ' : ch, ch);
             free(tmp_weights);
             return -1;
@@ -91,14 +92,14 @@ int gen_chars(char *s, const size_t num_char,
       }
 
       if (sum == 0.0f) {
-         fprintf(stderr, "error: weights sum to zero\n");
+         ERROR("weights sum to zero");
          free(tmp_weights);
          return -1;
       }
 
       cdf = malloc(sizeof(float) * charset_len);
       if (!cdf) {
-         fprintf(stderr, "error: cannot allocate cdf\n");
+         ERROR("cannot allocate cdf");
          free(tmp_weights);
          return -1;
       }

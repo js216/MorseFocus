@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "debug.h"
 #include "str.h"
 #include "record.h"
 #include "test_record.h"
@@ -18,7 +19,7 @@ int test_record_load_last(const char *test_file)
 
    FILE *fp = fopen(test_file, "w");
    if (!fp) {
-      printf("FAIL: cannot create test file");
+      TEST_FAIL("cannot create test file");
       return -1;
    }
 
@@ -37,7 +38,7 @@ int test_record_load_last(const char *test_file)
    // check the parsing worked
 
    if (r.valid != 1) {
-      printf("FAIL: record not marked as valid\n");
+      TEST_FAIL("record not marked as valid");
       return -1;
    }
 
@@ -47,29 +48,29 @@ int test_record_load_last(const char *test_file)
          (19 != r.datetime.tm_hour) ||
          (39 != r.datetime.tm_min) ||
          (10 != r.datetime.tm_sec)  ) {
-      printf("FAIL: wrong date/time read back\n");
+      TEST_FAIL("wrong date/time read back");
       return -1;
    }
 
    if (  (r.decay != 1.0) || (r.scale != 2.0) ||
          (r.speed1 != 3.0) || (r.speed2 != 4.0)  ) {
-      printf("FAIL: wrong decay/scale/speed1/speed2\n");
+      TEST_FAIL("wrong decay/scale/speed1/speed2");
       return -1;
    }
 
    if (strncmp(r.charset, "abcd~!@#$", MAX_CHARSET_LEN) != 0) {
-      printf("FAIL: wrong charset read back\n");
+      TEST_FAIL("wrong charset read back");
       return -1;
    }
 
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
       if (r.weights[i] != i) {
-         printf("FAIL: wrong weight %f != %f\n", r.weights[i], (float)i);
+         TEST_FAIL("wrong weight %f != %f", r.weights[i], (float)i);
          return -1;
       }
    }
 
-   printf("SUCCESS: test_record_load_last\n");
+   TEST_SUCCESS();
    return 0;
 }
 
@@ -95,14 +96,14 @@ int test_record_append(const char *test_file)
 
     // write to file
     if (record_append(test_file, &r) != 0) {
-       printf("FAIL: cannot append the record\n");
+       TEST_FAIL("cannot append the record");
        return -1;
     }
 
     // read file and verify contents
     fp = fopen(test_file, "r");
     if(fp == NULL) {
-       printf("FAIL: cannot open the test file\n");
+       TEST_FAIL("cannot open the test file");
        return -1;
     }
 
@@ -116,7 +117,7 @@ int test_record_append(const char *test_file)
     const char *exp_line =
        "2025-05-31 12:34:56 1.000 2.000 3.000 4.000 5 6 abc";
     if (strncmp(line, exp_line, strlen(exp_line)) != 0) {
-       printf("FAIL: fixed fields mismatch\n");
+       TEST_FAIL("fixed fields mismatch");
        return -1;
     }
 
@@ -128,11 +129,11 @@ int test_record_append(const char *test_file)
        "38.000 39.000 40.000 41.000 42.000 43.000 44.000 45.000 46.000 47.000 "
        "48.000 49.000\n";
     if (strcmp(line+strlen(exp_line)+1, exp_w) != 0) {
-       printf("FAIL: weights mismatch, read: %s\n", line+strlen(exp_line)+1);
+       TEST_FAIL("weights mismatch, read: %s", line+strlen(exp_line)+1);
        return -1;
     }
 
-    printf("SUCCESS: test_record_append\n");
+    TEST_SUCCESS();
     return 0;
 }
 
