@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -fanalyzer -Imodules -MMD -MP
+CC = gcc -fanalyzer
+CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -Imodules -MMD -MP
 LDFLAGS = -lm 
 
 modules = diff str gen record

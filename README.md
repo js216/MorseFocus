@@ -58,8 +58,8 @@ factors by 10% each run.
 
 Running the utilities without any arguments will print usage information:
 
-    $ ./run_gen.exe
-    Usage: ./run_gen.exe num_char [options]
+    $ ./run_gen
+    Usage: ./run_gen num_char [options]
     options:
       -i MIN     set minimum word length (default 2)
       -x MAX     set maximum word length (default 7)
@@ -68,21 +68,16 @@ Running the utilities without any arguments will print usage information:
       -o FILE    write output to FILE instead of stdout
       -s scale   multiply all weights by scale (default 1.0)
     
-    $ ./run_diff.exe
-    Usage: ./run_diff.exe f1 f2 [options]
+    $ ./run_diff
+    Usage: ./run_diff f1 f2 [options]
     Options:
       -w file   load weights from file
       -d decay  scale output weights (default: 1.0)
       -o file   append output weights to file
-
-### To do
-
-- make test cases a lot more comprehensive, including edge cases and malformed
-  input
-- make sure header inclusions, and function calls, form a DAG
-- use clang analyzer
-- GUI using Nuklear
-- speed PID for constant accuracy
+      -s scale   scale to record to file (default: 0)
+      -1 speed1  first speed to record to file (default: 0)
+      -2 speed2  second speed to record to file (default: 0)
+      -c charset charset to record to file (default: "~")
 
 ### License
 

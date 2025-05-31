@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "debug.h"
 #include "str.h"
 #include "diff.h"
 
@@ -16,6 +16,11 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
 {
    size_t len1 = strlen(s1);
    size_t len2 = strlen(s2);
+
+   if ((len1 == 0) || (len2 == 0)) {
+      ERROR("cannot compare zero-length strings");
+      return -1;
+   }
 
    int **dp = calloc((len1 + 1), sizeof(int *));
    if (!dp)

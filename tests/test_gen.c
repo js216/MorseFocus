@@ -156,10 +156,11 @@ static int test_gen_analyze(const char *s, const float *f,
 {
    float fs[MAX_CHARSET_LEN];
    test_gen_freq(fs, s);
-   int ret = 0;
-   ret |= test_gen_check_freq(f, fs, TEST_EPS);
-   ret |= test_gen_check_word_len(s, min_word, max_word);
-   return ret;
+   if (test_gen_check_freq(f, fs, TEST_EPS) != 0)
+      return -1;
+   if (test_gen_check_word_len(s, min_word, max_word) != 0)
+      return -1;
+   return 0;
 }
 
 
@@ -216,7 +217,6 @@ int test_gen_chars(void)
 {
    float weights[MAX_CHARSET_LEN];
    char buf[TEST_MAX_GEN_LEN];
-   int ret = 0;
 
    // make sure charset_def is not too long
    if (strlen(charset_def) > MAX_CHARSET_LEN) {
@@ -225,30 +225,26 @@ int test_gen_chars(void)
    }
 
    // test with default charset and uniform weights
-   ret |= test_gen_create_weights(weights, charset_def);
-   ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 3, 6, NULL, NULL);
-   ret |= test_gen_analyze(buf, weights, 3, 6);
-   if (ret != 0) {
+   if ((test_gen_create_weights(weights, charset_def) != 0)
+         || (gen_chars(buf, TEST_MAX_GEN_LEN, 3, 6, NULL, NULL) != 0)
+         || (test_gen_analyze(buf, weights, 3, 6) != 0)) {
       TEST_FAIL("test with default charset and uniform weights");
       return -1;
    }
 
-   // test with custom charset and uniform weights
-   ret |= test_gen_create_weights(weights, "abcde");
-   ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 2, 4, NULL, "abcde");
-   ret |= test_gen_analyze(buf, weights, 2, 4);
-   if (ret != 0) {
-      TEST_FAIL("test with custom charset and uniform weights");
+   // uniform weights, except favor '?' heavily
+   weights[str_char_to_int('?')] = 50;
+   if ((gen_chars(buf, TEST_MAX_GEN_LEN, 4, 8, weights, NULL) != 0)
+         || (test_gen_analyze(buf, weights, 4, 8) != 0)) {
+      TEST_FAIL("uniform weights, except favor '?' heavily");
       return -1;
    }
 
-   // uniform weights, except favor '?' heavily
-   ret |= test_gen_create_weights(weights, charset_def);
-   weights[str_char_to_int('?')] = 50;
-   ret |= gen_chars(buf, TEST_MAX_GEN_LEN, 4, 8, weights, NULL);
-   ret |= test_gen_analyze(buf, weights, 4, 8);
-   if (ret != 0) {
-      TEST_FAIL("uniform weights, except favor '?' heavily");
+   // test with custom charset and uniform weights
+   if ((test_gen_create_weights(weights, "abcde") != 0)
+         || (gen_chars(buf, TEST_MAX_GEN_LEN, 2, 4, NULL, "abcde") != 0)
+         || (test_gen_analyze(buf, weights, 2, 4) != 0)) {
+      TEST_FAIL("test with custom charset and uniform weights");
       return -1;
    }
 
