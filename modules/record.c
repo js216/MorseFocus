@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <limits.h>
 #include "str.h"
 #include "record.h"
 
@@ -81,6 +82,19 @@ struct record record_load_last(const char *filename)
    rec.speed1 = strtof(floats[2], NULL);
    rec.speed2 = strtof(floats[3], NULL);
 
+   // parse 2 ints: len, dist
+   char *ints[2];
+   for (int i = 0; i < 2; ++i) {
+      ints[i] = str_tok(NULL, " \t\n", &saveptr);
+      if (!ints[i]) {
+         fprintf(stderr, "error: missing int field #%d.\n", i + 1);
+         return rec;
+      }
+   }
+
+   rec.len = strtof(ints[0], NULL);
+   rec.dist = strtof(ints[1], NULL);
+
    // parse charset
    char *charset_str = str_tok(NULL, " \t\n", &saveptr);
    if (!charset_str) {
@@ -146,8 +160,8 @@ int record_append(const char *path, const struct record *r)
    }
 
    // write fixed fields
-   int num_pr = fprintf(fp, "%s %.3f %.3f %.3f %.3f %s", timestr, r->decay,
-         r->scale, r->speed1, r->speed2, r->charset);
+   int num_pr = fprintf(fp, "%s %.3f %.3f %.3f %.3f %d %d %s", timestr,
+         r->decay, r->scale, r->speed1, r->speed2, r->len, r->dist, r->charset);
    if (num_pr < 0) {
       fprintf(stderr, "error: cannot write to file\n");
       fclose(fp);

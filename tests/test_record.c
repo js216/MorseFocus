@@ -22,10 +22,10 @@ int test_record_load_last(const char *test_file)
       return 1;
    }
 
-   fprintf(fp, "2025-05-28 12:00:00 1.0 1.0 0.0 0.0 abc 0.1 0.2 0.3\n");
-   fprintf(fp, "2025-05-29 13:15:30 2.0 2.5 1.0 1.0 xyz 0.5 0.6 0.7\n");
-   fprintf(fp, "2025-05-30 19:39:10 1.0 2.0 3.0 4.0 abcd~!@#$ 0 1 2 3 4 5 "
-         "6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 "
+   fprintf(fp, "2025-05-28 12:00:00 1.0 1.0 0.0 0.0 3 1 abc 0.1 0.2 0.3\n");
+   fprintf(fp, "2025-05-29 13:15:30 2.0 2.5 1.0 1.0 3 2 xyz 0.5 0.6 0.7\n");
+   fprintf(fp, "2025-05-30 19:39:10 1.0 2.0 3.0 4.0 3 3 abcd~!@#$ 0 1 2 3 4 "
+         "5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 "
          "29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49\n");
 
    fclose(fp);
@@ -87,6 +87,8 @@ int test_record_append(const char *test_file)
     r.scale = 2.0f;
     r.speed1 = 3.0f;
     r.speed2 = 4.0f;
+    r.len = 5;
+    r.dist = 6;
     strcpy(r.charset, "abc");
     for (int i = 0; i < MAX_CHARSET_LEN; ++i)
         r.weights[i] = (float)i;
@@ -111,8 +113,9 @@ int test_record_append(const char *test_file)
     fclose(fp);
 
     // check beginning of the line
-    const char *exp_line = "2025-05-31 12:34:56 1.000 2.000 3.000 4.000 abc";
-    if (strncmp(line, exp_line, 47) != 0) {
+    const char *exp_line =
+       "2025-05-31 12:34:56 1.000 2.000 3.000 4.000 5 6 abc";
+    if (strncmp(line, exp_line, strlen(exp_line)) != 0) {
        printf("FAIL: fixed fields mismatch\n");
        return -1;
     }
@@ -124,8 +127,8 @@ int test_record_append(const char *test_file)
        "28.000 29.000 30.000 31.000 32.000 33.000 34.000 35.000 36.000 37.000 "
        "38.000 39.000 40.000 41.000 42.000 43.000 44.000 45.000 46.000 47.000 "
        "48.000 49.000\n";
-    if (strcmp(line+48, exp_w) != 0) {
-       printf("FAIL: weights mismatch\n");
+    if (strcmp(line+strlen(exp_line)+1, exp_w) != 0) {
+       printf("FAIL: weights mismatch, read: %s\n", line+strlen(exp_line)+1);
        return -1;
     }
 

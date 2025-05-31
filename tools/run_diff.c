@@ -93,9 +93,9 @@ int main(int argc, char *argv[])
 
    struct record r = {0};
 
-   const int diff = lev_diff(&r, clean1, clean2);
+   const int dist = lev_diff(&r, clean1, clean2);
 
-   printf("Distance: %d\n", diff);
+   printf("Distance: %d\n", dist);
    record_printout(&r);
 
    if (wfile) {
@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
       // current time
       time_t now = time(NULL);
       r.datetime = *localtime(&now);
+      r.len = len1;
+      r.dist = dist;
       r.decay = decay;
       r.scale = scale;
       r.speed1 = speed1;
