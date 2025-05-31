@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <time.h>
 
 /**
  * @brief Cleans s2 into s1, replacing non-printable characters with spaces, and
@@ -89,6 +90,37 @@ int str_write_time(FILE *fp);
  *               or to the null terminator if fewer fields exist.
  */
 char* str_skip_fields(const char *s, const int n);
+
+/**
+ * @brief Thread-safe, reentrant string tokenizer.
+ *
+ * Splits the input string into tokens separated by delimiter characters.
+ * On the first call, provide the string in `str`. For subsequent calls,
+ * pass NULL for `str` and use `saveptr` to continue tokenizing the same string.
+ *
+ * This function is a replacement for strtok_r where it is unavailable.
+ *
+ * @param str The string to tokenize on first call or NULL for subsequent calls.
+ * @param delim Null-terminated string of delimiter characters.
+ * @param saveptr Pointer to a char* variable storing context between calls.
+ *
+ * @return Pointer to the next token, or NULL if no tokens remain.
+ */
+char* str_tok(char *str, const char *delim, char **saveptr);
+
+/**
+ * @brief Simple portable fallback for strptime for format "%Y-%m-%d %H:%M:%S".
+ *
+ * Parses a datetime string like "2025-05-31 12:34:56" into a struct tm.
+ *
+ * @param s Input datetime string.
+ * @param format Expected format string (must be exactly "%Y-%m-%d %H:%M:%S").
+ * @param tm Pointer to struct tm to fill.
+ *
+ * @return Pointer to the character after the parsed part on success, or NULL on
+ * failure.
+ */
+char *str_ptime(const char *s, const char *format, struct tm *tm);
 
 #endif // STR_H
 

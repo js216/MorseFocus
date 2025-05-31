@@ -66,7 +66,6 @@ Running the utilities without any arguments will print usage information:
       -w FILE    load weights from last line of FILE
       -c CHARS   use custom charset (printable, no space)
       -o FILE    write output to FILE instead of stdout
-      -s scale   multiply all weights by scale factor
       -s scale   multiply all weights by scale (default 1.0)
     
     $ ./run_diff.exe

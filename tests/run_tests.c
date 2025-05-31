@@ -10,6 +10,7 @@
 #include "test_gen.h"
 #include "test_str.h"
 #include "test_weights.h"
+#include "test_record.h"
 
 #define TEST_FILE "test_file.txt"
 
@@ -32,6 +33,9 @@ int main(void)
    ret |= test_weights_load_last(TEST_FILE);
    ret |= test_weights_append(TEST_FILE);
    ret |= test_weights_add();
+
+   ret |= test_record_read_last(TEST_FILE);
+   ret |= test_record_append(TEST_FILE);
 
    remove(TEST_FILE);
    return ret;
