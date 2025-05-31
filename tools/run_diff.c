@@ -95,6 +95,12 @@ int main(int argc, char *argv[])
       }
    }
 
+   // check files are not too long
+   if ((str_file_len(file1) >= MAX_LEN) || (str_file_len(file1) >= MAX_LEN)) {
+      ERROR("files too long");
+      return -1;
+   }
+
    // allocate buffers
    char buf1[MAX_LEN], buf2[MAX_LEN];
    char clean1[MAX_LEN], clean2[MAX_LEN];

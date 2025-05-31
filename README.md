@@ -75,15 +75,12 @@ Running the utilities without any arguments will print usage information:
       -d decay  scale output weights (default: 1.0)
       -o file   append output weights to file
 
-
 ### To do
 
-- get rid of most unnecessary `#define` statements
 - make test cases a lot more comprehensive, including edge cases and malformed
   input
 - make sure header inclusions, and function calls, form a DAG
-- find and use a linter: Cppcheck, Clang Analyzer, Frama-C, Infer, Splint,
-  GCC -fanalyzer
+- use clang analyzer
 - GUI using Nuklear
 - speed PID for constant accuracy
 

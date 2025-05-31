@@ -96,59 +96,6 @@ char str_int_to_char(const int i)
 }
 
 
-int str_write_time(FILE *fp)
-{
-   time_t now = time(NULL);
-   struct tm *tm_info = localtime(&now);
-   char buffer[64];
-
-   if (tm_info == NULL) {
-      ERROR("unable to get local time");
-      return -1;
-   }
-
-   if (strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info)) {
-      fprintf(fp, "%s ", buffer);
-   } else {
-      ERROR("failed to format time");
-      return -1;
-   }
-
-   return 0;
-}
-
-
-char* str_skip_fields(const char *s, const int n)
-{
-    int fields_skipped = 0;
-
-    if (s == NULL || n < 0) {
-        return NULL;
-    }
-
-    while (*s && fields_skipped < n) {
-        // Skip leading spaces
-        while (*s && isspace((unsigned char)*s)) {
-            s++;
-        }
-
-        // Skip non-space characters (the field itself)
-        while (*s && !isspace((unsigned char)*s)) {
-            s++;
-        }
-
-        fields_skipped++;
-    }
-
-    // Skip any trailing spaces after the last field
-    while (*s && isspace((unsigned char)*s)) {
-        s++;
-    }
-
-    return (char *)s;
-}
-
-
 char *str_tok(char *str, const char *delim, char **saveptr)
 {
     char *start;

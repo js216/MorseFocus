@@ -17,8 +17,9 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
    size_t len1 = strlen(s1);
    size_t len2 = strlen(s2);
 
-   int **dp = malloc((len1 + 1) * sizeof(int *));
-   if (!dp) return -1;
+   int **dp = calloc((len1 + 1), sizeof(int *));
+   if (!dp)
+      return -1;
 
    for (size_t i = 0; i <= len1; ++i) {
       dp[i] = malloc((len2 + 1) * sizeof(int));

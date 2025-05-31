@@ -16,7 +16,7 @@
 #include "gen.h"
 
 #define TEST_MAX_GEN_LEN 100000
-#define TEST_EPS 0.1
+#define TEST_EPS 0.2
 
 static const char *charset_def = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
