@@ -45,7 +45,7 @@ int str_read_file(char *buf, const char *fname, const size_t max_len);
 /**
  * @brief Convert a supported character to its corresponding integer value.
  *
- * Digits map to 0–9, lowercase letters to 10–35, symbols to 36–40.
+ * Digits map to 0 to 9, lowercase letters to 10 to35, symbols to 36 to 40.
  *
  * @param ch The character to convert.
  * @return int The corresponding integer value, or -1 if unsupported.
@@ -55,7 +55,7 @@ int str_char_to_int(const char ch);
 /**
  * @brief Convert an integer back to its corresponding character.
  *
- * Integers 0–9 map to '0'–'9', 10–35 to 'a'–'z',
+ * Integers 0–9 map to '0'–'9', 10–35 to 'a' to 'z',
  * and 36–40 to the symbols . = , / ?
  *
  * @param i The integer to convert.
