@@ -10,9 +10,7 @@
 
 #include <stddef.h>
 
-int create_test_file(const char *filename);
 int test_weights_load_last(const char *filename);
-int read_last_line(char *buf, size_t size, const char *fname);
 int test_weights_append(const char *fname);
 int test_weights_add(void);
 

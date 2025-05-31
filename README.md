@@ -79,8 +79,6 @@ Running the utilities without any arguments will print usage information:
 
 ### To do
 
-- Makefile should run tests after each compile, so that running the final test
-  program is a prerequisite of each program in the makefile
 - introduce `struct record` to keep track of date/time, weights, speed, &c.,
   rather than ad hoc string manipulation
 - make sure header inclusions, and function calls, form a DAG

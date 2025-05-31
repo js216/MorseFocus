@@ -15,7 +15,7 @@
 #define MAX_WEIGHTS 32
 
 // writes known floating point data to the test file
-int create_test_file(const char *filename)
+static int test_weights_create_test_file(const char *filename)
 {
    FILE *fp = fopen(filename, "w");
    if (!fp) {
@@ -23,9 +23,9 @@ int create_test_file(const char *filename)
       return -1;
    }
 
-   fprintf(fp, "date time 1.0 2.0 3.0\n");
-   fprintf(fp, "date time 4.0 5.0 6.0 7.0\n");
-   fprintf(fp, "date time 8.5 9.25 10.75 11.125 12.625\n");  // last line
+   fprintf(fp, "date time decay 1.0 2.0 3.0\n");
+   fprintf(fp, "date time decay 4.0 5.0 6.0 7.0\n");
+   fprintf(fp, "date time decay 8.5 9.25 10.75 11.125 12.625\n");  // last line
 
    fclose(fp);
    return 0;
@@ -35,6 +35,11 @@ int create_test_file(const char *filename)
 // loads weights from last line and verifies expected values
 int test_weights_load_last(const char *filename)
 {
+   if (test_weights_create_test_file(filename) != 0) {
+      fprintf(stderr, "error: cannot create test file\n");
+      return -1;
+   }
+
    float weights[MAX_WEIGHTS] = {0.0f};
    int count = weights_load_last(weights, filename, MAX_WEIGHTS);
 
@@ -61,7 +66,7 @@ int test_weights_load_last(const char *filename)
 }
 
 
-int read_last_line(char *buf, size_t size, const char *fname)
+static int read_last_line(char *buf, size_t size, const char *fname)
 {
    FILE *fp = fopen(fname, "r");
    if (!fp)
@@ -109,7 +114,7 @@ int test_weights_append(const char *fname)
 
    // build expected string
    char expected[256];
-   snprintf(expected, sizeof(expected), "%.6f %.6f %.6f\n",
+   snprintf(expected, sizeof(expected), "%.3f %.3f %.3f\n",
             weights[0], weights[1], weights[2]);
 
    // skip ahead to where weights begin

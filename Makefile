@@ -27,6 +27,7 @@ build/%.o: tests/%.c | build
 
 build/run_tests: tests/run_tests.c $(module_objs) $(test_objs)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$@
 
 clean:
 	rm -f build/*

@@ -29,7 +29,6 @@ int main(void)
    ret |= test_str_char_to_int();
    ret |= test_str_int_to_char();
 
-   ret |= create_test_file(TEST_FILE);
    ret |= test_weights_load_last(TEST_FILE);
    ret |= test_weights_append(TEST_FILE);
    ret |= test_weights_add();
