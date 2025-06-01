@@ -79,6 +79,15 @@ Running the utilities without any arguments will print usage information:
       -2 speed2  second speed to record to file (default: 0)
       -c charset charset to record to file (default: "~")
 
+### TODO
+
+- Add linters to Makefile:
+   - scan-build
+   - clang-tidy
+   - splint
+   - cppcheck
+- Make a simple GUI for the program
+
 ### License
 
 BSD 2-Clause License
