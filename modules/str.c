@@ -99,57 +99,57 @@ char str_int_to_char(const int i)
 
 char *str_tok(char *str, const char *delim, char **saveptr)
 {
-    char *start;
-    if (str)
-        start = str;
-    else if (*saveptr)
-        start = *saveptr;
-    else
-        return NULL;
+   char *start;
+   if (str)
+      start = str;
+   else if (*saveptr)
+      start = *saveptr;
+   else
+      return NULL;
 
-    // Skip leading delimiters
-    start += strspn(start, delim);
-    if (*start == '\0') {
-        *saveptr = NULL;
-        return NULL;
-    }
+   // Skip leading delimiters
+   start += strspn(start, delim);
+   if (*start == '\0') {
+      *saveptr = NULL;
+      return NULL;
+   }
 
-    // Find end of token
-    char *end = start + strcspn(start, delim);
-    if (*end) {
-        *end = '\0';
-        *saveptr = end + 1;
-    } else {
-        *saveptr = NULL;
-    }
+   // Find end of token
+   char *end = start + strcspn(start, delim);
+   if (*end) {
+      *end = '\0';
+      *saveptr = end + 1;
+   } else {
+      *saveptr = NULL;
+   }
 
-    return start;
+   return start;
 }
 
 
 char *str_ptime(const char *s, const char *format, struct tm *tm)
 {
-    int year, mon, mday, hour, min, sec;
+   int year, mon, mday, hour, min, sec;
 
-    // Only support exact format "%Y-%m-%d %H:%M:%S"
-    if (format == NULL || strcmp(format, "%Y-%m-%d %H:%M:%S") != 0)
-        return NULL;
+   // Only support exact format "%Y-%m-%d %H:%M:%S"
+   if (format == NULL || strcmp(format, "%Y-%m-%d %H:%M:%S") != 0)
+      return NULL;
 
-    int ret = sscanf(s, "%4d-%2d-%2d %2d:%2d:%2d",
-                     &year, &mon, &mday, &hour, &min, &sec);
-    if (ret != 6)
-        return NULL;
+   int ret = sscanf(s, "%4d-%2d-%2d %2d:%2d:%2d",
+         &year, &mon, &mday, &hour, &min, &sec);
+   if (ret != 6)
+      return NULL;
 
-    tm->tm_year = year - 1900;  // years since 1900
-    tm->tm_mon = mon - 1;       // months since January [0-11]
-    tm->tm_mday = mday;
-    tm->tm_hour = hour;
-    tm->tm_min = min;
-    tm->tm_sec = sec;
-    tm->tm_isdst = -1;          // Not known
+   tm->tm_year = year - 1900;  // years since 1900
+   tm->tm_mon = mon - 1;       // months since January [0-11]
+   tm->tm_mday = mday;
+   tm->tm_hour = hour;
+   tm->tm_min = min;
+   tm->tm_sec = sec;
+   tm->tm_isdst = -1;          // Not known
 
-    // Return pointer after the matched datetime (fixed length = 19 chars)
-    return (char *)(s + 19);
+   // Return pointer after the matched datetime (fixed length = 19 chars)
+   return (char *)(s + 19);
 }
 
 
@@ -170,14 +170,14 @@ int str_is_clean(const char *s)
 
 char *str_dup(const char *s)
 {
-    if (!s)
-        return NULL;
+   if (!s)
+      return NULL;
 
-    size_t len = strlen(s) + 1;
-    char *dup = (char *)malloc(len);
-    if (dup)
-        memcpy(dup, s, len);
-    return dup;
+   size_t len = strlen(s) + 1;
+   char *dup = (char *)malloc(len);
+   if (dup)
+      memcpy(dup, s, len);
+   return dup;
 }
 
 

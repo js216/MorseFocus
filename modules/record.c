@@ -30,7 +30,8 @@ struct record record_load_last(const char *filename)
    char last_line[MAX_CSV_LEN] = "";
 
    while (fgets(line, sizeof(line), fp)) {
-      strcpy(last_line, line);
+      strncpy(last_line, line, sizeof(last_line) - 1);
+      last_line[sizeof(last_line) - 1] = '\0'; // ensure null termination
    }
 
    fclose(fp);

@@ -87,7 +87,7 @@ int main(int argc, char **argv)
       }
    }
 
-   struct record l = {0};
+   struct record l;
    if (wfile) {
       l = record_load_last(wfile);
       if (l.valid == 0) {

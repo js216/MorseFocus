@@ -6,8 +6,8 @@ the next session this character will appear more frequently.
 
 ### Building
 
-Pre-requisites: only `gcc` and `make` are required to build this project. The
-code is written entirely in standard C99.
+Pre-requisites: only `gcc` and `make` are required to build the command-line
+tools. The code is written entirely in standard C99.
 
 Clone the repository and run
 
@@ -15,6 +15,13 @@ Clone the repository and run
     $ make
 
 The executable files will appear under `build`.
+
+To run static code analysis, run `make check`, for which we need
+
+- `clang-tidy`
+- `clang-format`
+- `scan-build`
+- `jq`
 
 ### Command-line interface
 
@@ -67,7 +74,7 @@ Running the utilities without any arguments will print usage information:
       -c CHARS   use custom charset (printable, no space)
       -o FILE    write output to FILE instead of stdout
       -s SCALE   multiply all weights by scale (default 1.0)
-    
+
     $ ./run_diff
     Usage: ./run_diff f1 f2 [options]
     Options:
@@ -81,11 +88,8 @@ Running the utilities without any arguments will print usage information:
 
 ### TODO
 
-- Add linters to Makefile:
-   - scan-build
-   - clang-tidy
-   - splint
-   - cppcheck
+- Diff for word probabilities
+- Add a Markov chain text generator
 - Make a simple GUI for the program
 
 ### License

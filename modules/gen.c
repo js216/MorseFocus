@@ -22,7 +22,7 @@ float gen_rand()
       srand((unsigned)time(NULL));
       seeded = 1;
    }
-   const float r = rand() / (RAND_MAX + 1.0f);
+   const float r = rand() / ((float)RAND_MAX + 1.0f);
    return r;
 }
 

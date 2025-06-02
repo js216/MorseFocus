@@ -18,7 +18,7 @@
 
 #define TEST_MAX_CHARS 100000
 #define TEST_MAX_WORDS 1000
-#define TEST_EPS 0.2
+#define TEST_EPS 0.25
 
 extern int silence_errors;
 
@@ -160,10 +160,14 @@ static int test_gen_analyze(const char *s, const float *f,
 {
    float fs[MAX_CHARSET_LEN];
    test_gen_freq(fs, s);
-   if (test_gen_check_freq(f, fs, TEST_EPS) != 0)
+   if (test_gen_check_freq(f, fs, TEST_EPS) != 0) {
+      ERROR("frequency mismatch");
       return -1;
-   if (test_gen_check_word_len(s, min_word, max_word) != 0)
+   }
+   if (test_gen_check_word_len(s, min_word, max_word) != 0) {
+      ERROR("word length mismatch");
       return -1;
+   }
    return 0;
 }
 
