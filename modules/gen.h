@@ -50,7 +50,8 @@ int gen_chars(char *s, const size_t num_char, const int min_word,
  *
  * @param out_file Path to output file to write generated words. If NULL,
  * output is written to stdout.
- * @param word_file Path to input word list file. Must not be NULL.
+ * @param word_file Path to input word list file. If NULL, read from standard
+ * input.
  * @param nw Number of random words to generate.
  * @param nl Number of lines (words) to read from the word file.
  *
@@ -160,7 +161,7 @@ int parse_line(const char *line, char **word_out, float *weight_out,
  * Checks validity of characters in words.
  * On success, allocates entries array (must be freed by caller).
  *
- * @param word_file Path to input file.
+ * @param word_file Path to input file. If NULL, will read from standard input.
  * @param entries_out Output pointer to allocated WordEntry array.
  * @param nl Number of lines to read (all if not positive)
  * @return Number of entries read on success, -1 on failure.

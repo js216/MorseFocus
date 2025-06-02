@@ -31,28 +31,29 @@ int silence_errors;
 
 static void usage(const char *progname)
 {
-   printf("Usage: %s FILE NUM_WORDS [options]\n", progname);
-   printf("\nMandatory arguments:\n");
-   printf("  FILE        file containing one word per line\n");
+   printf("Usage: %s NUM_WORDS [FILE] [options]\n", progname);
+   printf("\nMandatory argument:\n");
    printf("  NUM_WORDS   number of words to generate\n");
-   printf("\nOptions:\n");
+   printf("\nOptional arguments:\n");
+   printf("  FILE        input file containing one word per line (default: "
+          "standard input)\n");
    printf("  -o FILE     write output to FILE instead of standard output\n");
-   printf("  -n NUM      number of lines to read from FILE (default: all)\n");
+   printf("  -n NUM      number of lines to read from input (default: all)\n");
 }
 
 int main(int argc, char *argv[])
 {
-   if (argc < 3) {
+   if (argc < 2) {
       usage(argv[0]);
       return 1;
    }
 
-   const char *word_file = argv[1];
-   const char *num_words_str = argv[2];
+   const char *num_words_str = argv[1];
+   const char *word_file = NULL;
    const char *out_file = NULL;
-   int num_lines = -1; // read all lines by default
+   int num_lines = -1; // default: read all lines
 
-   // Parse NUM_WORDS
+   // parse NUM_WORDS
    char *endptr;
    int num_words = (int)strtol(num_words_str, &endptr, 10);
    if (*endptr != '\0' || num_words <= 0) {
@@ -60,8 +61,15 @@ int main(int argc, char *argv[])
       return 1;
    }
 
-   // Parse optional arguments
-   for (int i = 3; i < argc; ++i) {
+   // determine if FILE was provided
+   int arg_index = 2;
+   if (arg_index < argc && argv[arg_index][0] != '-') {
+      word_file = argv[arg_index];
+      ++arg_index;
+   }
+
+   // parse options
+   for (int i = arg_index; i < argc; ++i) {
       if (strcmp(argv[i], "-o") == 0) {
          if (i + 1 >= argc) {
             ERROR("missing argument after -o\n");
@@ -84,7 +92,7 @@ int main(int argc, char *argv[])
       }
    }
 
-   // Run generator
+   // run generator
    if (gen_words(out_file, word_file, num_words, num_lines) != 0) {
       ERROR("failed to generate words.\n");
       return 1;
@@ -92,3 +100,5 @@ int main(int argc, char *argv[])
 
    return 0;
 }
+
+// end file run_words.c

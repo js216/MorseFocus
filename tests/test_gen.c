@@ -582,15 +582,7 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
    // testing malformed input
    silence_errors = 1;
 
-   // case 2: word_file is NULL (should fail)
-   ret = gen_words(NULL, NULL, 2, 2);
-   if (ret == 0) {
-      TEST_FAIL("gen_words succeeded with NULL word_file");
-      silence_errors = 0;
-      return -1;
-   }
-
-   // case 3: non-existent word file (should fail)
+   // case 2: non-existent word file (should fail)
    ret = gen_words(NULL, nonexistent_file, 2, 2);
    if (ret == 0) {
       TEST_FAIL("gen_words succeeded with nonexistent word file");
@@ -598,7 +590,7 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
       return -1;
    }
 
-   // case 4: nl > number of lines in file (should fail)
+   // case 3: nl > number of lines in file (should fail)
    ret = gen_words(NULL, valid_word_file, 2, 10);
    if (ret == 0) {
       TEST_FAIL("gen_words succeeded with nl > lines in file");

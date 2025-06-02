@@ -25,6 +25,8 @@ To run static code analysis, run `make check`, for which we need
 
 ### Command-line interface
 
+#### Random character generation
+
 To generate 75 random characters:
 
     $ ./run_gen.exe 75
@@ -85,6 +87,8 @@ Running the utilities without any arguments will print usage information:
       -1 SPEED1  first speed to record to file (default: 0)
       -2 SPEED2  second speed to record to file (default: 0)
       -c CHARSET charset to record to file (default: "~")
+
+#### Random word generation
 
 ### TODO
 

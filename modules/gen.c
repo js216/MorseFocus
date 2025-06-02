@@ -253,30 +253,22 @@ int parse_line(const char *line, char **word_out, float *weight_out,
 int parse_word_file(const char *word_file, struct WordEntry **entries_out,
                     int nl)
 {
-   // if not given number of lines to read
-   if (nl <= 0) {
-      nl = str_file_lines(word_file);
-      if (nl <= 0) {
-         ERROR("file empty or unreadable");
+   FILE *fp = stdin;
+   if (word_file) {
+      fp = fopen(word_file, "r");
+      if (!fp) {
+         ERROR("could not open word file");
          return -1;
       }
    }
 
-   // open the word file for reading
-   FILE *fp = fopen(word_file, "r");
-   if (!fp) {
-      ERROR("could not open word_file");
-      *entries_out = NULL;
-      return -1;
-   }
-
-   // allocate memory for entries array
-   const size_t num_bytes = nl * sizeof(struct WordEntry);
-   struct WordEntry *entries = malloc(num_bytes);
+   struct WordEntry *entries = NULL;
+   int capacity = (nl > 0) ? nl : 16; // start small and grow
+   entries = calloc(capacity, sizeof(struct WordEntry));
    if (!entries) {
-      fclose(fp);
-      *entries_out = NULL;
-      ERROR("memory allocation failed for %zu bytes (%d words)", num_bytes, nl);
+      if (word_file)
+         fclose(fp);
+      ERROR("memory allocation failed");
       return -1;
    }
 
@@ -284,51 +276,51 @@ int parse_word_file(const char *word_file, struct WordEntry **entries_out,
    int has_weight = -1;
    char line[MAX_WORD_LINE];
 
-   // read lines until EOF or requested number of lines reached
    while (fgets(line, sizeof(line), fp)) {
-      if (count >= nl) {
+      if (nl > 0 && count >= nl)
          break;
-      }
 
-      // check if line was too long to fit in buffer
       if (is_line_too_long(fp, line)) {
          ERROR("line too long");
          goto fail;
       }
 
-      // strip trailing newline or carriage return characters
       line[strcspn(line, "\r\n")] = 0;
 
       char *word;
       float weight;
-
-      // parse the line into word and optional weight
-      if (parse_line(line, &word, &weight, &has_weight) < 0) {
+      if (parse_line(line, &word, &weight, &has_weight) < 0)
          goto fail;
-      }
 
-      // validate that the word contains only allowed characters
       if (validate_word(word)) {
          ERROR("invalid character in word");
          goto fail;
       }
 
-      // duplicate the word string and store weight
+      if (count >= capacity) {
+         capacity *= 2;
+         struct WordEntry *new_entries =
+             realloc(entries, capacity * sizeof(struct WordEntry));
+         if (!new_entries) {
+            ERROR("memory reallocation failed");
+            goto fail;
+         }
+         entries = new_entries;
+      }
+
       entries[count].word = str_dup(word);
       if (!entries[count].word) {
          ERROR("memory allocation failed for word");
          goto fail;
       }
       entries[count].weight = weight;
-
-      ++count;
+      count++;
    }
 
-   // close the file after reading
-   fclose(fp);
+   if (word_file)
+      fclose(fp);
 
-   // check if the file contained fewer lines than requested
-   if (count < nl) {
+   if (nl > 0 && count < nl) {
       ERROR("not enough lines in file");
       free_entries(entries, count);
       *entries_out = NULL;
@@ -339,8 +331,8 @@ int parse_word_file(const char *word_file, struct WordEntry **entries_out,
    return count;
 
 fail:
-   // cleanup allocated memory and close file on error
-   fclose(fp);
+   if (word_file)
+      fclose(fp);
    free_entries(entries, count);
    *entries_out = NULL;
    return -1;
@@ -349,15 +341,12 @@ fail:
 int gen_words(const char *out_file, const char *word_file, const int nw,
               const int nl)
 {
-   if (!word_file) {
-      ERROR("word_file is NULL");
-      return -1;
-   }
-
    struct WordEntry *entries = NULL;
    int count = parse_word_file(word_file, &entries, nl);
-   if (count < 0)
+   if (count < 0) {
+      ERROR("could not parse file");
       return -1;
+   }
 
    float total_weight = compute_total_weight(entries, count);
 
@@ -366,7 +355,7 @@ int gen_words(const char *out_file, const char *word_file, const int nw,
       out = fopen(out_file, "w");
       if (!out) {
          ERROR("could not open output file");
-         free_entries(entries, count); // free before return!
+         free_entries(entries, count);
          return -1;
       }
    }
@@ -375,8 +364,7 @@ int gen_words(const char *out_file, const char *word_file, const int nw,
    if (out_file)
       fclose(out);
 
-   free_entries(entries, count); // always free allocated memory
-
+   free_entries(entries, count);
    return status;
 }
 

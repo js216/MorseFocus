@@ -13,7 +13,7 @@ all: $(addprefix build/, $(tools))
 module_objs = $(addprefix build/, $(addsuffix .o, $(modules)))
 test_objs = $(addprefix build/, $(addsuffix .o, $(tests)))
 
-.PHONY: clean all check
+.PHONY: clean all check format
 
 # Main program files
 
@@ -37,6 +37,9 @@ build/run_tests: tests/run_tests.o $(module_objs) $(test_objs)
 
 # Static code analysis
 
+format:
+	find . -name '*.c' -o -name '*.h' | xargs clang-format -i
+
 check:
 	# clang-format
 	find . -name '*.c' -o -name '*.h' | xargs clang-format --dry-run -Werror
@@ -44,7 +47,7 @@ check:
 	make clean
 	$(INTERCEPT) --cdb build/compile_commands.json make all
 	sed -i 's/-fanalyzer//g' build/compile_commands.json
-	jq -r '.[].file' build/compile_commands.json | xargs clang-tidy -p build -system-headers
+	jq -r '.[].file' build/compile_commands.json | xargs clang-tidy -p build -system-headers -warnings-as-errors=*
 	# scan-build
 	make clean
 	$(SCAN) --status-bugs make all
