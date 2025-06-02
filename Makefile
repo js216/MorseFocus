@@ -31,7 +31,7 @@ build/%: build/%.o $(module_objs)
 build/%.o: tests/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/run_tests: tests/run_tests.o $(module_objs) $(test_objs)
+build/run_tests: build/run_tests.o $(module_objs) $(test_objs)
 	$(CC) $^ -o $@ $(LDFLAGS)
 	cd build && ./run_tests
 
