@@ -13,6 +13,9 @@
 #include <time.h>
 
 #define MAX_CHARSET_LEN 50
+#define MAX_WORD_LINE 128
+#define MAX_CSV_LEN 4096
+#define MAX_FILENAME_LEN 256
 
 /**
  * @brief Cleans s2 into s1, replacing non-printable characters with spaces, and
@@ -103,6 +106,32 @@ char *str_ptime(const char *s, const char *format, struct tm *tm);
  * @return 0 on success, -1 if unsupported characters are found
  */
 int str_is_clean(const char *s);
+
+/**
+ * @brief Duplicate a null-terminated string by allocating new memory.
+ *
+ * Allocates enough memory for a copy of the string `s`, copies it,
+ * and returns a pointer to the new string. Returns NULL if memory
+ * allocation fails or if `s` is NULL.
+ *
+ * @param s Null-terminated input string to duplicate.
+ * @return Pointer to duplicated string on success, NULL on failure.
+ */
+char* str_dup(const char *s);
+
+/**
+ * @brief Counts the number of lines in a given text file.
+ *
+ * This function opens the specified file and counts the number of lines
+ * by counting newline ('\n') characters. If the file does not end with
+ * a newline but is not empty, the last line is also counted.
+ *
+ * @param filename The path to the file to count lines in.
+ *
+ * @return The number of lines in the file on success,
+ *         or -1 if the file could not be opened.
+ */
+int str_file_lines(const char *filename);
 
 #endif // STR_H
 

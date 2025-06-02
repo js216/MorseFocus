@@ -1,10 +1,10 @@
 CC = gcc -fanalyzer
 CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -Imodules -MMD -MP
-LDFLAGS = -lm 
+LDFLAGS = -lm
 
 modules = diff str gen record
 tests = test_diff test_str test_gen test_record
-tools = run_tests run_diff run_gen
+tools = run_tests run_diff run_gen run_words
 
 all: $(addprefix build/, $(tools))
 module_objs = $(addprefix build/, $(addsuffix .o, $(modules)))

@@ -9,22 +9,22 @@
  *
  * Usage:
  *
- *    run_diff f1 f2 [options]
+ *    run_diff F1 F2 [options]
  *
  * Positional Arguments:
  *
- * f1: path to first input text file
- * f2: path to second input text file
+ *   F1 path to first input text file
+ *   F2 path to second input text file
  *
  * Optional Flags:
  *
- * -w f3: path to file containing stored weights (default: none)
- * -d decay: floating-point decay factor (default: 1.0)
- * -o f4: append the resulting weights to file f4 (default: print only)
- * -s: scale to record to file (default: 0)
- * -1: first speed to record to file (default: 0)
- * -2: second speed to record to file (default: 0)
- * -c: charset to record to file (default: "~")
+ *   -w F3      path to file containing stored weights (default: none)
+ *   -d DECAY   floating-point decay factor (default: 1.0)
+ *   -o F4      append the resulting weights to file f4 (default: print only)
+ *   -s SCALE   to record to file (default: 0)
+ *   -1 FIRST   speed to record to file (default: 0)
+ *   -2 SECOND  speed to record to file (default: 0)
+ *   -c CHARSET to record to file (default: "~")
  *
  * @author Jakob Kastelic
  */
@@ -38,7 +38,9 @@
 #include "record.h"
 #include "diff.h"
 
-#define MAX_LEN 8192
+#define MAX_DIFF_LEN 8192
+
+int silence_errors;
 
 static void print_usage(const char *prog)
 {
@@ -96,16 +98,17 @@ int main(int argc, char *argv[])
    }
 
    // check files are not too long
-   if ((str_file_len(file1) >= MAX_LEN) || (str_file_len(file1) >= MAX_LEN)) {
+   if ((str_file_len(file1) >= MAX_DIFF_LEN) || (str_file_len(file1) >=
+            MAX_DIFF_LEN)) {
       ERROR("files too long");
       return -1;
    }
 
    // allocate buffers
-   char buf1[MAX_LEN], buf2[MAX_LEN];
-   char clean1[MAX_LEN], clean2[MAX_LEN];
-   int len1 = str_read_file(buf1, file1, MAX_LEN);
-   int len2 = str_read_file(buf2, file2, MAX_LEN);
+   char buf1[MAX_DIFF_LEN], buf2[MAX_DIFF_LEN];
+   char clean1[MAX_DIFF_LEN], clean2[MAX_DIFF_LEN];
+   int len1 = str_read_file(buf1, file1, MAX_DIFF_LEN);
+   int len2 = str_read_file(buf2, file2, MAX_DIFF_LEN);
    if (len1 <= 0 || len2 <= 0) {
       ERROR("cannot read input files");
       return -1;

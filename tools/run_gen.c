@@ -19,7 +19,7 @@
  *   -w FILE     load character weights from the last line of FILE
  *   -c CHARS    specify a custom character set (printable, no spaces)
  *   -o FILE     write output to FILE instead of printing to standard output
- *   -s scale    multiply all weights by scale factor (default 1.0)
+ *   -s SCALE    multiply all weights by scale factor (default 1.0)
  *
  * @author Jakob Kastelic
  */
@@ -35,6 +35,8 @@
 
 #define DEFAULT_MIN_WORD 2
 #define DEFAULT_MAX_WORD 7
+
+int silence_errors;
 
 static void usage(const char *prog)
 {

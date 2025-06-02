@@ -177,8 +177,8 @@ int test_str_int_to_char(void)
         }
     }
 
-    const char expected_symbols[] = { '.', '=', ',', '/', '?' };
-    for (int i = 0; i < 5; i++) {
+    const char expected_symbols[] = { '.', '=', ',', '/', '?', '\''};
+    for (int i = 0; i < 6; i++) {
         int index = 36 + i;
         char result = str_int_to_char(index);
         if (result != expected_symbols[i]) {
@@ -188,8 +188,8 @@ int test_str_int_to_char(void)
         }
     }
 
-    if (str_int_to_char(41) != '\0') {
-        TEST_FAIL("41 -> expected '0'");
+    if (str_int_to_char(42) != '\0') {
+        TEST_FAIL("42 -> expected '0'");
         return -1;
     }
 

@@ -66,18 +66,18 @@ Running the utilities without any arguments will print usage information:
       -w FILE    load weights from last line of FILE
       -c CHARS   use custom charset (printable, no space)
       -o FILE    write output to FILE instead of stdout
-      -s scale   multiply all weights by scale (default 1.0)
+      -s SCALE   multiply all weights by scale (default 1.0)
     
     $ ./run_diff
     Usage: ./run_diff f1 f2 [options]
     Options:
-      -w file   load weights from file
-      -d decay  scale output weights (default: 1.0)
-      -o file   append output weights to file
-      -s scale   scale to record to file (default: 0)
-      -1 speed1  first speed to record to file (default: 0)
-      -2 speed2  second speed to record to file (default: 0)
-      -c charset charset to record to file (default: "~")
+      -w FILE    load weights from file
+      -d DECAY   scale output weights (default: 1.0)
+      -o FILE    append output weights to file
+      -s SCALE   scale to record to file (default: 0)
+      -1 SPEED1  first speed to record to file (default: 0)
+      -2 SPEED2  second speed to record to file (default: 0)
+      -c CHARSET charset to record to file (default: "~")
 
 ### TODO
 

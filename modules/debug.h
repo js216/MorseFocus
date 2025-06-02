@@ -7,13 +7,18 @@
 
 #include <stdio.h>
 
+extern int silence_errors;
+
 #define ERROR(...) \
     do { \
-        printf("\033[1;31merror:\033[0m %s in %s (line %d): ", \
-               __func__, __FILE__, __LINE__); \
-        printf(__VA_ARGS__); \
-        printf("\n"); \
+        if (!silence_errors) { \
+            printf("\033[1;31merror:\033[0m %s in %s (line %d): ", \
+                   __func__, __FILE__, __LINE__); \
+            printf(__VA_ARGS__); \
+            printf("\n"); \
+        } \
     } while (0)
+
 
 #define TEST_FAIL(...) \
     do { \

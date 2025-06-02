@@ -15,8 +15,6 @@
 #include "debug.h"
 #include "record.h"
 
-#define MAX_LINE_LEN 4096
-
 struct record record_load_last(const char *filename)
 {
    struct record rec;
@@ -28,8 +26,8 @@ struct record record_load_last(const char *filename)
       return rec;
    }
 
-   char line[MAX_LINE_LEN];
-   char last_line[MAX_LINE_LEN] = "";
+   char line[MAX_CSV_LEN];
+   char last_line[MAX_CSV_LEN] = "";
 
    while (fgets(line, sizeof(line), fp)) {
       strcpy(last_line, line);
@@ -183,8 +181,8 @@ int record_append(const char *path, const struct record *r)
       }
 
       num_pr += ret;
-      if (num_pr > MAX_LINE_LEN) {
-         ERROR("wrote more than MAX_LINE_LEN");
+      if (num_pr > MAX_CSV_LEN) {
+         ERROR("wrote more than MAX_CSV_LEN");
          fclose(fp);
          return -1;
       }

@@ -80,6 +80,7 @@ int str_char_to_int(const char ch)
       case ',': return 38;
       case '/': return 39;
       case '?': return 40;
+      case '\'': return 41;
       default: return -1;
    }
 }
@@ -87,7 +88,7 @@ int str_char_to_int(const char ch)
 
 char str_int_to_char(const int i)
 {
-   static const char lookup[] = "0123456789abcdefghijklmnopqrstuvwxyz.=,/?";
+   static const char lookup[] = "0123456789abcdefghijklmnopqrstuvwxyz.=,/?'";
 
    if (i >= 0 && i < (int)(sizeof(lookup) - 1))
       return lookup[i];
@@ -125,8 +126,6 @@ char *str_tok(char *str, const char *delim, char **saveptr)
     return start;
 }
 
-
-#include <stdio.h>
 
 char *str_ptime(const char *s, const char *format, struct tm *tm)
 {
@@ -166,6 +165,51 @@ int str_is_clean(const char *s)
       }
    }
    return 0;
+}
+
+
+char *str_dup(const char *s)
+{
+    if (!s)
+        return NULL;
+
+    size_t len = strlen(s) + 1;
+    char *dup = (char *)malloc(len);
+    if (dup)
+        memcpy(dup, s, len);
+    return dup;
+}
+
+
+int str_file_lines(const char *filename)
+{
+   FILE *f = fopen(filename, "r");
+   if (!f) {
+      ERROR("could not open file");
+      return -1;
+   }
+
+   int lines = 0;
+   int c;
+
+   while ((c = fgetc(f)) != EOF) {
+      if (c == '\n') {
+         lines++;
+      }
+   }
+
+   // If the file does not end with a newline but is not empty,
+   // count the last line as well
+   if (lines > 0) {
+      fseek(f, -1, SEEK_END);
+      c = fgetc(f);
+      if (c != '\n') {
+         lines++;
+      }
+   }
+
+   fclose(f);
+   return lines;
 }
 
 // end file str.c
