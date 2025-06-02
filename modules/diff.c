@@ -5,12 +5,12 @@
  * @author Jakob Kastelic
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include "diff.h"
 #include "debug.h"
 #include "str.h"
-#include "diff.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int lev_diff(struct record *r, const char *s1, const char *s2)
 {
@@ -29,15 +29,18 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
    for (size_t i = 0; i <= len1; ++i) {
       dp[i] = malloc((len2 + 1) * sizeof(int));
       if (!dp[i]) {
-         for (size_t k = 0; k < i; ++k) free(dp[k]);
+         for (size_t k = 0; k < i; ++k)
+            free(dp[k]);
          free(dp);
          return -1;
       }
    }
 
    // initialize first row and column
-   for (size_t i = 0; i <= len1; ++i) dp[i][0] = i;
-   for (size_t j = 0; j <= len2; ++j) dp[0][j] = j;
+   for (size_t i = 0; i <= len1; ++i)
+      dp[i][0] = i;
+   for (size_t j = 0; j <= len2; ++j)
+      dp[0][j] = j;
 
    // fill the matrix
    for (size_t i = 1; i <= len1; ++i) {
@@ -47,8 +50,10 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
          int ins = dp[i][j - 1] + 1;
          int sub = dp[i - 1][j - 1] + cost;
          int min = del;
-         if (ins < min) min = ins;
-         if (sub < min) min = sub;
+         if (ins < min)
+            min = ins;
+         if (sub < min)
+            min = sub;
          dp[i][j] = min;
       }
    }
@@ -57,32 +62,33 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
    size_t i = len1 - 1;
    size_t j = len2 - 1;
    while (i > 0 || j > 0) {
-      if (i > 0 && j > 0 && dp[i][j] == dp[i - 1][j - 1] + ((s1[i - 1] != s2[j - 1]) ? 1 : 0)) {
+      if (i > 0 && j > 0 &&
+          dp[i][j] == dp[i - 1][j - 1] + ((s1[i - 1] != s2[j - 1]) ? 1 : 0)) {
          if (s1[i - 1] != s2[j - 1]) {
             // substitution: count both characters
-            r->weights[str_char_to_int(s1[i-1])]++;
-            r->weights[str_char_to_int(s2[j-1])]++;
+            r->weights[str_char_to_int(s1[i - 1])]++;
+            r->weights[str_char_to_int(s2[j - 1])]++;
          }
          --i;
          --j;
       } else if (i > 0 && dp[i][j] == dp[i - 1][j] + 1) {
          // deletion from s1
-         r->weights[str_char_to_int(s1[i-1])]++;
+         r->weights[str_char_to_int(s1[i - 1])]++;
          --i;
       } else {
          // insertion into s1 (from s2)
-         r->weights[str_char_to_int(s2[j-1])]++;
+         r->weights[str_char_to_int(s2[j - 1])]++;
          --j;
       }
    }
 
    int dist = dp[len1][len2];
 
-   for (size_t k = 0; k <= len1; ++k) free(dp[k]);
+   for (size_t k = 0; k <= len1; ++k)
+      free(dp[k]);
    free(dp);
 
    return dist;
 }
 
 // end of file diff.c
-

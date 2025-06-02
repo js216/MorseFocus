@@ -24,14 +24,14 @@
  * @author Jakob Kastelic
  */
 
+#include "debug.h"
+#include "gen.h"
+#include "record.h"
+#include "str.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include "debug.h"
-#include "gen.h"
-#include "str.h"
-#include "record.h"
 
 #define DEFAULT_MIN_WORD 2
 #define DEFAULT_MAX_WORD 7
@@ -41,15 +41,15 @@ int silence_errors;
 static void usage(const char *prog)
 {
    fprintf(stderr,
-      "Usage: %s num_char [options]\n"
-      "options:\n"
-      "  -i MIN     set minimum word length (default %d)\n"
-      "  -x MAX     set maximum word length (default %d)\n"
-      "  -w FILE    load weights from last line of FILE\n"
-      "  -c CHARS   use custom charset (printable, no space)\n"
-      "  -o FILE    write output to FILE instead of stdout\n"
-      "  -s scale   multiply all weights by scale (default 1.0)\n",
-      prog, DEFAULT_MIN_WORD, DEFAULT_MAX_WORD);
+           "Usage: %s num_char [options]\n"
+           "options:\n"
+           "  -i MIN     set minimum word length (default %d)\n"
+           "  -x MAX     set maximum word length (default %d)\n"
+           "  -w FILE    load weights from last line of FILE\n"
+           "  -c CHARS   use custom charset (printable, no space)\n"
+           "  -o FILE    write output to FILE instead of stdout\n"
+           "  -s scale   multiply all weights by scale (default 1.0)\n",
+           prog, DEFAULT_MIN_WORD, DEFAULT_MAX_WORD);
 }
 
 int main(int argc, char **argv)
@@ -133,4 +133,3 @@ int main(int argc, char **argv)
 }
 
 // end file run_gen.c
-

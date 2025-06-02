@@ -38,7 +38,8 @@ int str_clean(char *s1, const char *s2, size_t len);
 int str_file_len(const char *fname);
 
 /**
- * @brief Reads up to max_len - 1 bytes from a file into a buffer and null-terminates it.
+ * @brief Reads up to max_len - 1 bytes from a file into a buffer and
+ * null-terminates it.
  *
  * @param buf Destination buffer (must be at least max_len bytes).
  * @param fname Path to the file.
@@ -83,7 +84,7 @@ char str_int_to_char(const int i);
  *
  * @return Pointer to the next token, or NULL if no tokens remain.
  */
-char* str_tok(char *str, const char *delim, char **saveptr);
+char *str_tok(char *str, const char *delim, char **saveptr);
 
 /**
  * @brief Simple portable fallback for strptime for format "%Y-%m-%d %H:%M:%S".
@@ -117,7 +118,7 @@ int str_is_clean(const char *s);
  * @param s Null-terminated input string to duplicate.
  * @return Pointer to duplicated string on success, NULL on failure.
  */
-char* str_dup(const char *s);
+char *str_dup(const char *s);
 
 /**
  * @brief Counts the number of lines in a given text file.
@@ -136,4 +137,3 @@ int str_file_lines(const char *filename);
 #endif // STR_H
 
 // end file str.h
-

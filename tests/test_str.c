@@ -5,18 +5,18 @@
  * @author Jakob Kastelic
  */
 
+#include "test_str.h"
+#include "debug.h"
+#include "str.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include "debug.h"
-#include "str.h"
-#include "test_str.h"
 
 #define TEST_MAX_LEN 100
 
 static const char *test_content =
-   "This is a test file.\nIt has multiple lines.\n";
+    "This is a test file.\nIt has multiple lines.\n";
 
 int test_str_clean(void)
 {
@@ -50,7 +50,6 @@ int test_str_clean(void)
    return 0;
 }
 
-
 int test_str_file_len(const char *test_file)
 {
    int len = str_file_len(test_file);
@@ -64,7 +63,6 @@ int test_str_file_len(const char *test_file)
    TEST_SUCCESS();
    return 0;
 }
-
 
 int test_str_read_file(const char *test_file)
 {
@@ -86,7 +84,6 @@ int test_str_read_file(const char *test_file)
    return 0;
 }
 
-
 int test_str_prepare_test_file(const char *test_file)
 {
    FILE *f = fopen(test_file, "wb");
@@ -107,95 +104,87 @@ int test_str_prepare_test_file(const char *test_file)
    return 0;
 }
 
-
 int test_str_char_to_int(void)
 {
-    for (char ch = '0'; ch <= '9'; ch++) {
-        int expected = ch - '0';
-        int result = str_char_to_int(ch);
-        if (result != expected) {
-            TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
-            return -1;
-        }
-    }
+   for (char ch = '0'; ch <= '9'; ch++) {
+      int expected = ch - '0';
+      int result = str_char_to_int(ch);
+      if (result != expected) {
+         TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
+         return -1;
+      }
+   }
 
-    for (char ch = 'a'; ch <= 'z'; ch++) {
-        int expected = 10 + (ch - 'a');
-        int result = str_char_to_int(ch);
-        if (result != expected) {
-            TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
-            return -1;
-        }
-    }
+   for (char ch = 'a'; ch <= 'z'; ch++) {
+      int expected = 10 + (ch - 'a');
+      int result = str_char_to_int(ch);
+      if (result != expected) {
+         TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
+         return -1;
+      }
+   }
 
-    struct {
-        char ch;
-        int expected;
-    } symbols[] = {
-        { '.', 36 }, { '=', 37 }, { ',', 38 },
-        { '/', 39 }, { '?', 40 }
-    };
+   struct {
+      char ch;
+      int expected;
+   } symbols[] = {{'.', 36}, {'=', 37}, {',', 38}, {'/', 39}, {'?', 40}};
 
-    for (int i = 0; i < 5; i++) {
-        int result = str_char_to_int(symbols[i].ch);
-        if (result != symbols[i].expected) {
-            TEST_FAIL("'%c' -> %d, expected %d",
-                   symbols[i].ch, result, symbols[i].expected);
-            return -1;
-        }
-    }
+   for (int i = 0; i < 5; i++) {
+      int result = str_char_to_int(symbols[i].ch);
+      if (result != symbols[i].expected) {
+         TEST_FAIL("'%c' -> %d, expected %d", symbols[i].ch, result,
+                   symbols[i].expected);
+         return -1;
+      }
+   }
 
-    if (str_char_to_int('!') != -1) {
-        TEST_FAIL("'!' -> expected -1");
-        return -1;
-    }
+   if (str_char_to_int('!') != -1) {
+      TEST_FAIL("'!' -> expected -1");
+      return -1;
+   }
 
-    TEST_SUCCESS();
-    return 0;
+   TEST_SUCCESS();
+   return 0;
 }
-
 
 int test_str_int_to_char(void)
 {
-    for (int i = 0; i <= 9; i++) {
-        char expected = '0' + i;
-        char result = str_int_to_char(i);
-        if (result != expected) {
-            TEST_FAIL("%d -> '%c', expected '%c'",
-                   i, result, expected);
-            return -1;
-        }
-    }
+   for (int i = 0; i <= 9; i++) {
+      char expected = '0' + i;
+      char result = str_int_to_char(i);
+      if (result != expected) {
+         TEST_FAIL("%d -> '%c', expected '%c'", i, result, expected);
+         return -1;
+      }
+   }
 
-    for (int i = 10; i <= 35; i++) {
-        char expected = 'a' + (i - 10);
-        char result = str_int_to_char(i);
-        if (result != expected) {
-            TEST_FAIL("%d -> '%c', expected '%c'",
-                   i, result, expected);
-            return -1;
-        }
-    }
+   for (int i = 10; i <= 35; i++) {
+      char expected = 'a' + (i - 10);
+      char result = str_int_to_char(i);
+      if (result != expected) {
+         TEST_FAIL("%d -> '%c', expected '%c'", i, result, expected);
+         return -1;
+      }
+   }
 
-    const char expected_symbols[] = { '.', '=', ',', '/', '?', '\''};
-    for (int i = 0; i < 6; i++) {
-        int index = 36 + i;
-        char result = str_int_to_char(index);
-        if (result != expected_symbols[i]) {
-            TEST_FAIL("%d -> '%c', expected '%c'",
-                   index, result, expected_symbols[i]);
-            return -1;
-        }
-    }
+   const char expected_symbols[] = {'.', '=', ',', '/', '?', '\''};
+   for (int i = 0; i < 6; i++) {
+      int index = 36 + i;
+      char result = str_int_to_char(index);
+      if (result != expected_symbols[i]) {
+         TEST_FAIL("%d -> '%c', expected '%c'", index, result,
+                   expected_symbols[i]);
+         return -1;
+      }
+   }
 
-    if (str_int_to_char(42) != '\0') {
-        TEST_FAIL("42 -> expected '0'");
-        return -1;
-    }
+   if (str_int_to_char(42) != '\0') {
+      TEST_FAIL("42 -> expected '0'");
+      return -1;
+   }
 
-    TEST_SUCCESS();
-    return 0;
+   TEST_SUCCESS();
+   return 0;
 }
 
 // end file test_str.c
-

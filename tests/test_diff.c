@@ -5,12 +5,12 @@
  * @author Jakob Kastelic
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "debug.h"
 #include "diff.h"
 #include "record.h"
 #include "str.h"
+#include <stdio.h>
+#include <string.h>
 
 int test_diff(void)
 {
@@ -22,8 +22,8 @@ int test_diff(void)
 
    // check distance
    if (distance != 2) {
-       TEST_FAIL("incorrect distance %d calculated", distance);
-       return -1;
+      TEST_FAIL("incorrect distance %d calculated", distance);
+      return -1;
    }
 
    // expected weights
@@ -33,7 +33,7 @@ int test_diff(void)
    w_corr[str_char_to_int('s')] = 1;
 
    // compare actual and expected weights
-   for (int i=0; i<MAX_CHARSET_LEN; i++) {
+   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
       if (r.weights[i] != w_corr[i]) {
          TEST_FAIL("incorrect weight for '%c'", str_int_to_char(i));
          return -1;
@@ -44,6 +44,4 @@ int test_diff(void)
    return 0;
 }
 
-
 // end file test_diff.c
-

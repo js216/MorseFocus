@@ -5,15 +5,15 @@
  * @author Jakob Kastelic
  */
 
+#include "record.h"
+#include "debug.h"
+#include "str.h"
+#include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
-#include <limits.h>
-#include "str.h"
-#include "debug.h"
-#include "record.h"
 
 struct record record_load_last(const char *filename)
 {
@@ -105,8 +105,7 @@ struct record record_load_last(const char *filename)
    size_t charset_len = strlen(charset_str);
 
    if (charset_len == 0 || charset_len > MAX_CHARSET_LEN) {
-      ERROR("charset length must be 1–%d characters",
-            MAX_CHARSET_LEN);
+      ERROR("charset length must be 1–%d characters", MAX_CHARSET_LEN);
       return rec;
    }
 
@@ -116,7 +115,7 @@ struct record record_load_last(const char *filename)
    // parse weights
    size_t weight_count = 0;
    while (weight_count < MAX_CHARSET_LEN &&
-         (token = str_tok(NULL, " \t\n", &saveptr)) != NULL) {
+          (token = str_tok(NULL, " \t\n", &saveptr)) != NULL) {
       rec.weights[weight_count++] = strtof(token, NULL);
    }
 
@@ -133,7 +132,6 @@ struct record record_load_last(const char *filename)
    rec.valid = 1;
    return rec;
 }
-
 
 int record_append(const char *path, const struct record *r)
 {
@@ -152,16 +150,17 @@ int record_append(const char *path, const struct record *r)
 
    // format timestamp
    char timestr[32];
-   if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S",
-            &r->datetime) == 0) {
+   if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", &r->datetime) ==
+       0) {
       ERROR("cannot format datetime");
       fclose(fp);
       return -1;
    }
 
    // write fixed fields
-   int num_pr = fprintf(fp, "%s %.3f %.3f %.1f %.1f %d %d %s", timestr,
-         r->decay, r->scale, r->speed1, r->speed2, r->dist, r->len, r->charset);
+   int num_pr =
+       fprintf(fp, "%s %.3f %.3f %.1f %.1f %d %d %s", timestr, r->decay,
+               r->scale, r->speed1, r->speed2, r->dist, r->len, r->charset);
    if (num_pr < 0) {
       ERROR("cannot write to file");
       fclose(fp);
@@ -194,7 +193,6 @@ int record_append(const char *path, const struct record *r)
    return 0;
 }
 
-
 /**
  * @brief Check if a floating-point weight has no fractional part.
  *
@@ -206,9 +204,8 @@ int record_append(const char *path, const struct record *r)
  */
 static int record_is_integer(const float weight)
 {
-    return floorf(weight) == weight;
+   return floorf(weight) == weight;
 }
-
 
 void record_printout(const struct record *r)
 {
@@ -227,6 +224,4 @@ void record_printout(const struct record *r)
    }
 }
 
-
 // end file record.c
-

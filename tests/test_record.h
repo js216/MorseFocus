@@ -14,4 +14,3 @@ int test_record_append(const char *test_file);
 #endif // TEST_RECORD_H
 
 // end file test_record.h
-

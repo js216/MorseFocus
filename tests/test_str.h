@@ -18,5 +18,3 @@ int test_str_int_to_char(void);
 #endif // TEST_STR_H
 
 // end file test_str.h
-
-

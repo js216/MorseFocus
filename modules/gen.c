@@ -5,15 +5,15 @@
  * @author Jakob Kastelic
  */
 
+#include "gen.h"
+#include "debug.h"
+#include "record.h"
+#include "str.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
-#include "debug.h"
-#include "str.h"
-#include "record.h"
-#include "gen.h"
 
 float gen_rand()
 {
@@ -26,15 +26,11 @@ float gen_rand()
    return r;
 }
 
-
-int gen_chars(char *s, const size_t num_char,
-      const int min_word, const int max_word,
-      const float *weights, const char *charset)
+int gen_chars(char *s, const size_t num_char, const int min_word,
+              const int max_word, const float *weights, const char *charset)
 {
-   if (min_word < 1 || max_word < 1 || min_word > max_word)
-   {
-      ERROR("invalid word size range: min=%d, max=%d",
-            min_word, max_word);
+   if (min_word < 1 || max_word < 1 || min_word > max_word) {
+      ERROR("invalid word size range: min=%d, max=%d", min_word, max_word);
       return -1;
    }
 
@@ -72,8 +68,8 @@ int gen_chars(char *s, const size_t num_char,
          unsigned char ch = charset[j];
          const int k = str_char_to_int(ch);
          if (k < 0) {
-            ERROR("character '%c' (ASCII %d) is invalid",
-                  ch=='\0' ? ' ' : ch, ch);
+            ERROR("character '%c' (ASCII %d) is invalid", ch == '\0' ? ' ' : ch,
+                  ch);
             free(tmp_weights);
             return -1;
          }
@@ -143,7 +139,6 @@ int gen_chars(char *s, const size_t num_char,
    return 0;
 }
 
-
 void free_entries(struct WordEntry *entries, int count)
 {
    for (int i = 0; i < count; ++i) {
@@ -151,7 +146,6 @@ void free_entries(struct WordEntry *entries, int count)
    }
    free(entries);
 }
-
 
 float compute_total_weight(struct WordEntry *entries, int count)
 {
@@ -162,9 +156,8 @@ float compute_total_weight(struct WordEntry *entries, int count)
    return total;
 }
 
-
-const char *select_random_word(struct WordEntry *entries,
-      int count, float total_weight)
+const char *select_random_word(struct WordEntry *entries, int count,
+                               float total_weight)
 {
    float r = gen_rand() * (total_weight > 0.0f ? total_weight : count);
    float accum = 0.0f;
@@ -178,27 +171,25 @@ const char *select_random_word(struct WordEntry *entries,
    return entries[count - 1].word; // fallback
 }
 
-
-int write_words(FILE *out, struct WordEntry *entries, int count,
-      int nw, float total_weight)
+int write_words(FILE *out, struct WordEntry *entries, int count, int nw,
+                float total_weight)
 {
    for (int i = 0; i < nw; ++i) {
-      const char *word = select_random_word(entries, count,
-            total_weight);
-      if (fprintf(out, "%s", word) < 0) return -1;
-      if (i < nw - 1) fprintf(out, " ");
+      const char *word = select_random_word(entries, count, total_weight);
+      if (fprintf(out, "%s", word) < 0)
+         return -1;
+      if (i < nw - 1)
+         fprintf(out, " ");
    }
    fprintf(out, "\n");
    return 0;
 }
-
 
 int is_line_too_long(FILE *fp, char *line)
 {
    // if no newline in buffer and not EOF, line too long
    return (strchr(line, '\n') == NULL && !feof(fp));
 }
-
 
 int validate_word(const char *word)
 {
@@ -212,9 +203,8 @@ int validate_word(const char *word)
    return 0;
 }
 
-
-int parse_line(const char *line, char **word_out,
-      float *weight_out, int *has_weight_out)
+int parse_line(const char *line, char **word_out, float *weight_out,
+               int *has_weight_out)
 {
    char linecopy[MAX_WORD_LINE];
    strncpy(linecopy, line, sizeof(linecopy) - 1);
@@ -260,9 +250,8 @@ int parse_line(const char *line, char **word_out,
    return 0;
 }
 
-
-int parse_word_file(const char *word_file,
-      struct WordEntry **entries_out, int nl)
+int parse_word_file(const char *word_file, struct WordEntry **entries_out,
+                    int nl)
 {
    // if not given number of lines to read
    if (nl <= 0) {
@@ -357,10 +346,8 @@ fail:
    return -1;
 }
 
-
-
-int gen_words(const char *out_file, const char *word_file,
-      const int nw, const int nl)
+int gen_words(const char *out_file, const char *word_file, const int nw,
+              const int nl)
 {
    if (!word_file) {
       ERROR("word_file is NULL");
@@ -394,4 +381,3 @@ int gen_words(const char *out_file, const char *word_file,
 }
 
 // end file gen.c
-

@@ -29,14 +29,14 @@
  * @author Jakob Kastelic
  */
 
+#include "debug.h"
+#include "diff.h"
+#include "record.h"
+#include "str.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include "debug.h"
-#include "str.h"
-#include "record.h"
-#include "diff.h"
 
 #define MAX_DIFF_LEN 8192
 
@@ -45,15 +45,16 @@ int silence_errors;
 static void print_usage(const char *prog)
 {
    fprintf(stderr,
-      "Usage: %s f1 f2 [options]\n"
-      "Options:\n"
-      "  -w file    load weights from file\n"
-      "  -d decay   scale output weights (default: 1.0)\n"
-      "  -o file    append output weights to file\n"
-      "  -s scale   scale to record to file (default: 0)\n"
-      "  -1 speed1  first speed to record to file (default: 0)\n"
-      "  -2 speed2  second speed to record to file (default: 0)\n"
-      "  -c charset charset to record to file (default: \"~\")\n", prog);
+           "Usage: %s f1 f2 [options]\n"
+           "Options:\n"
+           "  -w file    load weights from file\n"
+           "  -d decay   scale output weights (default: 1.0)\n"
+           "  -o file    append output weights to file\n"
+           "  -s scale   scale to record to file (default: 0)\n"
+           "  -1 speed1  first speed to record to file (default: 0)\n"
+           "  -2 speed2  second speed to record to file (default: 0)\n"
+           "  -c charset charset to record to file (default: \"~\")\n",
+           prog);
 }
 
 int main(int argc, char *argv[])
@@ -98,8 +99,8 @@ int main(int argc, char *argv[])
    }
 
    // check files are not too long
-   if ((str_file_len(file1) >= MAX_DIFF_LEN) || (str_file_len(file1) >=
-            MAX_DIFF_LEN)) {
+   if ((str_file_len(file1) >= MAX_DIFF_LEN) ||
+       (str_file_len(file1) >= MAX_DIFF_LEN)) {
       ERROR("files too long");
       return -1;
    }
@@ -166,4 +167,3 @@ int main(int argc, char *argv[])
 }
 
 // end file run_diff.c
-

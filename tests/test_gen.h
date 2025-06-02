@@ -23,4 +23,3 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3);
 #endif // TEST_GEN_H
 
 // end file test_gen.h
-

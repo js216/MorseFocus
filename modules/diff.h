@@ -8,8 +8,8 @@
 #ifndef LEV_DIFF_H
 #define LEV_DIFF_H
 
-#include <stddef.h>
 #include "record.h"
+#include <stddef.h>
 
 /**
  * @brief Computes the Levenshtein distance between two strings and records
@@ -41,4 +41,3 @@ int lev_diff(struct record *r, const char *s1, const char *s2);
 #endif /* LEV_DIFF_H */
 
 // end file diff.h
-

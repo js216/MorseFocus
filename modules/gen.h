@@ -56,9 +56,8 @@ int gen_chars(char *s, const size_t num_char, const int min_word,
  *
  * @return 0 on success, -1 on failure.
  */
-int gen_words(const char *out_file, const char *word_file,
-      const int nw, const int nl);
-
+int gen_words(const char *out_file, const char *word_file, const int nw,
+              const int nl);
 
 /**********************************************
  * HELPER FUNCTIONS
@@ -100,8 +99,8 @@ float compute_total_weight(struct WordEntry *entries, int count);
  * @param total_weight Total weight of all entries.
  * @return Pointer to selected word.
  */
-const char *select_random_word(struct WordEntry *entries,
-      int count, float total_weight);
+const char *select_random_word(struct WordEntry *entries, int count,
+                               float total_weight);
 
 /**
  * @brief Write randomly selected words to the given output.
@@ -113,8 +112,8 @@ const char *select_random_word(struct WordEntry *entries,
  * @param total_weight Total weight of all entries.
  * @return 0 on success, -1 on error.
  */
-int write_words(FILE *out, struct WordEntry *entries, int count,
-      int nw, float total_weight);
+int write_words(FILE *out, struct WordEntry *entries, int count, int nw,
+                float total_weight);
 
 /**
  * @brief Checks if the read line is too long to fit in the buffer.
@@ -150,8 +149,8 @@ int validate_word(const char *word);
  *        updated if line has weight
  * @return 0 on success, -1 on error (e.g. inconsistent weights)
  */
-int parse_line(const char *line, char **word_out,
-      float *weight_out, int *has_weight_out);
+int parse_line(const char *line, char **word_out, float *weight_out,
+               int *has_weight_out);
 
 /**
  * @brief Parse word file with optional weights.
@@ -166,10 +165,9 @@ int parse_line(const char *line, char **word_out,
  * @param nl Number of lines to read (all if not positive)
  * @return Number of entries read on success, -1 on failure.
  */
-int parse_word_file(const char *word_file,
-      struct WordEntry **entries_out, int nl);
+int parse_word_file(const char *word_file, struct WordEntry **entries_out,
+                    int nl);
 
 #endif // GEN_CHARS_H
 
 // end file gen.h
-

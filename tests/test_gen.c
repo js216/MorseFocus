@@ -5,16 +5,16 @@
  * @author Jakob Kastelic
  */
 
+#include "debug.h"
+#include "gen.h"
+#include "record.h"
+#include "str.h"
+#include <ctype.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
 #include <stdlib.h>
-#include "debug.h"
-#include "str.h"
-#include "record.h"
-#include "gen.h"
+#include <string.h>
 
 #define TEST_MAX_CHARS 100000
 #define TEST_MAX_WORDS 1000
@@ -56,7 +56,6 @@ static void test_gen_freq(float *freq, const char *s)
    }
 }
 
-
 /**
  * @brief Compare two frequency tables after normalization.
  *
@@ -88,15 +87,17 @@ static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
       if (avg == 0.0f) {
          if (v1 != 0.0f || v2 != 0.0f) {
             TEST_FAIL("index %d (ASCII '%c'), one is zero, one is not "
-                  "(%.6f vs %.6f)", i, str_int_to_char(i), v1, v2);
+                      "(%.6f vs %.6f)",
+                      i, str_int_to_char(i), v1, v2);
             return -1;
          }
       } else {
          float diff = fabsf(v1 - v2);
          if (diff > ep * avg) {
             TEST_FAIL("index %d (ASCII '%c'): diff %.2f%% exceeds "
-                  "%.2f%% (%.6f vs %.6f)", i, str_int_to_char(i),
-                  100*diff/avg, 100*ep, v1, v2);
+                      "%.2f%% (%.6f vs %.6f)",
+                      i, str_int_to_char(i), 100 * diff / avg, 100 * ep, v1,
+                      v2);
             return -1;
          }
       }
@@ -104,7 +105,6 @@ static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
 
    return 0;
 }
-
 
 /**
  * @brief Checks that all words in the string are within given length bounds.
@@ -121,7 +121,7 @@ static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
  *         -1 if any word violates these bounds.
  */
 static int test_gen_check_word_len(const char *s, const int min_word,
-      const int max_word)
+                                   const int max_word)
 {
    int word_len = 0;
 
@@ -146,7 +146,6 @@ static int test_gen_check_word_len(const char *s, const int min_word,
    return 0;
 }
 
-
 /**
  * @brief Verify character frequencies and word lengths in given string.
  * @param s String to analyze.
@@ -155,8 +154,8 @@ static int test_gen_check_word_len(const char *s, const int min_word,
  * @param max_word maximum length of each word (>=min_word)
  * @return 0 on success, -1 on failure
  */
-static int test_gen_analyze(const char *s, const float *f,
-      const int min_word, const int max_word)
+static int test_gen_analyze(const char *s, const float *f, const int min_word,
+                            const int max_word)
 {
    float fs[MAX_CHARSET_LEN];
    test_gen_freq(fs, s);
@@ -170,7 +169,6 @@ static int test_gen_analyze(const char *s, const float *f,
    }
    return 0;
 }
-
 
 /**
  * @brief Initializes a weight array based on a given character set.
@@ -197,8 +195,7 @@ int test_gen_create_weights(float *w, const char *charset)
    size_t len = strlen(charset);
 
    if (len >= MAX_CHARSET_LEN) {
-      TEST_FAIL("charset too long (max %d characters)",
-            MAX_CHARSET_LEN - 1);
+      TEST_FAIL("charset too long (max %d characters)", MAX_CHARSET_LEN - 1);
       return -1;
    }
 
@@ -209,8 +206,7 @@ int test_gen_create_weights(float *w, const char *charset)
       int offset = str_char_to_int(charset[i]);
 
       if (offset == -1 || offset >= MAX_CHARSET_LEN) {
-         TEST_FAIL("invalid character '%c' in charset",
-               charset[i]);
+         TEST_FAIL("invalid character '%c' in charset", charset[i]);
          return -1;
       }
 
@@ -219,7 +215,6 @@ int test_gen_create_weights(float *w, const char *charset)
 
    return 0;
 }
-
 
 int test_gen_chars(void)
 {
@@ -233,25 +228,25 @@ int test_gen_chars(void)
    }
 
    // test with default charset and uniform weights
-   if ((test_gen_create_weights(weights, charset_def) != 0)
-         || (gen_chars(buf, TEST_MAX_CHARS, 3, 6, NULL, NULL) != 0)
-         || (test_gen_analyze(buf, weights, 3, 6) != 0)) {
+   if ((test_gen_create_weights(weights, charset_def) != 0) ||
+       (gen_chars(buf, TEST_MAX_CHARS, 3, 6, NULL, NULL) != 0) ||
+       (test_gen_analyze(buf, weights, 3, 6) != 0)) {
       TEST_FAIL("test with default charset and uniform weights");
       return -1;
    }
 
    // uniform weights, except favor '?' heavily
    weights[str_char_to_int('?')] = 50;
-   if ((gen_chars(buf, TEST_MAX_CHARS, 4, 8, weights, NULL) != 0)
-         || (test_gen_analyze(buf, weights, 4, 8) != 0)) {
+   if ((gen_chars(buf, TEST_MAX_CHARS, 4, 8, weights, NULL) != 0) ||
+       (test_gen_analyze(buf, weights, 4, 8) != 0)) {
       TEST_FAIL("uniform weights, except favor '?' heavily");
       return -1;
    }
 
    // test with custom charset and uniform weights
-   if ((test_gen_create_weights(weights, "abcde") != 0)
-         || (gen_chars(buf, TEST_MAX_CHARS, 2, 4, NULL, "abcde") != 0)
-         || (test_gen_analyze(buf, weights, 2, 4) != 0)) {
+   if ((test_gen_create_weights(weights, "abcde") != 0) ||
+       (gen_chars(buf, TEST_MAX_CHARS, 2, 4, NULL, "abcde") != 0) ||
+       (test_gen_analyze(buf, weights, 2, 4) != 0)) {
       TEST_FAIL("test with custom charset and uniform weights");
       return -1;
    }
@@ -259,7 +254,6 @@ int test_gen_chars(void)
    TEST_SUCCESS();
    return 0;
 }
-
 
 int test_free_entries(void)
 {
@@ -278,14 +272,9 @@ int test_free_entries(void)
    return 0;
 }
 
-
 int test_compute_total_weight(void)
 {
-   struct WordEntry entries[3] = {
-      { "a", 1.0 },
-      { "b", 2.5 },
-      { "c", 0.5 }
-   };
+   struct WordEntry entries[3] = {{"a", 1.0}, {"b", 2.5}, {"c", 0.5}};
    float total = compute_total_weight(entries, 3);
    if (total < 3.99 || total > 4.01) {
       TEST_FAIL("total weight incorrect");
@@ -295,14 +284,9 @@ int test_compute_total_weight(void)
    return 0;
 }
 
-
 int test_select_random_word(void)
 {
-   struct WordEntry entries[3] = {
-      { "zero", 0.0f },
-      { "one", 1.0f },
-      { "two", 2.0f }
-   };
+   struct WordEntry entries[3] = {{"zero", 0.0f}, {"one", 1.0f}, {"two", 2.0f}};
    float total = compute_total_weight(entries, 3);
 
    if (total < 2.99f || total > 3.01f) {
@@ -347,14 +331,10 @@ int test_select_random_word(void)
    return 0;
 }
 
-
 int test_write_words(const char *test_file)
 {
    struct WordEntry entries[3] = {
-      { "alpha", 1.0f },
-      { "beta", 1.0f },
-      { "gamma", 1.0f }
-   };
+       {"alpha", 1.0f}, {"beta", 1.0f}, {"gamma", 1.0f}};
 
    int nw = 5;
    float total_weight = compute_total_weight(entries, 3);
@@ -386,8 +366,7 @@ int test_write_words(const char *test_file)
    int word_count = 0;
    char *tok = strtok(buffer, " \n");
    while (tok) {
-      if (strcmp(tok, "alpha") && strcmp(tok, "beta") &&
-            strcmp(tok, "gamma")) {
+      if (strcmp(tok, "alpha") && strcmp(tok, "beta") && strcmp(tok, "gamma")) {
          TEST_FAIL("unexpected word in output");
          return -1;
       }
@@ -403,7 +382,6 @@ int test_write_words(const char *test_file)
    TEST_SUCCESS();
    return 0;
 }
-
 
 int test_is_line_too_long(const char *test_file)
 {
@@ -436,7 +414,6 @@ int test_is_line_too_long(const char *test_file)
    return 0;
 }
 
-
 int test_validate_word(void)
 {
    if (validate_word("validword23490???")) {
@@ -460,14 +437,13 @@ int test_validate_word(void)
    return 0;
 }
 
-
 int test_parse_line(void)
 {
    char *word;
    float w;
    int hw = -1;
 
-   char line1[] = "testword 1.5";     // writable buffer
+   char line1[] = "testword 1.5"; // writable buffer
    if (parse_line(line1, &word, &w, &hw) != 0) {
       TEST_FAIL("parse_line failed on valid input");
       return -1;
@@ -482,7 +458,7 @@ int test_parse_line(void)
    free(word);
 
    hw = -1;
-   char line2[] = "simpleword";       // writable buffer
+   char line2[] = "simpleword"; // writable buffer
    if (parse_line(line2, &word, &w, &hw) != 0) {
       TEST_FAIL("parse_line failed on simple word");
       return -1;
@@ -514,7 +490,6 @@ int test_parse_line(void)
    return 0;
 }
 
-
 int test_parse_word_file(const char *test_file)
 {
    FILE *f = fopen(test_file, "w");
@@ -540,8 +515,8 @@ int test_parse_word_file(const char *test_file)
    }
 
    if (strcmp(entries[0].word, "apple") != 0 ||
-         strcmp(entries[1].word, "banana") != 0 ||
-         strcmp(entries[2].word, "cherry") != 0) {
+       strcmp(entries[1].word, "banana") != 0 ||
+       strcmp(entries[2].word, "cherry") != 0) {
       TEST_FAIL("wrong word data");
       return -1;
    }
@@ -551,7 +526,6 @@ int test_parse_word_file(const char *test_file)
    return 0;
 }
 
-
 int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
 {
    char valid_word_file[MAX_FILENAME_LEN];
@@ -559,9 +533,8 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
    char temp_out_file[MAX_FILENAME_LEN];
 
    // check input lengths and copy with null termination
-   if (strlen(tf1) >= MAX_FILENAME_LEN ||
-         strlen(tf2) >= MAX_FILENAME_LEN ||
-         strlen(tf3) >= MAX_FILENAME_LEN) {
+   if (strlen(tf1) >= MAX_FILENAME_LEN || strlen(tf2) >= MAX_FILENAME_LEN ||
+       strlen(tf3) >= MAX_FILENAME_LEN) {
       TEST_FAIL("one or more test filenames too long");
       return -1;
    }
@@ -645,4 +618,3 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
 }
 
 // end file test_gen.c
-

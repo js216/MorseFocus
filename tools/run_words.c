@@ -20,12 +20,12 @@
  * @author Jakob Kastelic
  */
 
+#include "debug.h"
+#include "gen.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include "gen.h"
-#include "debug.h"
 
 int silence_errors;
 
@@ -40,7 +40,6 @@ static void usage(const char *progname)
    printf("  -n NUM      number of lines to read from FILE (default: all)\n");
 }
 
-
 int main(int argc, char *argv[])
 {
    if (argc < 3) {
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
    const char *word_file = argv[1];
    const char *num_words_str = argv[2];
    const char *out_file = NULL;
-   int num_lines = -1;  // read all lines by default
+   int num_lines = -1; // read all lines by default
 
    // Parse NUM_WORDS
    char *endptr;
@@ -93,4 +92,3 @@ int main(int argc, char *argv[])
 
    return 0;
 }
-

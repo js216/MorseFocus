@@ -38,6 +38,8 @@ build/run_tests: tests/run_tests.o $(module_objs) $(test_objs)
 # Static code analysis
 
 check:
+	# clang-format
+	find . -name '*.c' -o -name '*.h' | xargs clang-format --dry-run -Werror
 	# clang-tidy
 	make clean
 	$(INTERCEPT) --cdb build/compile_commands.json make all

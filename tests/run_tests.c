@@ -5,14 +5,14 @@
  * @author Jakob Kastelic
  */
 
-#include <stdio.h>
-#include <string.h>
-#include "str.h"
 #include "debug.h"
+#include "str.h"
 #include "test_diff.h"
 #include "test_gen.h"
-#include "test_str.h"
 #include "test_record.h"
+#include "test_str.h"
+#include <stdio.h>
+#include <string.h>
 
 #define TEST_FILE1 "test_file.txt"
 #define TEST_FILE2 "test_file1.txt"
@@ -22,32 +22,31 @@ int silence_errors;
 
 static int test_files_check(const char *tf1, const char *tf2, const char *tf3)
 {
-    FILE *f;
+   FILE *f;
 
-    f = fopen(tf1, "r");
-    if (f) {
-        fclose(f);
-        ERROR("test file '%s' already exists", tf1);
-        return -1;
-    }
+   f = fopen(tf1, "r");
+   if (f) {
+      fclose(f);
+      ERROR("test file '%s' already exists", tf1);
+      return -1;
+   }
 
-    f = fopen(tf2, "r");
-    if (f) {
-        fclose(f);
-        ERROR("test file '%s' already exists", tf2);
-        return -1;
-    }
+   f = fopen(tf2, "r");
+   if (f) {
+      fclose(f);
+      ERROR("test file '%s' already exists", tf2);
+      return -1;
+   }
 
-    f = fopen(tf3, "r");
-    if (f) {
-        fclose(f);
-        ERROR("test file '%s' already exists", tf3);
-        return -1;
-    }
+   f = fopen(tf3, "r");
+   if (f) {
+      fclose(f);
+      ERROR("test file '%s' already exists", tf3);
+      return -1;
+   }
 
-    return 0;
+   return 0;
 }
-
 
 int main(void)
 {
@@ -86,4 +85,3 @@ int main(void)
 }
 
 // end file tests.c
-

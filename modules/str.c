@@ -5,19 +5,18 @@
  * @author Jakob Kastelic
  */
 
+#include "str.h"
+#include "debug.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <time.h>
 #include <string.h>
-#include "debug.h"
-#include "str.h"
+#include <time.h>
 
 int str_clean(char *s1, const char *s2, size_t len)
 {
    size_t i;
-   for (i = 0; i < len; ++i)
-   {
+   for (i = 0; i < len; ++i) {
       unsigned char ch = (unsigned char)s2[i];
       if (ch >= 32 && ch <= 126)
          s1[i] = (char)tolower(ch);
@@ -26,7 +25,6 @@ int str_clean(char *s1, const char *s2, size_t len)
    }
    return 0;
 }
-
 
 int str_file_len(const char *fname)
 {
@@ -48,7 +46,6 @@ int str_file_len(const char *fname)
    return (int)size;
 }
 
-
 int str_read_file(char *buf, const char *fname, const size_t max_len)
 {
    if (!buf || !fname || max_len < 1)
@@ -61,10 +58,9 @@ int str_read_file(char *buf, const char *fname, const size_t max_len)
    size_t read_len = fread(buf, 1, max_len - 1, f);
    fclose(f);
 
-   buf[read_len] = '\0';  // ensure null termination
+   buf[read_len] = '\0'; // ensure null termination
    return (int)read_len;
 }
-
 
 int str_char_to_int(const char ch)
 {
@@ -75,16 +71,22 @@ int str_char_to_int(const char ch)
       return 10 + (ch - 'a');
    }
    switch (ch) {
-      case '.': return 36;
-      case '=': return 37;
-      case ',': return 38;
-      case '/': return 39;
-      case '?': return 40;
-      case '\'': return 41;
-      default: return -1;
+   case '.':
+      return 36;
+   case '=':
+      return 37;
+   case ',':
+      return 38;
+   case '/':
+      return 39;
+   case '?':
+      return 40;
+   case '\'':
+      return 41;
+   default:
+      return -1;
    }
 }
-
 
 char str_int_to_char(const int i)
 {
@@ -95,7 +97,6 @@ char str_int_to_char(const int i)
 
    return '\0';
 }
-
 
 char *str_tok(char *str, const char *delim, char **saveptr)
 {
@@ -126,7 +127,6 @@ char *str_tok(char *str, const char *delim, char **saveptr)
    return start;
 }
 
-
 char *str_ptime(const char *s, const char *format, struct tm *tm)
 {
    int year, mon, mday, hour, min, sec;
@@ -135,27 +135,26 @@ char *str_ptime(const char *s, const char *format, struct tm *tm)
    if (format == NULL || strcmp(format, "%Y-%m-%d %H:%M:%S") != 0)
       return NULL;
 
-   int ret = sscanf(s, "%4d-%2d-%2d %2d:%2d:%2d",
-         &year, &mon, &mday, &hour, &min, &sec);
+   int ret = sscanf(s, "%4d-%2d-%2d %2d:%2d:%2d", &year, &mon, &mday, &hour,
+                    &min, &sec);
    if (ret != 6)
       return NULL;
 
-   tm->tm_year = year - 1900;  // years since 1900
-   tm->tm_mon = mon - 1;       // months since January [0-11]
+   tm->tm_year = year - 1900; // years since 1900
+   tm->tm_mon = mon - 1;      // months since January [0-11]
    tm->tm_mday = mday;
    tm->tm_hour = hour;
    tm->tm_min = min;
    tm->tm_sec = sec;
-   tm->tm_isdst = -1;          // Not known
+   tm->tm_isdst = -1; // Not known
 
    // Return pointer after the matched datetime (fixed length = 19 chars)
    return (char *)(s + 19);
 }
 
-
 int str_is_clean(const char *s)
 {
-   for (int i = 0; i<MAX_CHARSET_LEN; i++) {
+   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
       if (s[i] == '\0')
          return 0;
 
@@ -166,7 +165,6 @@ int str_is_clean(const char *s)
    }
    return 0;
 }
-
 
 char *str_dup(const char *s)
 {
@@ -179,7 +177,6 @@ char *str_dup(const char *s)
       memcpy(dup, s, len);
    return dup;
 }
-
 
 int str_file_lines(const char *filename)
 {
@@ -213,4 +210,3 @@ int str_file_lines(const char *filename)
 }
 
 // end file str.c
-

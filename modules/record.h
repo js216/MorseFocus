@@ -8,8 +8,8 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include <time.h>
 #include "str.h"
+#include <time.h>
 
 struct record {
    int valid;
@@ -67,4 +67,3 @@ void record_printout(const struct record *r);
 #endif // RECORD_H
 
 // end file record.h
-

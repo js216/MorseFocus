@@ -13,4 +13,3 @@ int test_diff(void);
 #endif // TEST_DIFF_H
 
 // end file test_diff.h
-
