@@ -161,8 +161,8 @@ int record_append(const char *path, const struct record *r)
    }
 
    // write fixed fields
-   int num_pr = fprintf(fp, "%s %.3f %.3f %.3f %.3f %d %d %s", timestr,
-         r->decay, r->scale, r->speed1, r->speed2, r->len, r->dist, r->charset);
+   int num_pr = fprintf(fp, "%s %.3f %.3f %.1f %.1f %d %d %s", timestr,
+         r->decay, r->scale, r->speed1, r->speed2, r->dist, r->len, r->charset);
    if (num_pr < 0) {
       ERROR("cannot write to file");
       fclose(fp);
@@ -171,7 +171,11 @@ int record_append(const char *path, const struct record *r)
 
    // write weights
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
-      const int ret = fprintf(fp, " %.3f", r->weights[i]);
+      int ret = -1;
+      if (r->weights[i] == truncf(r->weights[i]))
+         ret = fprintf(fp, " %.0f", r->weights[i]);
+      else
+         ret = fprintf(fp, " %.3f", r->weights[i]);
       if (ret < 0) {
          ERROR("cannot write weights");
          fclose(fp);

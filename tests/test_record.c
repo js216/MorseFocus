@@ -88,8 +88,8 @@ int test_record_append(const char *test_file)
     r.scale = 2.0f;
     r.speed1 = 3.0f;
     r.speed2 = 4.0f;
-    r.len = 5;
-    r.dist = 6;
+    r.dist = 5;
+    r.len = 6;
     strcpy(r.charset, "abc");
     for (int i = 0; i < MAX_CHARSET_LEN; ++i)
         r.weights[i] = (float)i;
@@ -115,19 +115,16 @@ int test_record_append(const char *test_file)
 
     // check beginning of the line
     const char *exp_line =
-       "2025-05-31 12:34:56 1.000 2.000 3.000 4.000 5 6 abc";
+       "2025-05-31 12:34:56 1.000 2.000 3.0 4.0 5 6 abc";
     if (strncmp(line, exp_line, strlen(exp_line)) != 0) {
        TEST_FAIL("fixed fields mismatch");
        return -1;
     }
 
     // parse weights from line
-    const char *exp_w = "0.000 1.000 2.000 3.000 4.000 5.000 6.000 7.000 "
-       "8.000 9.000 10.000 11.000 12.000 13.000 14.000 15.000 16.000 17.000 "
-       "18.000 19.000 20.000 21.000 22.000 23.000 24.000 25.000 26.000 27.000 "
-       "28.000 29.000 30.000 31.000 32.000 33.000 34.000 35.000 36.000 37.000 "
-       "38.000 39.000 40.000 41.000 42.000 43.000 44.000 45.000 46.000 47.000 "
-       "48.000 49.000\n";
+    const char *exp_w = "0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 "
+       "21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 "
+       "44 45 46 47 48 49\n";
     if (strcmp(line+strlen(exp_line)+1, exp_w) != 0) {
        TEST_FAIL("weights mismatch, read: %s", line+strlen(exp_line)+1);
        return -1;

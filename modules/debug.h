@@ -17,7 +17,8 @@
 
 #define TEST_FAIL(...) \
     do { \
-        printf("\033[1;31mFAIL:\033[0m %s: ", __func__); \
+        printf("\033[1;31mFAIL:\033[0m %s in %s (line %d): ", \
+               __func__, __FILE__, __LINE__); \
         printf(__VA_ARGS__); \
         printf("\n"); \
     } while (0)
