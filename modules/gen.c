@@ -15,7 +15,7 @@
 #include <string.h>
 #include <time.h>
 
-float gen_rand()
+float gen_rand(void)
 {
    static int seeded = 0;
    if (!seeded) {

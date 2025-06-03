@@ -346,13 +346,19 @@ int test_write_words(const char *test_file)
    }
 
    if (write_words(fp, entries, 3, nw, total_weight) != 0) {
-      fclose(fp);
       TEST_FAIL("write_words returned failure");
+      fclose(fp);
+      return -1;
+   }
+
+   // rewind
+   if (fseek(fp, 0, SEEK_SET) != 0) {
+      TEST_FAIL("fseek failed");
+      fclose(fp);
       return -1;
    }
 
    // rewind and read output
-   rewind(fp);
    char buffer[256] = {0};
    if (!fgets(buffer, sizeof(buffer), fp)) {
       fclose(fp);
@@ -393,7 +399,12 @@ int test_is_line_too_long(const char *test_file)
    }
 
    fputs("short\nlonglonglonglong\n", fp);
-   rewind(fp);
+
+   if (fseek(fp, 0, SEEK_SET) != 0) {
+      TEST_FAIL("fseek failed");
+      fclose(fp);
+      return -1;
+   }
 
    fgets(line, sizeof(line), fp);
    if (is_line_too_long(fp, line)) {
