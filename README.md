@@ -92,6 +92,20 @@ Running the utilities without any arguments will print usage information:
 
 ### TODO
 
+- Character generator should be more precise (~1%) in following the weights
+- Charset should use a macro string, and weights should determine which
+  characters are present
+- Tiny GUI program to display the progress of weights over time, and
+  github/lcwo-style squares for streak tracing
+- Status bar is also where startup notifications get written to, rather than
+  randomly across the splash screen
+- Status tab (under Settings) displays uptime as communicated from motherboard.
+  FP firmware also keeps its own uptime, and when there's a significant mismatch
+  between the two, it displays an error message.
+- Interactive CLI app
+- Document `run_words`
+- Diff should output recommended speed for the next run, using the formula
+  `new_speed = old_speed * (1 - k*(error_rate - 0.1))`
 - Diff for word probabilities
 - Add a Markov chain text generator
 - Make a simple GUI for the program
