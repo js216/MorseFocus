@@ -39,6 +39,8 @@
 #include <string.h>
 
 #define MAX_DIFF_LEN 8192
+#define TARGET_ACCURACY 0.1
+#define PID_K 1.0
 
 int silence_errors;
 
@@ -122,7 +124,9 @@ int main(int argc, char *argv[])
 
    const int dist = lev_diff(&r, clean1, clean2);
 
-   printf("Distance: %d\n", dist);
+   const float err_pct = 100 * (float)dist / (float)len1;
+   printf("%d errors out of %d = %.1f%%\n", dist, len1, err_pct);
+   printf("Next speed: %.1f\n", speed1 * (1 - PID_K*(err_pct/100.0 - TARGET_ACCURACY)));
    record_printout(&r);
 
    if (wfile) {
