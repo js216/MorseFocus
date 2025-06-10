@@ -169,11 +169,12 @@ int record_append(const char *path, const struct record *r)
 
    // write weights
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
+      const double w = r->weights[i] * r->decay;
       int ret = -1;
-      if (r->weights[i] == truncf(r->weights[i]))
-         ret = fprintf(fp, " %.0f", r->weights[i]);
+      if (w == truncf(w))
+         ret = fprintf(fp, " %.0f", w);
       else
-         ret = fprintf(fp, " %.3f", r->weights[i]);
+         ret = fprintf(fp, " %.3f", w);
       if (ret < 0) {
          ERROR("cannot write weights");
          fclose(fp);

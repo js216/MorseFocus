@@ -126,7 +126,8 @@ int main(int argc, char *argv[])
 
    const float err_pct = 100 * (float)dist / (float)len1;
    printf("%d errors out of %d = %.1f%%\n", dist, len1, err_pct);
-   printf("Next speed: %.1f\n", speed1 * (1 - PID_K*(err_pct/100.0 - TARGET_ACCURACY)));
+   printf("Next speed: %.1f\n",
+          speed1 * (1 - PID_K * (err_pct / 100.0 - TARGET_ACCURACY)));
    record_printout(&r);
 
    if (wfile) {
