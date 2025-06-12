@@ -9,7 +9,7 @@ LDFLAGS = -lm
 lib = miniaudio
 modules = diff str gen record cw
 tests = test_diff test_str test_gen test_record test_cw
-tools = run_tests run_diff run_gen run_words run_cw
+tools = run_tests run_diff run_gen run_words run_cw morsefocus
 
 lib_objs = $(addprefix build/, $(addsuffix .o, $(lib)))
 module_objs  = $(addprefix build/, $(addsuffix .o, $(modules)))
@@ -48,7 +48,7 @@ format:
 
 check:
 	# clang-format
-	find . -name '*.c' -o -name '*.h' | xargs clang-format --dry-run -Werror
+	find . -path ./lib -prune -o \( -name '*.c' -o -name '*.h' \) -print | xargs clang-format --dry-run -Werror
 	# clang-tidy
 	make clean
 	$(INTERCEPT) --cdb build/compile_commands.json make all

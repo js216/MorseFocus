@@ -26,7 +26,7 @@ int test_record_load_last(const char *test_file)
    fprintf(fp, "2025-05-28 12:00:00 1.0 1.0 0.0 0.0 3 1 abc 0.1 0.2 0.3\n");
    fprintf(fp, "2025-05-29 13:15:30 2.0 2.5 1.0 1.0 3 2 xyz 0.5 0.6 0.7\n");
    fprintf(fp,
-           "2025-05-30 19:39:10 1.0 2.0 3.0 4.0 3 3 abcd~!@#$ 0 1 2 3 4 "
+           "2025-05-30 19:39:10 1.0 2.0 3.0 4.0 3 300 abcd~!@#$ 0 1 2 3 4 "
            "5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 "
            "29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49\n");
 
@@ -53,6 +53,12 @@ int test_record_load_last(const char *test_file)
    if ((r.decay != 1.0) || (r.scale != 2.0) || (r.speed1 != 3.0) ||
        (r.speed2 != 4.0)) {
       TEST_FAIL("wrong decay/scale/speed1/speed2");
+      return -1;
+   }
+
+   if ((r.dist != 3.0) || (r.len != 300.0) || (r.speed1 != 3.0) ||
+       (r.speed2 != 4.0)) {
+      TEST_FAIL("wrong dist or len");
       return -1;
    }
 

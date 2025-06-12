@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
    float decay = 1.0f;
 
    // optional data to store in the file
-   float scale = 0.000;
+   float scale = 1.000;
    float speed1 = 0.0;
    float speed2 = 0.0;
    char *charset = "~";

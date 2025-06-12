@@ -92,18 +92,13 @@ Running the utilities without any arguments will print usage information:
 
 ### TODO
 
-- Interactive CLI app
-- Document `run_words`, `run_cw`
+- Document `run_words`, `run_cw`, `morsefocus`
 - Character generator should be more precise (~1%) in following the weights
 - Charset should use a macro string, and weights should determine which
   characters are present
-- Tiny GUI program to display the progress of weights over time, and
-  github/lcwo-style squares for streak tracing
-- Diff should output recommended speed for the next run, using the formula
-  `new_speed = old_speed * (1 - k*(error_rate - 0.1))`
-- Diff for word probabilities
-- Add a Markov chain text generator
 - Make a simple GUI for the program
+- Add a Markov chain text generator
+- Diff for word probabilities
 
 ### License
 

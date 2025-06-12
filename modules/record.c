@@ -92,8 +92,8 @@ struct record record_load_last(const char *filename)
       }
    }
 
-   rec.len = strtof(ints[0], NULL);
-   rec.dist = strtof(ints[1], NULL);
+   rec.dist = strtof(ints[0], NULL);
+   rec.len = strtof(ints[1], NULL);
 
    // parse charset
    char *charset_str = str_tok(NULL, " \t\n", &saveptr);

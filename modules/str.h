@@ -23,7 +23,7 @@
  *
  * @param s1 Destination buffer (must have space for at least len chars)
  * @param s2 Source buffer to clean (len chars)
- * @param len Number of characters to process
+ * @param len Number of characters to read from s2 and place into s1.
  *
  * @return Number of characters processed (equal to len)
  */
@@ -99,6 +99,30 @@ char *str_tok(char *str, const char *delim, char **saveptr);
  * failure.
  */
 char *str_ptime(const char *s, const char *format, struct tm *tm);
+
+/**
+ * @brief Convert a string to lowercase in place.
+ *
+ * Converts all ASCII uppercase characters in the string @p s to their
+ * lowercase equivalents using the standard C library function tolower().
+ * Non-alphabetical characters are not modified.
+ *
+ * @param s Pointer to a null-terminated string to be converted.
+ *          If @c NULL, the function does nothing.
+ */
+void str_to_lower(char *s);
+
+/**
+ * @brief Trim trailing whitespace from a string in place.
+ *
+ * Removes all trailing whitespace characters (spaces, tabs, newlines, etc.)
+ * from the null-terminated string @p s by replacing them with the null
+ * terminator. Leading whitespace is not affected.
+ *
+ * @param s Pointer to a null-terminated string to be trimmed.
+ *          If @c NULL, the function does nothing.
+ */
+void str_trim(char *s);
 
 /**
  * @brief Check if string contains only allowed characters.

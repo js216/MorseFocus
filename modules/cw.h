@@ -51,9 +51,8 @@ int count_units(const char *morse);
  * @return Total playback duration in milliseconds, or -1 on error.
  */
 int cw_play(const char *str, const float speed1, const float speed2,
-      const float freq, const float amp, const float delay);
+            const float freq, const float amp, const float delay);
 
 #endif // CW_H
 
 // end file cw.h
-

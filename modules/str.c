@@ -166,6 +166,26 @@ int str_is_clean(const char *s)
    return 0;
 }
 
+void str_to_lower(char *s)
+{
+   if (!s)
+      return;
+   for (; *s; s++) {
+      *s = (char)tolower((unsigned char)*s);
+   }
+}
+
+void str_trim(char *s)
+{
+   if (!s)
+      return;
+   size_t len = strlen(s);
+   while (len > 0 && isspace((unsigned char)s[len - 1])) {
+      s[len - 1] = '\0';
+      len--;
+   }
+}
+
 char *str_dup(const char *s)
 {
    if (!s)

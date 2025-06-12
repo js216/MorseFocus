@@ -9,33 +9,104 @@
 #include "diff.h"
 #include "record.h"
 #include "str.h"
-#include <stdio.h>
-#include <string.h>
+#include <math.h>
+
+#define TEST_DIFF_NUM 4
+
+struct test_diff_case {
+   const char *s1;
+   const char *s2;
+   int expected_distance;
+   float w_exp[MAX_CHARSET_LEN];
+};
+
+static struct test_diff_case get_diff_test_case(const int i)
+{
+   struct test_diff_case tc = {0};
+
+   if (i == 0) {
+      tc.s1 = "abc test hey";
+      tc.s2 = "abd tests hey";
+      tc.expected_distance = 2;
+      tc.w_exp[str_char_to_int('c')] = 1.0f;
+      tc.w_exp[str_char_to_int('d')] = 1.0f;
+      tc.w_exp[str_char_to_int('s')] = 1.0f;
+   }
+
+   else if (i == 1) {
+      tc.s1 = "hello";
+      tc.s2 = "hullo";
+      tc.expected_distance = 1;
+      tc.w_exp[str_char_to_int('e')] = 1.0f;
+      tc.w_exp[str_char_to_int('u')] = 1.0f;
+   }
+
+   else if (i == 2) {
+      tc.s1 = "morse code";
+      tc.s2 = "horse rode";
+      tc.expected_distance = 2;
+      tc.w_exp[str_char_to_int('c')] = 1.0f;
+      tc.w_exp[str_char_to_int('h')] = 1.0f;
+      tc.w_exp[str_char_to_int('m')] = 1.0f;
+      tc.w_exp[str_char_to_int('r')] = 1.0f;
+   }
+
+   else if (i == 2) {
+      tc.s1 = "morse code";
+      tc.s2 = "horse rode";
+      tc.expected_distance = 2;
+      tc.w_exp[str_char_to_int('c')] = 1.0f;
+      tc.w_exp[str_char_to_int('h')] = 1.0f;
+      tc.w_exp[str_char_to_int('m')] = 1.0f;
+      tc.w_exp[str_char_to_int('r')] = 1.0f;
+   }
+
+   else if (i == 3) {
+      tc.s1 = "ezb4z";
+      tc.s2 = "ezb4z";
+      tc.expected_distance = 0;
+   }
+
+   else {
+      ERROR("invalid test case number");
+   }
+
+   return tc;
+}
+
+static int compare_weights(const float *actual, const float *expected,
+                           size_t len, size_t case_num)
+{
+   const float EPS = 1e-6f;
+
+   for (size_t i = 0; i < len; ++i) {
+      if (fabsf(actual[i] - expected[i]) > EPS) {
+         TEST_FAIL("test %zu: mismatch at char '%c' weight[%zu] = %.6f, "
+                   "expected %.6f",
+                   case_num,
+                   str_int_to_char(i) == '\0' ? ' ' : str_int_to_char(i), i,
+                   actual[i], expected[i]);
+         return -1;
+      }
+   }
+
+   return 0;
+}
 
 int test_diff(void)
 {
-   const char *s1 = "abc test hey";
-   const char *s2 = "abd tests hey";
+   for (int i = 0; i < TEST_DIFF_NUM; ++i) {
+      struct test_diff_case tc = get_diff_test_case(i);
+      struct record r = {0};
 
-   struct record r = {0};
-   int distance = lev_diff(&r, s1, s2);
+      int dist = lev_diff(&r, tc.s1, tc.s2);
+      if (dist != tc.expected_distance) {
+         TEST_FAIL("test %d: expected distance %d, got %d", i,
+                   tc.expected_distance, dist);
+         return -1;
+      }
 
-   // check distance
-   if (distance != 2) {
-      TEST_FAIL("incorrect distance %d calculated", distance);
-      return -1;
-   }
-
-   // expected weights
-   float w_corr[MAX_CHARSET_LEN] = {0};
-   w_corr[str_char_to_int('c')] = 1;
-   w_corr[str_char_to_int('d')] = 1;
-   w_corr[str_char_to_int('s')] = 1;
-
-   // compare actual and expected weights
-   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
-      if (r.weights[i] != w_corr[i]) {
-         TEST_FAIL("incorrect weight for '%c'", str_int_to_char(i));
+      if (compare_weights(r.weights, tc.w_exp, MAX_CHARSET_LEN, i) != 0) {
          return -1;
       }
    }

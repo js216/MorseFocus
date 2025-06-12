@@ -12,11 +12,12 @@
 #include <unistd.h>
 #endif
 
+#include "cw.h"
+#include "debug.h"
+#include "miniaudio.h"
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include "miniaudio.h"
-#include "cw.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -26,43 +27,42 @@
 #define FADE_LEN 100
 
 struct cw_data {
-   const char *morse;      // pointer to expanded Morse code string
-   int pos;                // current character position in Morse string
+   const char *morse; // pointer to expanded Morse code string
+   int pos;           // current character position in Morse string
 
-   int tone_samples;       // number of samples left in current tone
-   int tone_len;           // duration of current tone in samples
-   int gap_samples;        // number of samples left in current gap
+   int tone_samples; // number of samples left in current tone
+   int tone_len;     // duration of current tone in samples
+   int gap_samples;  // number of samples left in current gap
 
-   int dot_len;            // duration of a dot in samples
-   int intra_gap;          // duration of intra-character gap in samples
-   int inter_gap;          // duration of inter-character/word gap in samples
+   int dot_len;   // duration of a dot in samples
+   int intra_gap; // duration of intra-character gap in samples
+   int inter_gap; // duration of inter-character/word gap in samples
 
-   float freq;             // tone frequency in Hz
-   float amp;              // tone amplitude from 0 to 1
-   float delay;            // initial delay
+   float freq;  // tone frequency in Hz
+   float amp;   // tone amplitude from 0 to 1
+   float delay; // initial delay
 
    unsigned long long total_samples; // total number of samples played
 };
 
 static const char *morse_table[128] = {
-   ['A'] = ".-",    ['B'] = "-...",  ['C'] = "-.-.",  ['D'] = "-..",
-   ['E'] = ".",     ['F'] = "..-.",  ['G'] = "--.",   ['H'] = "....",
-   ['I'] = "..",    ['J'] = ".---",  ['K'] = "-.-",   ['L'] = ".-..",
-   ['M'] = "--",    ['N'] = "-.",    ['O'] = "---",   ['P'] = ".--.",
-   ['Q'] = "--.-",  ['R'] = ".-.",   ['S'] = "...",   ['T'] = "-",
-   ['U'] = "..-",   ['V'] = "...-",  ['W'] = ".--",   ['X'] = "-..-",
-   ['Y'] = "-.--",  ['Z'] = "--..",
+    ['A'] = ".-",      ['B'] = "-...",   ['C'] = "-.-.",   ['D'] = "-..",
+    ['E'] = ".",       ['F'] = "..-.",   ['G'] = "--.",    ['H'] = "....",
+    ['I'] = "..",      ['J'] = ".---",   ['K'] = "-.-",    ['L'] = ".-..",
+    ['M'] = "--",      ['N'] = "-.",     ['O'] = "---",    ['P'] = ".--.",
+    ['Q'] = "--.-",    ['R'] = ".-.",    ['S'] = "...",    ['T'] = "-",
+    ['U'] = "..-",     ['V'] = "...-",   ['W'] = ".--",    ['X'] = "-..-",
+    ['Y'] = "-.--",    ['Z'] = "--..",
 
-   ['0'] = "-----", ['1'] = ".----", ['2'] = "..---", ['3'] = "...--",
-   ['4'] = "....-", ['5'] = ".....", ['6'] = "-....", ['7'] = "--...",
-   ['8'] = "---..", ['9'] = "----.",
+    ['0'] = "-----",   ['1'] = ".----",  ['2'] = "..---",  ['3'] = "...--",
+    ['4'] = "....-",   ['5'] = ".....",  ['6'] = "-....",  ['7'] = "--...",
+    ['8'] = "---..",   ['9'] = "----.",
 
-   ['.'] = ".-.-.-", [','] = "--..--", ['?'] = "..--..", ['\''] = ".----.",
-   ['!'] = "-.-.--", ['/'] = "-..-.",  ['('] = "-.--.",  [')'] = "-.--.-",
-   ['&'] = ".-...",  [':'] = "---...", [';'] = "-.-.-.", ['='] = "-...-",
-   ['+'] = ".-.-.",  ['-'] = "-....-", ['_'] = "..--.-", ['"'] = ".-..-.",
-   ['$'] = "...-..-", ['@'] = ".--.-."
-};
+    ['.'] = ".-.-.-",  [','] = "--..--", ['?'] = "..--..", ['\''] = ".----.",
+    ['!'] = "-.-.--",  ['/'] = "-..-.",  ['('] = "-.--.",  [')'] = "-.--.-",
+    ['&'] = ".-...",   [':'] = "---...", [';'] = "-.-.-.", ['='] = "-...-",
+    ['+'] = ".-.-.",   ['-'] = "-....-", ['_'] = "..--.-", ['"'] = ".-..-.",
+    ['$'] = "...-..-", ['@'] = ".--.-."};
 
 static void sleep_ms(unsigned int ms)
 {
@@ -123,23 +123,23 @@ int count_units(const char *morse)
 
    while (*p) {
       switch (*p) {
-         case '.':
+      case '.':
+         units += 1;
+         if (p[1] == '.' || p[1] == '-')
+            units += 1; // intra-char gap
+         break;
+      case '-':
+         units += 3;
+         if (p[1] == '.' || p[1] == '-')
             units += 1;
-            if (p[1] == '.' || p[1] == '-')
-               units += 1; // intra-char gap
-            break;
-         case '-':
-            units += 3;
-            if (p[1] == '.' || p[1] == '-')
-               units += 1;
-            break;
-         case '|':
-            units += 3; // char gap
-            break;
-         case '/':
-            if (p[1] != '\0')
-               units += 7; // only if not final
-            break;
+         break;
+      case '|':
+         units += 3; // char gap
+         break;
+      case '/':
+         if (p[1] != '\0')
+            units += 7; // only if not final
+         break;
       }
       p++;
    }
@@ -147,34 +147,36 @@ int count_units(const char *morse)
    return units;
 }
 
-static void start_symbol_tone(struct cw_data *cw, char sym) {
+static void start_symbol_tone(struct cw_data *cw, char sym)
+{
    switch (sym) {
-      case '.':
-         cw->tone_samples = cw->dot_len;
-         cw->gap_samples = cw->intra_gap;
-         break;
-      case '-':
-         cw->tone_samples = 3 * cw->dot_len;
-         cw->gap_samples = cw->intra_gap;
-         break;
-      case '|':
-         cw->tone_samples = 0;
-         cw->gap_samples = cw->inter_gap * 3;
-         break;
-      case '/':
-         cw->tone_samples = 0;
-         cw->gap_samples = cw->inter_gap * 7;
-         break;
-      case ' ':
-      default:
-         cw->tone_samples = 0;
-         cw->gap_samples = cw->intra_gap;
-         break;
+   case '.':
+      cw->tone_samples = cw->dot_len;
+      cw->gap_samples = cw->intra_gap;
+      break;
+   case '-':
+      cw->tone_samples = 3 * cw->dot_len;
+      cw->gap_samples = cw->intra_gap;
+      break;
+   case '|':
+      cw->tone_samples = 0;
+      cw->gap_samples = cw->inter_gap * 3;
+      break;
+   case '/':
+      cw->tone_samples = 0;
+      cw->gap_samples = cw->inter_gap * 7;
+      break;
+   case ' ':
+   default:
+      cw->tone_samples = 0;
+      cw->gap_samples = cw->intra_gap;
+      break;
    }
    cw->tone_len = cw->tone_samples;
 }
 
-static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput, ma_uint32 frameCount)
+static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
+                          ma_uint32 frameCount)
 {
    (void)pInput;
    struct cw_data *cw = (struct cw_data *)pDevice->pUserData;
@@ -193,7 +195,8 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
       float sample = 0.0f;
 
       if (cw->tone_samples > 0) {
-         unsigned long long tone_played = cw->tone_len - cw->tone_samples;  // samples played in current tone
+         unsigned long long tone_played =
+             cw->tone_len - cw->tone_samples; // samples played in current tone
          float fade_factor = 1.0f;
 
          // Fade-in over first FADE_LEN samples
@@ -207,7 +210,8 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
 
          const float sr = (float)pDevice->sampleRate;
          const float r = (float)(cw->total_samples % pDevice->sampleRate) / sr;
-         sample = fade_factor * cw->amp * sinf(2.0f * (float)M_PI * cw->freq * r);
+         sample =
+             fade_factor * cw->amp * sinf(2.0f * (float)M_PI * cw->freq * r);
 
          cw->tone_samples--;
       }
@@ -233,16 +237,20 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
 }
 
 int cw_play(const char *str, const float speed1, const float speed2,
-      const float freq, const float amp, const float delay)
+            const float freq, const float amp, const float delay)
 {
-   if (!str || speed1 <= 0 || speed2 <= 0 || freq <= 0 || amp <= 0)
+   if (!str || speed1 <= 0 || speed2 <= 0 || freq <= 0 || amp <= 0) {
+      ERROR("invalid parameters given");
       return -1;
+   }
 
    char *morse = malloc(strlen(str) * 10 + 1);
-   if (!morse)
+   if (!morse) {
+      ERROR("out of memory");
       return -1;
+   }
 
-   ascii_to_morse_expanded(str, morse);  // You must define this
+   ascii_to_morse_expanded(str, morse); // You must define this
 
    ma_device_config cfg = ma_device_config_init(ma_device_type_playback);
    cfg.playback.format = ma_format_f32;
@@ -259,8 +267,8 @@ int cw_play(const char *str, const float speed1, const float speed2,
 
    cw.delay = delay * ((float)cfg.sampleRate / (float)cfg.periodSizeInFrames);
 
-   float dot_dur = 60.0f / (50.0f * speed1);  // Dot duration
-   float gap_dur = 60.0f / (50.0f * speed2);  // Gap unit duration
+   float dot_dur = 60.0f / (50.0f * speed1); // Dot duration
+   float gap_dur = 60.0f / (50.0f * speed2); // Gap unit duration
 
    float sr = (float)cfg.sampleRate;
    cw.dot_len = (int)(dot_dur * sr);
@@ -273,11 +281,13 @@ int cw_play(const char *str, const float speed1, const float speed2,
    if (ma_device_init(NULL, &cfg, &dev) != MA_SUCCESS) {
       free(morse);
       return -1;
+      ERROR("cannot initialize audio device");
    }
 
    if (ma_device_start(&dev) != MA_SUCCESS) {
       ma_device_uninit(&dev);
       free(morse);
+      ERROR("cannot start audio device");
       return -1;
    }
 
@@ -288,8 +298,8 @@ int cw_play(const char *str, const float speed1, const float speed2,
    ma_device_uninit(&dev);
    free(morse);
 
-   return (int)((cw.total_samples * 1000ULL) / (unsigned long long)cfg.sampleRate);
+   return (int)((cw.total_samples * 1000ULL) /
+                (unsigned long long)cfg.sampleRate);
 }
 
 // end of cw.c
-

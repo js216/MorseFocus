@@ -14,4 +14,3 @@ int test_count_units(void);
 #endif // TEST_CW_H
 
 // end file test_cw.h
-
