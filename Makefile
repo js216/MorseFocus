@@ -1,21 +1,27 @@
-CC = gcc -fanalyzer
+CC = gcc
 INTERCEPT = intercept-build-14
 SCAN = scan-build-14
 
-CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -Imodules -MMD -MP
+INCLUDE = -Imodules -Ilib
+CFLAGS = -std=c99 -Wall -Wextra -Werror -pedantic -fanalyzer -MMD -MP $(INCLUDE)
 LDFLAGS = -lm
 
-modules = diff str gen record
-tests = test_diff test_str test_gen test_record
-tools = run_tests run_diff run_gen run_words
+lib = miniaudio
+modules = diff str gen record cw
+tests = test_diff test_str test_gen test_record test_cw
+tools = run_tests run_diff run_gen run_words run_cw
+
+lib_objs = $(addprefix build/, $(addsuffix .o, $(lib)))
+module_objs  = $(addprefix build/, $(addsuffix .o, $(modules)))
+test_objs    = $(addprefix build/, $(addsuffix .o, $(tests)))
 
 all: $(addprefix build/, $(tools))
-module_objs = $(addprefix build/, $(addsuffix .o, $(modules)))
-test_objs = $(addprefix build/, $(addsuffix .o, $(tests)))
-
 .PHONY: clean all check format
 
 # Main program files
+
+build/%.o: lib/%.c | build
+	$(CC) $(filter-out -fanalyzer,$(CFLAGS)) -c $< -o $@
 
 build/%.o: modules/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -23,7 +29,7 @@ build/%.o: modules/%.c | build
 build/%.o: tools/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/%: build/%.o $(module_objs)
+build/%: build/%.o $(lib_objs) $(module_objs)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 # Test files
@@ -31,7 +37,7 @@ build/%: build/%.o $(module_objs)
 build/%.o: tests/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/run_tests: build/run_tests.o $(module_objs) $(test_objs)
+build/run_tests: build/run_tests.o $(lib_objs) $(module_objs) $(test_objs)
 	$(CC) $^ -o $@ $(LDFLAGS)
 	cd build && ./run_tests
 
@@ -50,7 +56,7 @@ check:
 	jq -r '.[].file' build/compile_commands.json | xargs clang-tidy -p build -system-headers -warnings-as-errors=*
 	# scan-build
 	make clean
-	$(SCAN) --status-bugs make all
+	$(SCAN) --status-bugs make all CFLAGS="$(filter-out -fanalyzer,$(CFLAGS))"
 
 # Common recipes
 
@@ -61,5 +67,4 @@ build:
 	mkdir -p build
 
 -include $(wildcard build/*.d)
-
 

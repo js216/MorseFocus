@@ -5,14 +5,17 @@
  * @author Jakob Kastelic
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "debug.h"
 #include "str.h"
+
 #include "test_diff.h"
 #include "test_gen.h"
 #include "test_record.h"
 #include "test_str.h"
-#include <stdio.h>
-#include <string.h>
+#include "test_cw.h"
 
 #define TEST_FILE1 "test_file.txt"
 #define TEST_FILE2 "test_file1.txt"
@@ -76,6 +79,9 @@ int main(void)
    ret |= test_parse_line();
    ret |= test_parse_word_file(TEST_FILE1);
    ret |= test_gen_words(TEST_FILE1, TEST_FILE2, TEST_FILE3);
+
+   ret |= test_ascii_to_morse_expanded();
+   ret |= test_count_units();
 
    remove(TEST_FILE1);
    remove(TEST_FILE2);
