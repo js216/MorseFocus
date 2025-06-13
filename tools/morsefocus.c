@@ -383,7 +383,7 @@ int main(int argc, char **argv)
 
    // Play Morse code audio of generated text
    if (cw_play(gen_buf, args.rec.speed1, args.rec.speed2, args.freq, args.amp,
-            args.delay) < 0) {
+               args.delay) < 0) {
       free(gen_buf);
       ERROR("error: playback error\n");
       return -1;
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
    const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
    record_printout(&r0);
    printf("%d errors out of %d = %.1f%%\n", args.rec.dist, args.rec.len,
-         err_pct);
+          err_pct);
    free(gen_buf);
 
    // Save updated weights, if file given
