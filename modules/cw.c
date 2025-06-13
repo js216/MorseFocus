@@ -255,13 +255,13 @@ int cw_play(const char *str, const float speed1, const float speed2,
       return -1;
    }
 
-   ascii_to_morse_expanded(str, morse); // You must define this
+   ascii_to_morse_expanded(str, morse);
 
    ma_device_config cfg = ma_device_config_init(ma_device_type_playback);
    cfg.playback.format = ma_format_f32;
    cfg.playback.channels = 2;
    cfg.dataCallback = data_callback;
-   cfg.sampleRate = 48000; // You can omit this to use the default
+   cfg.sampleRate = 48000;
    cfg.periodSizeInFrames = 64;
    cfg.periods = 1;
 
@@ -272,8 +272,8 @@ int cw_play(const char *str, const float speed1, const float speed2,
 
    cw.delay = delay * ((float)cfg.sampleRate / (float)cfg.periodSizeInFrames);
 
-   float dot_dur = 60.0f / (50.0f * speed1); // Dot duration
-   float gap_dur = 60.0f / (50.0f * speed2); // Gap unit duration
+   float dot_dur = 60.0f / (50.0f * speed1);
+   float gap_dur = 60.0f / (50.0f * speed2);
 
    float sr = (float)cfg.sampleRate;
    cw.dot_len = (int)(dot_dur * sr);
@@ -305,6 +305,51 @@ int cw_play(const char *str, const float speed1, const float speed2,
 
    return (int)((cw.total_samples * 1000ULL) /
                 (unsigned long long)cfg.sampleRate);
+}
+
+float cw_duration(const char *str, const float speed1, const float speed2)
+{
+   if (!str || speed1 <= 0.0f || speed2 <= 0.0f || speed1 < speed2)
+      return -1.0f;
+
+   size_t len = strlen(str);
+   char *morse = malloc(len * 10 + 1);
+   if (!morse)
+      return -1.0f;
+
+   ascii_to_morse_expanded(str, morse);
+   const char *p = morse;
+
+   float dot_dur = 60.0f / (50.0f * speed1);
+   float gap_dur = 60.0f / (50.0f * speed2);
+
+   float total = 0.0f;
+
+   while (*p) {
+      switch (*p) {
+      case '.':
+         total += dot_dur;
+         if (p[1] == '.' || p[1] == '-')
+            total += dot_dur;
+         break;
+      case '-':
+         total += 3 * dot_dur;
+         if (p[1] == '.' || p[1] == '-')
+            total += dot_dur;
+         break;
+      case '|':
+         total += 3 * gap_dur;
+         break;
+      case '/':
+         if (p[1] != '\0')
+            total += 7 * gap_dur;
+         break;
+      }
+      p++;
+   }
+
+   free(morse);
+   return total;
 }
 
 // end of cw.c

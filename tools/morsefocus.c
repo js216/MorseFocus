@@ -315,8 +315,10 @@ int main(int argc, char **argv)
    if (!gen_buf)
       return -1;
 
-   printf("Sending %.0f characters at %.1f/%.1f wpm\r\n", args.rec.len,
-          args.rec.speed1, args.rec.speed2);
+   // Initial stats
+   const float secs = cw_duration(gen_buf, args.rec.speed1, args.rec.speed2);
+   printf("Sending %.0f characters at %.1f/%.1f wpm (~%.1f min)\r\n",
+          args.rec.len, args.rec.speed1, args.rec.speed2, secs / 60.0);
    printf("Received text? ");
    fflush(stdout);
 

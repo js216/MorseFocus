@@ -53,6 +53,18 @@ int count_units(const char *morse);
 int cw_play(const char *str, const float speed1, const float speed2,
             const float freq, const float amp, const float delay);
 
+/**
+ * @brief Compute the CW transmission duration in seconds.
+ *
+ * Uses the same timing rules as cw_play() without audio playback.
+ *
+ * @param str     Input text string to encode and transmit as CW.
+ * @param speed1  Character speed (WPM).
+ * @param speed2  Farnsworth spacing speed (WPM).
+ * @return        Transmission time in seconds, or -1.0f on error.
+ */
+float cw_duration(const char *str, const float speed1, const float speed2);
+
 #endif // CW_H
 
 // end file cw.h
