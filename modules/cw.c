@@ -244,6 +244,11 @@ int cw_play(const char *str, const float speed1, const float speed2,
       return -1;
    }
 
+   if (speed1 < speed2) {
+      ERROR("speed1 must be equal or greater than speed2");
+      return -1;
+   }
+
    char *morse = malloc(strlen(str) * 10 + 1);
    if (!morse) {
       ERROR("out of memory");

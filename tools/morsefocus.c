@@ -18,8 +18,8 @@
  *  -a <amp>     Amplitude (0..1), default 0.3
  *  -n <delay>   Initial delay seconds (0..60), default 1
  *  -w FILE      load weights from last line of FILE
- *  -1 <speed1>  Speed1 in WPM (1..500), default 25
- *  -2 <speed2>  Speed2 in WPM (1..500), default 25
+ *  -1 <speed1>  Character speed in WPM (1..500), default 25
+ *  -2 <speed2>  Farnsworth speed in WPM (1..500), default 25
  *  -s scale     multiply all weights by scale (default 1.0)
  *  -d decay     scale output weights (default: 1.0)
  *
@@ -64,8 +64,8 @@ static void usage(const char *prog)
            "  -a <amp>     Amplitude (0..1), default 0.3\n"
            "  -n <delay>   Initial delay seconds (0..60), default 1\n"
            "  -w FILE      load weights from last line of FILE\n"
-           "  -1 <speed1>  Speed1 in WPM (1..500), default 25\n"
-           "  -2 <speed2>  Speed2 in WPM (1..500), default 25\n"
+           "  -1 <speed1>  Character speed in WPM (1..500), default 25\n"
+           "  -2 <speed2>  Farnsworth in WPM (1..500), default 25\n"
            "  -s scale     multiply all weights by scale (default 1.0)\n"
            "  -d decay     scale output weights (default: 1.0)\n",
            prog);
@@ -74,7 +74,16 @@ static void usage(const char *prog)
 static int check_float_range(float val, float min, float max, const char *name)
 {
    if (val < min || val > max) {
-      ERROR("Error: %s must be between %.2f and %.2f\n", name, min, max);
+      ERROR("error: %s must be between %.2f and %.2f\n", name, min, max);
+      return -1;
+   }
+   return 0;
+}
+
+static int check_int_range(int val, int min, int max, const char *name)
+{
+   if (val < min || val > max) {
+      ERROR("error: %s must be between %d and %d\n", name, min, max);
       return -1;
    }
    return 0;
@@ -113,75 +122,88 @@ static struct parsed_args parse_args(int argc, char **argv)
    time_t now = time(NULL);
    args.rec.datetime = *localtime(&now);
 
+   args.rec.len = atoi(argv[1]);
+   if (check_int_range(args.rec.len, 1, 1024, "frequency") < 0)
+      exit(-1);
+
    for (int i = 2; i < argc; ++i) {
       if (!strcmp(argv[i], "-i")) {
          if (++i >= argc)
-            handle_error("Missing value for -i (minimum word length)");
+            handle_error("missing value for -i (minimum word length)");
          args.min_word = atoi(argv[i]);
+         if (check_int_range(args.min_word, 1, 1000, "frequency") < 0)
+            exit(-1);
 
       } else if (!strcmp(argv[i], "-x")) {
          if (++i >= argc)
-            handle_error("Missing value for -x (maximum word length)");
+            handle_error("missing value for -x (maximum word length)");
          args.max_word = atoi(argv[i]);
+         if (check_int_range(args.max_word, 1, 1000, "frequency") < 0)
+            exit(-1);
 
       } else if (!strcmp(argv[i], "-w")) {
          if (++i >= argc)
-            handle_error("Missing value for -w (weights file path)");
+            handle_error("missing value for -w (weights file path)");
          args.wfile = argv[i];
 
       } else if (!strcmp(argv[i], "-t")) {
          if (++i >= argc)
-            handle_error("Missing value for -t (tone frequency)");
+            handle_error("missing value for -t (tone frequency)");
          args.freq = strtof(argv[i], NULL);
          if (check_float_range(args.freq, 60.0f, 10000.0f, "frequency") < 0)
             exit(-1);
 
       } else if (!strcmp(argv[i], "-a")) {
          if (++i >= argc)
-            handle_error("Missing value for -a (amplitude)");
+            handle_error("missing value for -a (amplitude)");
          args.amp = strtof(argv[i], NULL);
          if (check_float_range(args.amp, 0.0f, 1.0f, "amplitude") < 0)
             exit(-1);
 
       } else if (!strcmp(argv[i], "-1")) {
          if (++i >= argc)
-            handle_error("Missing value for -1 (speed1)");
+            handle_error("missing value for -1 (speed1)");
          args.rec.speed1 = atoi(argv[i]);
-         if (args.rec.speed1 < 1 || args.rec.speed1 > 500)
-            handle_error("Speed1 must be in range 1..500");
+         if (check_float_range(args.rec.speed1, 1.0f, 500.0f, "speed1") < 0)
+            exit(-1);
 
       } else if (!strcmp(argv[i], "-2")) {
          if (++i >= argc)
-            handle_error("Missing value for -2 (speed2)");
+            handle_error("missing value for -2 (speed2)");
          args.rec.speed2 = atoi(argv[i]);
-         if (args.rec.speed2 < 1 || args.rec.speed2 > 500)
-            handle_error("Speed2 must be in range 1..500");
+         if (check_float_range(args.rec.speed2, 1.0f, 500.0f, "speed2") < 0)
+            exit(-1);
 
       } else if (!strcmp(argv[i], "-s")) {
          if (++i >= argc)
-            handle_error("Missing value for -s (scale)");
+            handle_error("missing value for -s (scale)");
          args.rec.scale = strtof(argv[i], NULL);
+         if (check_float_range(args.rec.scale, 0.1f, 1.0f, "scale") < 0)
+            exit(-1);
 
       } else if (!strcmp(argv[i], "-n")) {
          if (++i >= argc)
-            handle_error("Missing value for -n (delay)");
+            handle_error("missing value for -n (delay)");
          args.delay = strtof(argv[i], NULL);
          if (check_float_range(args.delay, 0.0f, 60.0f, "delay") < 0)
             exit(-1);
 
       } else if (!strcmp(argv[i], "-d")) {
          if (++i >= argc)
-            handle_error("Missing value for -n (decay)");
+            handle_error("missing value for -n (decay)");
          args.rec.decay = strtof(argv[i], NULL);
          if (check_float_range(args.rec.decay, 0.0f, 60.0f, "decay") < 0)
             exit(-1);
 
       } else {
-         ERROR("Unrecognized option: %s\n", argv[i]);
+         ERROR("unrecognized option: %s\n", argv[i]);
          usage(argv[0]);
          exit(-1);
       }
    }
+
+   if (args.rec.speed1 < args.rec.speed2)
+      handle_error("speed1 must be equal or greater than speed2");
 
    return args;
 }
@@ -195,11 +217,11 @@ static int ask_yes_no(const char *prompt)
 
       if (fgets(buf, sizeof(buf), stdin) == NULL) {
          if (feof(stdin)) {
-            ERROR("Input error: End of file detected\n");
+            ERROR("input error: End of file detected\n");
          } else if (ferror(stdin)) {
-            ERROR("Input error: I/O error detected\n");
+            ERROR("input error: I/O error detected\n");
          } else {
-            ERROR("Input error: Unknown error\n");
+            ERROR("input error: Unknown error\n");
          }
          return -1;
       }
@@ -222,7 +244,7 @@ static int ask_yes_no(const char *prompt)
          return 0;
       }
 
-      ERROR("Invalid response \"%s\": please answer 'y' or 'n'\n", buf);
+      ERROR("invalid response \"%s\": please answer 'y' or 'n'\n", buf);
    }
 }
 
@@ -253,8 +275,10 @@ static int file_is_empty(const char *filename)
 
 static int prepare_record(struct parsed_args *args, const int len)
 {
-   if (!args->wfile || file_is_empty(args->wfile) != 0)
+   if (!args->wfile || file_is_empty(args->wfile) != 0) {
+      args->rec.len = len;
       return 0;
+   }
 
    args->rec = record_load_last(args->wfile);
    if (!args->rec.valid) {
@@ -268,8 +292,8 @@ static int prepare_record(struct parsed_args *args, const int len)
 
    const float err_pct = 100.0f * (float)args->rec.dist / (float)args->rec.len;
    printf("Previous accuracy = %.1f%%\n", err_pct);
-
    args->rec.speed2 *= (1.0f - PID_K * (err_pct / 100.0f - TARGET_ACCURACY));
+
    args->rec.len = len;
    return 0;
 }
@@ -345,7 +369,7 @@ int main(int argc, char **argv)
    struct parsed_args args = parse_args(argc, argv);
 
    // Read weights and settings, if file given
-   if (prepare_record(&args, atoi(argv[1])) < 0)
+   if (prepare_record(&args, args.rec.len) < 0)
       return -1;
 
    // Prepare record and generate text buffer
@@ -361,7 +385,7 @@ int main(int argc, char **argv)
    if (cw_play(gen_buf, args.rec.speed1, args.rec.speed2, args.freq, args.amp,
             args.delay) < 0) {
       free(gen_buf);
-      ERROR("Error: playback error\n");
+      ERROR("error: playback error\n");
       return -1;
    }
 
