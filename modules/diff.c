@@ -59,8 +59,8 @@ int lev_diff(struct record *r, const char *s1, const char *s2)
    }
 
    // backtrack to count edits per character
-   size_t i = len1 - 1;
-   size_t j = len2 - 1;
+   int i = (size_t) len1;
+   int j = (size_t) len2;
    while (i > 0 || j > 0) {
       if (i > 0 && j > 0 &&
           dp[i][j] == dp[i - 1][j - 1] + ((s1[i - 1] != s2[j - 1]) ? 1 : 0)) {

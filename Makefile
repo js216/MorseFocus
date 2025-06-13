@@ -9,7 +9,7 @@ LDFLAGS = -lm
 lib = miniaudio
 modules = diff str gen record cw
 tests = test_diff test_str test_gen test_record test_cw
-tools = run_tests run_diff run_gen run_words run_cw morsefocus
+tools = run_diff run_gen run_words run_cw morsefocus
 
 lib_objs = $(addprefix build/, $(addsuffix .o, $(lib)))
 module_objs  = $(addprefix build/, $(addsuffix .o, $(modules)))
@@ -29,8 +29,8 @@ build/%.o: modules/%.c | build
 build/%.o: tools/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/%: build/%.o $(lib_objs) $(module_objs)
-	$(CC) $^ -o $@ $(LDFLAGS)
+build/%: build/%.o $(lib_objs) $(module_objs) build/run_tests
+	$(CC) $(filter-out build/run_tests, $^) -o $@ $(LDFLAGS)
 
 # Test files
 
@@ -39,7 +39,7 @@ build/%.o: tests/%.c | build
 
 build/run_tests: build/run_tests.o $(lib_objs) $(module_objs) $(test_objs)
 	$(CC) $^ -o $@ $(LDFLAGS)
-	cd build && ./run_tests
+	cd build && ./run_tests || { rm -f run_tests; exit 1; }
 
 # Static code analysis
 
