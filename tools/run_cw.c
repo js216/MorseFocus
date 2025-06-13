@@ -70,7 +70,11 @@ static char *read_input_file(const char *filename)
       ERROR("Error: ftell failed on '%s'\n", filename);
       return NULL;
    }
-   rewind(f);
+   if (fseek(f, 0, SEEK_SET) != 0) {
+      fclose(f);
+      ERROR("fseek failed");
+      return NULL;
+   }
 
    char *buf = malloc(size + 1);
    if (!buf) {
