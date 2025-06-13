@@ -34,6 +34,21 @@ int gen_chars(char *s, const size_t num_char, const int min_word,
       return -1;
    }
 
+   if (num_char > GEN_MAX) {
+      ERROR("too many chars requested");
+      return -1;
+   }
+
+   if (min_word > GEN_MAX) {
+      ERROR("min word too large");
+      return -1;
+   }
+
+   if (max_word > GEN_MAX) {
+      ERROR("max word too large");
+      return -1;
+   }
+
    if (num_char < 2) {
       ERROR("refuse to generate < 2 characters");
       return -1;

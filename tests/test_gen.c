@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TEST_MAX_CHARS 100000
 #define TEST_MAX_WORDS 1000
 #define TEST_EPS 0.25
 
@@ -219,7 +218,7 @@ int test_gen_create_weights(float *w, const char *charset)
 int test_gen_chars(void)
 {
    float weights[MAX_CHARSET_LEN];
-   char buf[TEST_MAX_CHARS];
+   char buf[GEN_MAX];
 
    // make sure charset_def is not too long
    if (strlen(charset_def) > MAX_CHARSET_LEN) {
@@ -229,7 +228,7 @@ int test_gen_chars(void)
 
    // test with default charset and uniform weights
    if ((test_gen_create_weights(weights, charset_def) != 0) ||
-       (gen_chars(buf, TEST_MAX_CHARS, 3, 6, NULL, NULL) != 0) ||
+       (gen_chars(buf, GEN_MAX, 3, 6, NULL, NULL) != 0) ||
        (test_gen_analyze(buf, weights, 3, 6) != 0)) {
       TEST_FAIL("test with default charset and uniform weights");
       return -1;
@@ -237,7 +236,7 @@ int test_gen_chars(void)
 
    // uniform weights, except favor '?' heavily
    weights[str_char_to_int('?')] = 50;
-   if ((gen_chars(buf, TEST_MAX_CHARS, 4, 8, weights, NULL) != 0) ||
+   if ((gen_chars(buf, GEN_MAX, 4, 8, weights, NULL) != 0) ||
        (test_gen_analyze(buf, weights, 4, 8) != 0)) {
       TEST_FAIL("uniform weights, except favor '?' heavily");
       return -1;
@@ -245,7 +244,7 @@ int test_gen_chars(void)
 
    // test with custom charset and uniform weights
    if ((test_gen_create_weights(weights, "abcde") != 0) ||
-       (gen_chars(buf, TEST_MAX_CHARS, 2, 4, NULL, "abcde") != 0) ||
+       (gen_chars(buf, GEN_MAX, 2, 4, NULL, "abcde") != 0) ||
        (test_gen_analyze(buf, weights, 2, 4) != 0)) {
       TEST_FAIL("test with custom charset and uniform weights");
       return -1;

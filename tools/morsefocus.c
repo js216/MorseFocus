@@ -6,23 +6,6 @@
  * Morse code, waits for the user input, and calculates the character accuracy
  * statistics.
  *
- * Usage:
- *
- * $ morsefocus NUM_CHAR [options]
- *
- * Options:
- *
- *  -i MIN       set minimum word length (default 2)
- *  -x MAX       set maximum word length (default 7)
- *  -t <freq>    Tone frequency Hz (60..10000), default 700
- *  -a <amp>     Amplitude (0..1), default 0.3
- *  -n <delay>   Initial delay seconds (0..60), default 1
- *  -w FILE      load weights from last line of FILE
- *  -1 <speed1>  Character speed in WPM (1..500), default 25
- *  -2 <speed2>  Farnsworth speed in WPM (1..500), default 25
- *  -s scale     multiply all weights by scale (default 1.0)
- *  -d decay     scale output weights (default: 1.0)
- *
  * @author Jakob Kastelic
  */
 
@@ -41,35 +24,61 @@
 #define TARGET_ACCURACY 0.1
 #define PID_K 1.0
 
-struct parsed_args {
-   int min_word;
-   int max_word;
+struct ParsedArgs {
+   float min_word;
+   float max_word;
    float freq;
    float amp;
    float delay;
-   const char *wfile;
+   const char *file_name;
    struct record rec;
 };
 
-int silence_errors;
+struct ArgDef {
+   const char *flag;
+   const char *name;
+   float min_val;
+   float max_val;
+   void *target;
+};
 
-static void usage(const char *prog)
-{
-   fprintf(stderr,
-           "Usage: %s num_char [options]\n"
-           "options:\n"
-           "  -i MIN       set minimum word length (default 2)\n"
-           "  -x MAX       set maximum word length (default 7)\n"
-           "  -t <freq>    Tone frequency Hz (60..10000), default 700\n"
-           "  -a <amp>     Amplitude (0..1), default 0.3\n"
-           "  -n <delay>   Initial delay seconds (0..60), default 1\n"
-           "  -w FILE      load weights from last line of FILE\n"
-           "  -1 <speed1>  Character speed in WPM (1..500), default 25\n"
-           "  -2 <speed2>  Farnsworth in WPM (1..500), default 25\n"
-           "  -s scale     multiply all weights by scale (default 1.0)\n"
-           "  -d decay     scale output weights (default: 1.0)\n",
-           prog);
-}
+static struct ParsedArgs args = {
+    .min_word = 2,
+    .max_word = 7,
+    .freq = 700,
+    .amp = 0.3,
+    .delay = 1.0,
+    .file_name = NULL,
+    .rec = {.len = 250, .speed1 = 25, .speed2 = 25, .decay = 1.0, .scale = 1.0},
+};
+
+static const struct ArgDef arg_defs[] = {
+    {"-n", "length", 1.0f, 1000.0f, &args.rec.len},
+    {"-s", "scale", 0.1f, 1.0f, &args.rec.scale},
+    {"-d", "decay", 0.0f, 60.0f, &args.rec.decay},
+    {"-1", "speed1", 1.0f, 500.0f, &args.rec.speed1},
+    {"-2", "speed2", 1.0f, 500.0f, &args.rec.speed2},
+    {"-i", "min word", 1.0f, 1000.0f, &args.min_word},
+    {"-x", "max word", 1.0f, 1000.0f, &args.max_word},
+    {"-f", "frequency", 60.0f, 10000.0f, &args.freq},
+    {"-a", "amplitude", 0.0f, 1.0f, &args.amp},
+    {"-w", "delay", 0.0f, 60.0f, &args.delay}};
+
+static const char *usage =
+    "Usage: %s file_name [options]\n\n"
+    "Options:\n"
+    "  -n <num>     number of characters to generate (default: 250)\n"
+    "  -s <scale>   multiply all weights by scale (default 1.0)\n"
+    "  -d <decay>   scale output weights (default: 1.0)\n"
+    "  -1 <speed>   Character speed in WPM (1..500), default 25\n"
+    "  -2 <speed>   Farnsworth in WPM (1..500), default 25\n"
+    "  -i <min>     set minimum word length (default 2)\n"
+    "  -x <max>     set maximum word length (default 7)\n"
+    "  -f <freq>    Tone frequency Hz (60..10000), default 700\n"
+    "  -a <amp>     Amplitude (0..1), default 0.3\n"
+    "  -w <wait>    Initial delay seconds (0..60), default 1\n";
+
+int silence_errors;
 
 static int check_float_range(float val, float min, float max, const char *name)
 {
@@ -80,132 +89,40 @@ static int check_float_range(float val, float min, float max, const char *name)
    return 0;
 }
 
-static int check_int_range(int val, int min, int max, const char *name)
+/**
+ * @brief Check whether a file exists and contains data.
+ *
+ * @param filename Path to the file to check.
+ * @return -1 on error (e.g. NULL filename, I/O failure),
+ *          1 if the file exists and has content,
+ *          0 if the file is missing or empty.
+ */
+static int file_has_content(const char *filename)
 {
-   if (val < min || val > max) {
-      ERROR("error: %s must be between %d and %d\n", name, min, max);
+   if (filename == NULL) {
+      ERROR("no filename given");
       return -1;
    }
-   return 0;
-}
 
-static void handle_error(const char *msg)
-{
-   ERROR("%s\n", msg);
-   exit(-1);
-}
+   FILE *fp = fopen(filename, "rb");
+   if (fp == NULL)
+      return 0; // file missing or inaccessible → treat as no content
 
-static struct parsed_args parse_args(int argc, char **argv)
-{
-   if (argc < 2) {
-      usage(argv[0]);
-      exit(-1);
+   if (fseek(fp, 0, SEEK_END) != 0) {
+      fclose(fp);
+      ERROR("fseek failed on '%s'\n", filename);
+      return -1;
    }
 
-   struct parsed_args args = {.min_word = 2,
-                              .max_word = 7,
-                              .freq = 700.0f,
-                              .amp = 0.3f,
-                              .delay = 1.0f,
-                              .wfile = NULL,
-                              .rec = {
-                                  .valid = 1,
-                                  .decay = 1.0f,
-                                  .scale = 1.0f,
-                                  .speed1 = 25,
-                                  .speed2 = 25,
-                              }};
-
-   // legacy field
-   strcpy(args.rec.charset, "~");
-
-   time_t now = time(NULL);
-   args.rec.datetime = *localtime(&now);
-
-   args.rec.len = atoi(argv[1]);
-   if (check_int_range(args.rec.len, 1, 1024, "frequency") < 0)
-      exit(-1);
-
-   for (int i = 2; i < argc; ++i) {
-      if (!strcmp(argv[i], "-i")) {
-         if (++i >= argc)
-            handle_error("missing value for -i (minimum word length)");
-         args.min_word = atoi(argv[i]);
-         if (check_int_range(args.min_word, 1, 1000, "frequency") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-x")) {
-         if (++i >= argc)
-            handle_error("missing value for -x (maximum word length)");
-         args.max_word = atoi(argv[i]);
-         if (check_int_range(args.max_word, 1, 1000, "frequency") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-w")) {
-         if (++i >= argc)
-            handle_error("missing value for -w (weights file path)");
-         args.wfile = argv[i];
-
-      } else if (!strcmp(argv[i], "-t")) {
-         if (++i >= argc)
-            handle_error("missing value for -t (tone frequency)");
-         args.freq = strtof(argv[i], NULL);
-         if (check_float_range(args.freq, 60.0f, 10000.0f, "frequency") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-a")) {
-         if (++i >= argc)
-            handle_error("missing value for -a (amplitude)");
-         args.amp = strtof(argv[i], NULL);
-         if (check_float_range(args.amp, 0.0f, 1.0f, "amplitude") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-1")) {
-         if (++i >= argc)
-            handle_error("missing value for -1 (speed1)");
-         args.rec.speed1 = atoi(argv[i]);
-         if (check_float_range(args.rec.speed1, 1.0f, 500.0f, "speed1") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-2")) {
-         if (++i >= argc)
-            handle_error("missing value for -2 (speed2)");
-         args.rec.speed2 = atoi(argv[i]);
-         if (check_float_range(args.rec.speed2, 1.0f, 500.0f, "speed2") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-s")) {
-         if (++i >= argc)
-            handle_error("missing value for -s (scale)");
-         args.rec.scale = strtof(argv[i], NULL);
-         if (check_float_range(args.rec.scale, 0.1f, 1.0f, "scale") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-n")) {
-         if (++i >= argc)
-            handle_error("missing value for -n (delay)");
-         args.delay = strtof(argv[i], NULL);
-         if (check_float_range(args.delay, 0.0f, 60.0f, "delay") < 0)
-            exit(-1);
-
-      } else if (!strcmp(argv[i], "-d")) {
-         if (++i >= argc)
-            handle_error("missing value for -n (decay)");
-         args.rec.decay = strtof(argv[i], NULL);
-         if (check_float_range(args.rec.decay, 0.0f, 60.0f, "decay") < 0)
-            exit(-1);
-
-      } else {
-         ERROR("unrecognized option: %s\n", argv[i]);
-         usage(argv[0]);
-         exit(-1);
-      }
+   long size = ftell(fp);
+   if (size == -1L) {
+      fclose(fp);
+      ERROR("ftell failed on '%s'\n", filename);
+      return -1;
    }
 
-   if (args.rec.speed1 < args.rec.speed2)
-      handle_error("speed1 must be equal or greater than speed2");
-
-   return args;
+   fclose(fp);
+   return (size > 0) ? 1 : 0;
 }
 
 static int ask_yes_no(const char *prompt)
@@ -231,7 +148,7 @@ static int ask_yes_no(const char *prompt)
 
       // Check for valid input (case-insensitive)
       // Use manual lowercase conversion for portability
-      for (char *p = buf; *p; ++p) {
+      for (char *p = buf; *p; p++) {
          if (*p >= 'A' && *p <= 'Z') {
             *p = *p - 'A' + 'a';
          }
@@ -248,59 +165,82 @@ static int ask_yes_no(const char *prompt)
    }
 }
 
-static int file_is_empty(const char *filename)
+static int parse_args(int argc, char **argv)
 {
-   FILE *fp = fopen(filename, "rb");
-   if (fp == NULL) {
-      ERROR("failed to open file '%s'\n", filename);
-      return -1;
+   // mandatory positional filename argument
+   if (argc < 2) {
+      fprintf(stderr, usage, argv[0]);
+      exit(-1);
+   }
+   args.file_name = argv[1];
+
+   // read values from file, if it has any content
+   if (file_has_content(args.file_name)) {
+      args.rec = record_load_last(args.file_name);
+      if (!args.rec.valid) {
+         ERROR("invalid record obtained from %s", args.file_name);
+         return -1;
+      }
+
+      for (int i = 0; i < MAX_CHARSET_LEN; i++) {
+         args.rec.weights[i] *= args.rec.scale;
+      }
+
+      const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
+      args.rec.speed2 *= (1.0f - PID_K * (err_pct / 100.0f - TARGET_ACCURACY));
    }
 
-   if (fseek(fp, 0, SEEK_END) != 0) {
-      ERROR("fseek failed on '%s'\n", filename);
-      fclose(fp);
-      return -1;
+   // fixed fields
+   strcpy(args.rec.charset, "~");
+   time_t now = time(NULL);
+   args.rec.datetime = *localtime(&now);
+
+   // optional flagged arguments
+   for (int i = 2; i < argc; i++) {
+      const char *arg = argv[i];
+      const struct ArgDef *def = NULL;
+
+      // every optional argument needs a value
+      if (i++ >= argc) {
+         ERROR("missing value for argument %s\n", arg);
+         exit(-1);
+      }
+
+      // find the flag in arg_defs
+      const size_t num_args = sizeof(arg_defs) / sizeof(arg_defs[0]);
+      for (size_t j = 0; j < num_args; j++) {
+         if (strcmp(arg, arg_defs[j].flag) == 0) {
+            def = &arg_defs[j];
+            break;
+         }
+      }
+
+      // flag found?
+      if (def == NULL) {
+         ERROR("unrecognized option: %s\n", arg);
+         fprintf(stderr, usage, argv[0]);
+         exit(-1);
+      }
+
+      // set argument value
+      const float val = strtof(argv[i], NULL);
+      *(float *)def->target = val;
+      if (check_float_range(val, def->min_val, def->max_val, def->name) < 0)
+         exit(-1);
    }
 
-   long size = ftell(fp);
-   if (size == -1L) {
-      ERROR("ftell failed on '%s'\n", filename);
-      fclose(fp);
-      return -1;
+   if (args.rec.speed1 < args.rec.speed2) {
+      ERROR("speed1 must be equal or greater than speed2\n");
+      exit(-1);
    }
 
-   fclose(fp);
-   return (size == 0) ? 1 : 0;
-}
-
-static int prepare_record(struct parsed_args *args, const int len)
-{
-   if (!args->wfile || file_is_empty(args->wfile) != 0) {
-      args->rec.len = len;
-      return 0;
-   }
-
-   args->rec = record_load_last(args->wfile);
-   if (!args->rec.valid) {
-      ERROR("invalid record obtained from %s", args->wfile);
-      return -1;
-   }
-
-   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
-      args->rec.weights[i] *= args->rec.scale;
-   }
-
-   const float err_pct = 100.0f * (float)args->rec.dist / (float)args->rec.len;
-   printf("Previous accuracy = %.1f%%\n", err_pct);
-   args->rec.speed2 *= (1.0f - PID_K * (err_pct / 100.0f - TARGET_ACCURACY));
-
-   args->rec.len = len;
+   args.rec.valid = 1;
    return 0;
 }
 
-static char *alloc_and_generate(struct parsed_args *args)
+static char *alloc_and_generate(void)
 {
-   const int len = args->rec.len + 2;
+   const int len = args.rec.len + 2;
 
    char *buf = malloc(len);
    if (!buf) {
@@ -308,10 +248,11 @@ static char *alloc_and_generate(struct parsed_args *args)
       return NULL;
    }
 
-   if (!args->wfile || file_is_empty(args->wfile) != 0)
-      memset(args->rec.weights, 1, sizeof(args->rec.weights));
+   if (!file_has_content(args.file_name))
+      for (int i = 0; i < MAX_CHARSET_LEN; i++)
+         args.rec.weights[i] = 1;
 
-   if (gen_chars(buf, len, args->min_word, args->max_word, args->rec.weights,
+   if (gen_chars(buf, len, args.min_word, args.max_word, args.rec.weights,
                  NULL) != 0) {
       ERROR("gen_chars() failed");
       free(buf);
@@ -366,18 +307,16 @@ static char *get_user_input(size_t maxlen)
 int main(int argc, char **argv)
 {
    // Parse command line arguments
-   struct parsed_args args = parse_args(argc, argv);
-
-   // Read weights and settings, if file given
-   if (prepare_record(&args, args.rec.len) < 0)
+   if (parse_args(argc, argv) < 0)
       return -1;
 
-   // Prepare record and generate text buffer
-   char *gen_buf = alloc_and_generate(&args);
+   // Generate random characters
+   char *gen_buf = alloc_and_generate();
    if (!gen_buf)
       return -1;
 
-   printf("Using speed %.1f/%.1f wpm\r\n", args.rec.speed1, args.rec.speed2);
+   printf("Sending %.0f characters at %.1f/%.1f wpm\r\n", args.rec.len,
+          args.rec.speed1, args.rec.speed2);
    printf("Received text? ");
    fflush(stdout);
 
@@ -389,31 +328,33 @@ int main(int argc, char **argv)
       return -1;
    }
 
-   // Read user input, compare and calculate accuracy
+   // Read user input
    char *user_buf = get_user_input(args.rec.len + 1);
    if (user_buf == NULL) {
       free(gen_buf);
       return -1;
    }
 
+   // Compare and calculate accuracy
    struct record r0 = {0};
    args.rec.dist = lev_diff(&r0, gen_buf, user_buf);
    free(user_buf);
 
+   // Printout stats
    printf("Expected text: %s\n", gen_buf);
    const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
    record_printout(&r0);
-   printf("%d errors out of %d = %.1f%%\n", args.rec.dist, args.rec.len,
+   printf("%.0f errors out of %.0f = %.1f%%\n", args.rec.dist, args.rec.len,
           err_pct);
    free(gen_buf);
 
    // Save updated weights, if file given
-   if (args.wfile && ask_yes_no("Record this to the given weights file?")) {
+   if (ask_yes_no("Record this to the given weights file?")) {
       for (int i = 0; i < MAX_CHARSET_LEN; i++)
          args.rec.weights[i] += r0.weights[i];
 
-      if (record_append(args.wfile, &args.rec) != 0) {
-         ERROR("writing record to file: %s", args.wfile);
+      if (record_append(args.file_name, &args.rec) != 0) {
+         ERROR("writing record to file: %s", args.file_name);
          return -1;
       }
    }

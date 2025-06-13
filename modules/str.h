@@ -113,11 +113,7 @@ char *str_ptime(const char *s, const char *format, struct tm *tm);
 void str_to_lower(char *s);
 
 /**
- * @brief Trim trailing whitespace from a string in place.
- *
- * Removes all trailing whitespace characters (spaces, tabs, newlines, etc.)
- * from the null-terminated string @p s by replacing them with the null
- * terminator. Leading whitespace is not affected.
+ * @brief Trim whitespace from a string in place.
  *
  * @param s Pointer to a null-terminated string to be trimmed.
  *          If @c NULL, the function does nothing.

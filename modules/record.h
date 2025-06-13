@@ -18,8 +18,8 @@ struct record {
    float scale;
    float speed1;
    float speed2;
-   int dist;
-   int len;
+   float dist;
+   float len;
    char charset[MAX_CHARSET_LEN];
    float weights[MAX_CHARSET_LEN];
 };

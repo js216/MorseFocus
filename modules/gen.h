@@ -11,6 +11,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#define GEN_MAX 100000
+
 struct WordEntry {
    char *word;
    float weight;

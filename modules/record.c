@@ -67,9 +67,9 @@ struct record record_load_last(const char *filename)
       return rec;
    }
 
-   // parse 4 floats: decay, scale, speed1, speed2
-   char *floats[4];
-   for (int i = 0; i < 4; ++i) {
+   // parse 6 floats: decay, scale, speed1, speed2, len, dist
+   char *floats[6];
+   for (int i = 0; i < 6; ++i) {
       floats[i] = str_tok(NULL, " \t\n", &saveptr);
       if (!floats[i]) {
          ERROR("missing float field #%d", i + 1);
@@ -81,19 +81,8 @@ struct record record_load_last(const char *filename)
    rec.scale = strtof(floats[1], NULL);
    rec.speed1 = strtof(floats[2], NULL);
    rec.speed2 = strtof(floats[3], NULL);
-
-   // parse 2 ints: len, dist
-   char *ints[2];
-   for (int i = 0; i < 2; ++i) {
-      ints[i] = str_tok(NULL, " \t\n", &saveptr);
-      if (!ints[i]) {
-         ERROR("missing int field #%d", i + 1);
-         return rec;
-      }
-   }
-
-   rec.dist = strtof(ints[0], NULL);
-   rec.len = strtof(ints[1], NULL);
+   rec.dist = strtof(floats[4], NULL);
+   rec.len = strtof(floats[5], NULL);
 
    // parse charset
    char *charset_str = str_tok(NULL, " \t\n", &saveptr);
@@ -133,6 +122,13 @@ struct record record_load_last(const char *filename)
    return rec;
 }
 
+static int is_int(const float f)
+{
+   if (fabsf(f) < 1e-30)
+      return 1;
+   return f == truncf(f);
+}
+
 int record_append(const char *path, const struct record *r)
 {
    // check record is valid
@@ -159,7 +155,7 @@ int record_append(const char *path, const struct record *r)
 
    // write fixed fields
    int num_pr =
-       fprintf(fp, "%s %.3f %.3f %.1f %.1f %d %d %s", timestr, r->decay,
+       fprintf(fp, "%s %.3f %.3f %.1f %.1f %.0f %.0f %s", timestr, r->decay,
                r->scale, r->speed1, r->speed2, r->dist, r->len, r->charset);
    if (num_pr < 0) {
       ERROR("cannot write to file");
@@ -169,9 +165,9 @@ int record_append(const char *path, const struct record *r)
 
    // write weights
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
-      const double w = r->weights[i] * r->decay;
+      const float w = r->weights[i] * r->decay;
       int ret = -1;
-      if (w == truncf(w))
+      if (is_int(w))
          ret = fprintf(fp, " %.0f", w);
       else
          ret = fprintf(fp, " %.3f", w);

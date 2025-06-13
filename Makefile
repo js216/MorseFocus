@@ -4,7 +4,7 @@ SCAN = scan-build-14
 
 INCLUDE = -Imodules -Ilib
 CFLAGS = -std=c99 -Wall -Wextra -Werror -pedantic -fanalyzer -MMD -MP $(INCLUDE)
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -MMD -MP $(INCLUDE)
+CFLAGS_LIBS = -std=c99 -Wall -Wextra -pedantic -MMD -MP $(INCLUDE)
 LDFLAGS = -lm
 
 lib = miniaudio
@@ -31,7 +31,7 @@ build/%.o: tools/%.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
 build/%: build/%.o $(lib_objs) $(module_objs) build/run_tests
-	$(CC) $(filter-out build/run_tests, $^) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(filter-out build/run_tests, $^) -o $@ $(LDFLAGS)
 
 # Test files
 

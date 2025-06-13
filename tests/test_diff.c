@@ -11,7 +11,7 @@
 #include "str.h"
 #include <math.h>
 
-#define TEST_DIFF_NUM 5
+#define TEST_DIFF_NUM 6
 
 struct test_diff_case {
    const char *s1;
@@ -73,6 +73,12 @@ static struct test_diff_case get_diff_test_case(const int i)
       tc.expected_distance = 1;
       tc.w_exp[str_char_to_int('a')] = 1.0f;
       tc.w_exp[str_char_to_int('b')] = 1.0f;
+   }
+
+   else if (i == 5) {
+      tc.s1 = "cn";
+      tc.s2 = "cn";
+      tc.expected_distance = 0;
    }
 
    else {
