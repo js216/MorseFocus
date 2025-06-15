@@ -14,7 +14,6 @@
 struct record {
    int valid;
    struct tm datetime;
-   float decay;
    float scale;
    float speed1;
    float speed2;
@@ -29,7 +28,7 @@ struct record {
  *
  * The file must contain lines in the following format:
  * @verbatim
- * YYYY-MM-DD HH:MM:SS decay scale speed1 speed2 charset w1 w2 w3 ...
+ * YYYY-MM-DD HH:MM:SS scale speed1 speed2 charset w1 w2 w3 ...
  * @endverbatim
  *
  * - `charset` must be a single contiguous string (no spaces), with a length
@@ -50,7 +49,7 @@ struct record record_load_last(const char *filename);
 /**
  * @brief Appends a record to the given file in text format.
  *
- * Format: YYYY-MM-DD HH:MM:SS decay scale speed1 speed2 charset w1 ...
+ * Format: YYYY-MM-DD HH:MM:SS scale speed1 speed2 charset w1 ...
  *
  * @param path Path to the output file.
  * @param r Pointer to the record to write.
@@ -63,6 +62,17 @@ int record_append(const char *path, const struct record *r);
  * @param r Record to print.
  */
 void record_printout(const struct record *r);
+
+/**
+ * @brief Apply scale function to weights.
+ *
+ * The function is nonlinear, such that larger weights get scaled more. The
+ * scale factor, as well as the weights, are obtained from the record.
+ *
+ * @param r Pointer to the record to write.
+ * @return 0 on success, -1 on failure.
+ */
+int record_scale_weights(struct record *r);
 
 #endif // RECORD_H
 

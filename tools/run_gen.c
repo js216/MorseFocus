@@ -8,19 +8,6 @@
  * customizable set, and their frequency can be weighted using a file of
  * floating-point values.
  *
- * Usage:
- *
- *    run_gen NUM_CHAR [options]
- *
- * Options:
- *
- *   -i MIN      set minimum word length (default: 2)
- *   -x MAX      set maximum word length (default: 7)
- *   -w FILE     load character weights from the last line of FILE
- *   -c CHARS    specify a custom character set (printable, no spaces)
- *   -o FILE     write output to FILE instead of printing to standard output
- *   -s SCALE    multiply all weights by scale factor (default 1.0)
- *
  * @author Jakob Kastelic
  */
 

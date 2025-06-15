@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "record.h"
 #include "str.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,10 +24,10 @@ int test_record_load_last(const char *test_file)
       return -1;
    }
 
-   fprintf(fp, "2025-05-28 12:00:00 1.0 1.0 0.0 0.0 3 1 abc 0.1 0.2 0.3\n");
-   fprintf(fp, "2025-05-29 13:15:30 2.0 2.5 1.0 1.0 3 2 xyz 0.5 0.6 0.7\n");
+   fprintf(fp, "2025-05-28 12:00:00 0.1 0.0 0.0 3 1 abc 0.1 0.2 0.3\n");
+   fprintf(fp, "2025-05-29 13:15:30 0.2 1.0 1.0 3 2 xyz 0.5 0.6 0.7\n");
    fprintf(fp,
-           "2025-05-30 19:39:10 1.0 2.0 3.0 4.0 3 300 abcd~!@#$ 0 1 2 3 4 "
+           "2025-05-30 19:39:10 1.0 3.0 4.0 3 300 abcd~!@#$ 0 1 2 3 4 "
            "5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 "
            "29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49\n");
 
@@ -50,9 +51,18 @@ int test_record_load_last(const char *test_file)
       return -1;
    }
 
-   if ((r.decay != 1.0) || (r.scale != 2.0) || (r.speed1 != 3.0) ||
-       (r.speed2 != 4.0)) {
-      TEST_FAIL("wrong decay/scale/speed1/speed2");
+   if (r.scale != 1.0) {
+      TEST_FAIL("wrong scale %f", r.scale);
+      return -1;
+   }
+
+   if (r.speed1 != 3.0) {
+      TEST_FAIL("wrong speed1 %f", r.speed1);
+      return -1;
+   }
+
+   if (r.speed2 != 4.0) {
+      TEST_FAIL("wrong speed2 %f", r.speed2);
       return -1;
    }
 
@@ -87,8 +97,7 @@ int test_record_append(const char *test_file)
    // fill in known values
    str_ptime("2025-05-31 12:34:56", "%Y-%m-%d %H:%M:%S", &r.datetime);
    r.valid = 1;
-   r.decay = 1.0f;
-   r.scale = 2.0f;
+   r.scale = 0.2f;
    r.speed1 = 3.0f;
    r.speed2 = 4.0f;
    r.dist = 5;
@@ -117,7 +126,7 @@ int test_record_append(const char *test_file)
    fclose(fp);
 
    // check beginning of the line
-   const char *exp_line = "2025-05-31 12:34:56 1.000 2.000 3.0 4.0 5 6 abc";
+   const char *exp_line = "2025-05-31 12:34:56 0.200 3.0 4.0 5 6 abc";
    if (strncmp(line, exp_line, strlen(exp_line)) != 0) {
       TEST_FAIL("fixed fields mismatch");
       return -1;

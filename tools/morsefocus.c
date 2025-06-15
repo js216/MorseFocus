@@ -49,13 +49,12 @@ static struct ParsedArgs args = {
     .amp = 0.3,
     .delay = 1.0,
     .file_name = NULL,
-    .rec = {.len = 250, .speed1 = 25, .speed2 = 25, .decay = 1.0, .scale = 1.0},
+    .rec = {.len = 250, .speed1 = 25, .speed2 = 25, .scale = 1.0},
 };
 
 static const struct ArgDef arg_defs[] = {
     {"-n", "length", 1.0f, 1000.0f, &args.rec.len},
-    {"-s", "scale", 0.1f, 1.0f, &args.rec.scale},
-    {"-d", "decay", 0.0f, 60.0f, &args.rec.decay},
+    {"-s", "scale", 0.001f, 1.0f, &args.rec.scale},
     {"-1", "speed1", 1.0f, 500.0f, &args.rec.speed1},
     {"-2", "speed2", 1.0f, 500.0f, &args.rec.speed2},
     {"-i", "min word", 1.0f, 1000.0f, &args.min_word},
@@ -68,8 +67,7 @@ static const char *usage =
     "Usage: %s file_name [options]\n\n"
     "Options:\n"
     "  -n <num>     number of characters to generate (default: 250)\n"
-    "  -s <scale>   multiply all weights by scale (default 1.0)\n"
-    "  -d <decay>   scale output weights (default: 1.0)\n"
+    "  -d <scale>   scale weights (default: 1.0)\n"
     "  -1 <speed>   Character speed in WPM (1..500), default 25\n"
     "  -2 <speed>   Farnsworth in WPM (1..500), default 25\n"
     "  -i <min>     set minimum word length (default 2)\n"
@@ -182,10 +180,6 @@ static int parse_args(int argc, char **argv)
          return -1;
       }
 
-      for (int i = 0; i < MAX_CHARSET_LEN; i++) {
-         args.rec.weights[i] *= args.rec.scale;
-      }
-
       const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
       args.rec.speed2 *= (1.0f - PID_K * (err_pct / 100.0f - TARGET_ACCURACY));
    }
@@ -233,6 +227,9 @@ static int parse_args(int argc, char **argv)
       ERROR("speed1 must be equal or greater than speed2\n");
       exit(-1);
    }
+
+   if (record_scale_weights(&args.rec) < 0)
+      return -1;
 
    args.rec.valid = 1;
    return 0;

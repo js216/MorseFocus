@@ -67,9 +67,9 @@ struct record record_load_last(const char *filename)
       return rec;
    }
 
-   // parse 6 floats: decay, scale, speed1, speed2, len, dist
-   char *floats[6];
-   for (int i = 0; i < 6; ++i) {
+   // parse 5 floats: scale, speed1, speed2, len, dist
+   char *floats[5];
+   for (int i = 0; i < 5; ++i) {
       floats[i] = str_tok(NULL, " \t\n", &saveptr);
       if (!floats[i]) {
          ERROR("missing float field #%d", i + 1);
@@ -77,12 +77,11 @@ struct record record_load_last(const char *filename)
       }
    }
 
-   rec.decay = strtof(floats[0], NULL);
-   rec.scale = strtof(floats[1], NULL);
-   rec.speed1 = strtof(floats[2], NULL);
-   rec.speed2 = strtof(floats[3], NULL);
-   rec.dist = strtof(floats[4], NULL);
-   rec.len = strtof(floats[5], NULL);
+   rec.scale = strtof(floats[0], NULL);
+   rec.speed1 = strtof(floats[1], NULL);
+   rec.speed2 = strtof(floats[2], NULL);
+   rec.dist = strtof(floats[3], NULL);
+   rec.len = strtof(floats[4], NULL);
 
    // parse charset
    char *charset_str = str_tok(NULL, " \t\n", &saveptr);
@@ -154,9 +153,8 @@ int record_append(const char *path, const struct record *r)
    }
 
    // write fixed fields
-   int num_pr =
-       fprintf(fp, "%s %.3f %.3f %.1f %.1f %.0f %.0f %s", timestr, r->decay,
-               r->scale, r->speed1, r->speed2, r->dist, r->len, r->charset);
+   int num_pr = fprintf(fp, "%s %.3f %.1f %.1f %.0f %.0f %s", timestr, r->scale,
+                        r->speed1, r->speed2, r->dist, r->len, r->charset);
    if (num_pr < 0) {
       ERROR("cannot write to file");
       fclose(fp);
@@ -165,12 +163,11 @@ int record_append(const char *path, const struct record *r)
 
    // write weights
    for (int i = 0; i < MAX_CHARSET_LEN; ++i) {
-      const float w = r->weights[i] * r->decay;
       int ret = -1;
-      if (is_int(w))
-         ret = fprintf(fp, " %.0f", w);
+      if (is_int(r->weights[i]))
+         ret = fprintf(fp, " %.0f", r->weights[i]);
       else
-         ret = fprintf(fp, " %.3f", w);
+         ret = fprintf(fp, " %.3f", r->weights[i]);
       if (ret < 0) {
          ERROR("cannot write weights");
          fclose(fp);
@@ -219,6 +216,28 @@ void record_printout(const struct record *r)
             printf("'%c' : %.3f\n", ch, r->weights[i]);
       }
    }
+}
+
+int record_scale_weights(struct record *r)
+{
+   if (r == NULL) {
+      ERROR("record does not exist");
+      return -1;
+   }
+
+   if ((r->scale <= 0.01f) || (r->scale > 1.0f)) {
+      ERROR("scale %.3e out of range", r->scale);
+      return -1;
+   }
+
+   for (int i = 0; i < MAX_CHARSET_LEN; i++) {
+      if (r->weights[i] < 0)
+         r->weights[i] = 0;
+      else
+         r->weights[i] = powf(r->weights[i], r->scale);
+   }
+
+   return 0;
 }
 
 // end file record.c

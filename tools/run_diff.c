@@ -7,25 +7,6 @@
  * difference with previously stored weights. It optionally writes the result to
  * a file.
  *
- * Usage:
- *
- *    run_diff F1 F2 [options]
- *
- * Positional Arguments:
- *
- *   F1 path to first input text file
- *   F2 path to second input text file
- *
- * Optional Flags:
- *
- *   -w F3      path to file containing stored weights (default: none)
- *   -d DECAY   floating-point decay factor (default: 1.0)
- *   -o F4      append the resulting weights to file f4 (default: print only)
- *   -s SCALE   to record to file (default: 0)
- *   -1 FIRST   speed to record to file (default: 0)
- *   -2 SECOND  speed to record to file (default: 0)
- *   -c CHARSET to record to file (default: "~")
- *
  * @author Jakob Kastelic
  */
 
@@ -50,9 +31,8 @@ static void print_usage(const char *prog)
            "Usage: %s f1 f2 [options]\n"
            "Options:\n"
            "  -w file    load weights from file\n"
-           "  -d decay   scale output weights (default: 1.0)\n"
+           "  -d scale   scale factor for weights (default: 1.0)\n"
            "  -o file    append output weights to file\n"
-           "  -s scale   scale to record to file (default: 0)\n"
            "  -1 speed1  first speed to record to file (default: 0)\n"
            "  -2 speed2  second speed to record to file (default: 0)\n"
            "  -c charset charset to record to file (default: \"~\")\n",
@@ -70,10 +50,9 @@ int main(int argc, char *argv[])
    const char *file2 = argv[2];
    const char *wfile = NULL;
    const char *ofile = NULL;
-   float decay = 1.0f;
+   float scale = 1.0f;
 
    // optional data to store in the file
-   float scale = 1.000;
    float speed1 = 0.0;
    float speed2 = 0.0;
    char *charset = "~";
@@ -83,11 +62,9 @@ int main(int argc, char *argv[])
       if (strcmp(argv[i], "-w") == 0 && i + 1 < argc) {
          wfile = argv[++i];
       } else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
-         decay = strtof(argv[++i], NULL);
+         scale = strtof(argv[++i], NULL);
       } else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
          ofile = argv[++i];
-      } else if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
-         scale = strtof(argv[++i], NULL);
       } else if (strcmp(argv[i], "-1") == 0 && i + 1 < argc) {
          speed1 = strtof(argv[++i], NULL);
       } else if (strcmp(argv[i], "-2") == 0 && i + 1 < argc) {
@@ -148,7 +125,6 @@ int main(int argc, char *argv[])
       r.datetime = *localtime(&now);
       r.len = len1;
       r.dist = dist;
-      r.decay = decay;
       r.scale = scale;
       r.speed1 = speed1;
       r.speed2 = speed2;
