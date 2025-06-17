@@ -283,6 +283,10 @@ int str_file_lines(const char *filename)
    if (lines > 0) {
       if (fseek(f, -1, SEEK_END) != 0) {
          ERROR("fseek failed");
+         if (fclose(f) != 0) {
+            ERROR("failed to close file");
+            return -1;
+         }
          return -1;
       }
 
