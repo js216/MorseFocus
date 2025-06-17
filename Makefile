@@ -8,9 +8,9 @@ CFLAGS_LIBS = -std=c99 -Wall -Wextra -pedantic -MMD -MP $(INCLUDE)
 LDFLAGS = -lm
 
 lib = miniaudio
-modules = diff str gen record cw
+modules = diff str gen record cw xorshift32
 tests = test_diff test_str test_gen test_record test_cw
-tools = run_diff run_gen run_words run_cw morsefocus
+tools = morsefocus
 
 lib_objs = $(addprefix build/, $(addsuffix .o, $(lib)))
 module_objs  = $(addprefix build/, $(addsuffix .o, $(modules)))

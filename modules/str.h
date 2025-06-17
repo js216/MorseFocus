@@ -87,18 +87,13 @@ char str_int_to_char(const int i);
 char *str_tok(char *str, const char *delim, char **saveptr);
 
 /**
- * @brief Simple portable fallback for strptime for format "%Y-%m-%d %H:%M:%S".
+ * @brief Parse a datetime string in the format "YYYY-MM-DD HH:MM:SS".
  *
- * Parses a datetime string like "2025-05-31 12:34:56" into a struct tm.
- *
- * @param s Input datetime string.
- * @param format Expected format string (must be exactly "%Y-%m-%d %H:%M:%S").
- * @param tm Pointer to struct tm to fill.
- *
- * @return Pointer to the character after the parsed part on success, or NULL on
- * failure.
+ * @param tm Pointer to `struct tm` to populate.
+ * @param s Null-terminated input string.
+ * @return 0 on success, -1 on failure.
  */
-char *str_ptime(const char *s, const char *format, struct tm *tm);
+int parse_datetime(struct tm *tm, const char *s);
 
 /**
  * @brief Convert a string to lowercase in place.

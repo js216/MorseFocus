@@ -5,16 +5,10 @@
  * @author Jakob Kastelic
  */
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#define _POSIX_C_SOURCE 199309L
-#include <unistd.h>
-#endif
-
 #include "cw.h"
 #include "debug.h"
 #include "miniaudio.h"
+#include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,26 +20,13 @@
 #define INITIAL_SILENCE 250
 #define FADE_LEN 100
 
-struct cw_data {
-   const char *morse; // pointer to expanded Morse code string
-   int pos;           // current character position in Morse string
+#define INTER_GAP 1
+#define CHAR_GAP 3
+#define DIT_DUR 1
+#define DAH_DUR 3
+#define WORD_BREAK 7
 
-   int tone_samples; // number of samples left in current tone
-   int tone_len;     // duration of current tone in samples
-   int gap_samples;  // number of samples left in current gap
-
-   int dot_len;   // duration of a dot in samples
-   int intra_gap; // duration of intra-character gap in samples
-   int inter_gap; // duration of inter-character/word gap in samples
-
-   float freq;  // tone frequency in Hz
-   float amp;   // tone amplitude from 0 to 1
-   float delay; // initial delay
-
-   unsigned long long total_samples; // total number of samples played
-};
-
-static const char *morse_table[128] = {
+static const char *const morse_table[] = {
     ['A'] = ".-",      ['B'] = "-...",   ['C'] = "-.-.",   ['D'] = "-..",
     ['E'] = ".",       ['F'] = "..-.",   ['G'] = "--.",    ['H'] = "....",
     ['I'] = "..",      ['J'] = ".---",   ['K'] = "-.-",    ['L'] = ".-..",
@@ -64,18 +45,6 @@ static const char *morse_table[128] = {
     ['+'] = ".-.-.",   ['-'] = "-....-", ['_'] = "..--.-", ['"'] = ".-..-.",
     ['$'] = "...-..-", ['@'] = ".--.-."};
 
-static void sleep_ms(unsigned int ms)
-{
-#ifdef _WIN32
-   Sleep(ms);
-#else
-   struct timespec ts;
-   ts.tv_sec = ms / 1000;
-   ts.tv_nsec = (ms % 1000) * 1000000L;
-   nanosleep(&ts, NULL);
-#endif
-}
-
 void ascii_to_morse_expanded(const char *in, char *out)
 {
    size_t pos = 0;
@@ -93,11 +62,10 @@ void ascii_to_morse_expanded(const char *in, char *out)
          continue;
       }
 
-      if (c >= 'a' && c <= 'z') {
-         c -= 32;
-      }
+      c = toupper((unsigned char)c);
 
-      const char *mc = (c < 128) ? morse_table[c] : NULL;
+      const int tbl_size = sizeof(morse_table) / sizeof(morse_table[0]);
+      const char *mc = (c < tbl_size) ? morse_table[c] : NULL;
       if (!mc) {
          in++;
          continue;
@@ -126,19 +94,19 @@ int count_units(const char *morse)
       case '.':
          units += 1;
          if (p[1] == '.' || p[1] == '-')
-            units += 1; // intra-char gap
+            units += INTER_GAP;
          break;
       case '-':
-         units += 3;
+         units += DAH_DUR;
          if (p[1] == '.' || p[1] == '-')
-            units += 1;
+            units += INTER_GAP;
          break;
       case '|':
-         units += 3; // char gap
+         units += CHAR_GAP;
          break;
       case '/':
          if (p[1] != '\0')
-            units += 7; // only if not final
+            units += WORD_BREAK;
          break;
       }
       p++;
@@ -175,6 +143,8 @@ static void start_symbol_tone(struct cw_data *cw, char sym)
    cw->tone_len = cw->tone_samples;
 }
 
+// Callback from miniaudio.h library, cannot change prototype:
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
                           ma_uint32 frameCount)
 {
@@ -184,20 +154,20 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
 
    static int initial = -1;
    if (initial == -1) {
-      initial = cw->delay;
+      initial = cw->delay_frames;
    } else if (initial > 0) {
       initial--;
       memset(out, 0, sizeof(float) * 2 * frameCount);
       return;
    }
 
-   for (ma_uint32 i = 0; i < frameCount; i++) {
-      float sample = 0.0f;
+   for (size_t i = 0; i < frameCount; i++) {
+      float sample = 0.0F;
 
       if (cw->tone_samples > 0) {
          unsigned long long tone_played =
              cw->tone_len - cw->tone_samples; // samples played in current tone
-         float fade_factor = 1.0f;
+         float fade_factor = 1.0F;
 
          // Fade-in over first FADE_LEN samples
          if (tone_played < FADE_LEN) {
@@ -211,23 +181,23 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
          const float sr = (float)pDevice->sampleRate;
          const float r = (float)(cw->total_samples % pDevice->sampleRate) / sr;
          sample =
-             fade_factor * cw->amp * sinf(2.0f * (float)M_PI * cw->freq * r);
+             fade_factor * cw->amp * sinf(2.0F * (float)M_PI * cw->freq * r);
 
          cw->tone_samples--;
       }
 
       // when waiting in silence
       else if (cw->gap_samples > 0) {
-         sample = 0.0f;
+         sample = 0.0F;
          cw->gap_samples--;
       }
 
       else if (cw->morse[cw->pos]) {
          char sym = cw->morse[cw->pos++];
          start_symbol_tone(cw, sym);
-         sample = 0.0f;
+         sample = 0.0F;
       } else {
-         sample = 0.0f;
+         sample = 0.0F;
       }
 
       out[i * 2] = sample;
@@ -236,94 +206,124 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
    }
 }
 
-int cw_play(const char *str, const float speed1, const float speed2,
-            const float freq, const float amp, const float delay)
+static int setup_audio_device(struct cw_data *cw, ma_device *dev)
 {
-   if (!str || speed1 <= 0 || speed2 <= 0 || freq <= 0 || amp <= 0) {
+   ma_device_config cfg = ma_device_config_init(ma_device_type_playback);
+   cfg.playback.format = ma_format_f32;
+   cfg.playback.channels = 2;
+   cfg.sampleRate = 48000;
+   cfg.periodSizeInFrames = 64;
+   cfg.periods = 1;
+   cfg.dataCallback = data_callback;
+
+   const float sr = (float)cfg.sampleRate;
+   const float ratio = sr / (float)cfg.periodSizeInFrames;
+
+   // Calculate delay_frames if not set yet (optional)
+   if (cw->delay_frames == 0 && cw->delay_sec > 0.0F) {
+      cw->delay_frames = (int)(cw->delay_sec * ratio);
+   }
+
+   float dot_dur = 60.0F / (50.0F * cw->speed1);
+   float gap_dur = 60.0F / (50.0F * cw->speed2);
+
+   cw->dot_len = (int)(dot_dur * sr);
+   cw->intra_gap = cw->dot_len;
+   cw->inter_gap = (int)(gap_dur * sr);
+
+   cfg.pUserData = cw;
+
+   if (ma_device_init(NULL, &cfg, dev) != MA_SUCCESS)
+      return -1;
+
+   if (ma_device_start(dev) != MA_SUCCESS) {
+      ma_device_uninit(dev);
+      return -1;
+   }
+
+   return (int)cfg.sampleRate;
+}
+
+static char *prepare_morse(const char *str)
+{
+   char *morse = malloc(strlen(str) * 10 + 1);
+   if (!morse) {
+      ERROR("out of memory");
+      return NULL;
+   }
+
+   ascii_to_morse_expanded(str, morse);
+   return morse;
+}
+
+static int wait_for_playback_to_finish(struct cw_data *cw)
+{
+   while (cw->morse[cw->pos] || cw->tone_samples > 0 || cw->gap_samples > 0) {
+      ma_sleep(10);
+   }
+
+   return 0;
+}
+
+int cw_play(const char *str, struct cw_data *cw)
+{
+   if (!str || !cw) {
       ERROR("invalid parameters given");
       return -1;
    }
 
-   if (speed1 < speed2) {
+   if (cw->speed1 <= 0 || cw->speed2 <= 0 || cw->freq <= 0 || cw->amp <= 0) {
+      ERROR("invalid parameters given");
+      return -1;
+   }
+
+   if (cw->speed1 < cw->speed2) {
       ERROR("speed1 must be equal or greater than speed2");
       return -1;
    }
 
-   char *morse = malloc(strlen(str) * 10 + 1);
+   char *morse = prepare_morse(str);
    if (!morse) {
-      ERROR("out of memory");
       return -1;
    }
-
-   ascii_to_morse_expanded(str, morse);
-
-   ma_device_config cfg = ma_device_config_init(ma_device_type_playback);
-   cfg.playback.format = ma_format_f32;
-   cfg.playback.channels = 2;
-   cfg.dataCallback = data_callback;
-   cfg.sampleRate = 48000;
-   cfg.periodSizeInFrames = 64;
-   cfg.periods = 1;
-
-   struct cw_data cw = {0};
-   cw.morse = morse;
-   cw.freq = freq;
-   cw.amp = amp;
-
-   cw.delay = delay * ((float)cfg.sampleRate / (float)cfg.periodSizeInFrames);
-
-   float dot_dur = 60.0f / (50.0f * speed1);
-   float gap_dur = 60.0f / (50.0f * speed2);
-
-   float sr = (float)cfg.sampleRate;
-   cw.dot_len = (int)(dot_dur * sr);
-   cw.intra_gap = cw.dot_len;
-   cw.inter_gap = (int)(gap_dur * sr);
-
-   cfg.pUserData = &cw;
 
    ma_device dev;
-   if (ma_device_init(NULL, &cfg, &dev) != MA_SUCCESS) {
-      free(morse);
-      return -1;
-      ERROR("cannot initialize audio device");
-   }
 
-   if (ma_device_start(&dev) != MA_SUCCESS) {
-      ma_device_uninit(&dev);
+   // Copy morse pointer into the struct for later use
+   cw->morse = morse;
+
+   const int sr = setup_audio_device(cw, &dev);
+   if (sr < 0) {
+      ERROR("audio device setup failed");
       free(morse);
-      ERROR("cannot start audio device");
       return -1;
    }
 
-   while (cw.morse[cw.pos] || cw.tone_samples > 0 || cw.gap_samples > 0) {
-      sleep_ms(10);
-   }
+   wait_for_playback_to_finish(cw);
 
    ma_device_uninit(&dev);
    free(morse);
 
-   return (int)((cw.total_samples * 1000ULL) /
-                (unsigned long long)cfg.sampleRate);
+   return (int)((cw->total_samples * 1000ULL) / sr);
 }
 
 float cw_duration(const char *str, const float speed1, const float speed2)
 {
-   if (!str || speed1 <= 0.0f || speed2 <= 0.0f || speed1 < speed2)
-      return -1.0f;
+   if (!str || speed1 <= 0.0F || speed2 <= 0.0F || speed1 < speed2)
+      return -1.0F;
 
    size_t len = strlen(str);
    char *morse = malloc(len * 10 + 1);
    if (!morse)
-      return -1.0f;
+      return -1.0F;
 
    ascii_to_morse_expanded(str, morse);
    const char *p = morse;
 
-   float dot_dur = 60.0f / (50.0f * speed1);
-   float gap_dur = 60.0f / (50.0f * speed2);
+   float dot_dur = 60.0F / (50.0F * speed1);
+   float gap_dur = 60.0F / (50.0F * speed2);
 
-   float total = 0.0f;
+   float total = 0.0F;
 
    while (*p) {
       switch (*p) {

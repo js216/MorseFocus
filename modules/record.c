@@ -34,7 +34,10 @@ struct record record_load_last(const char *filename)
       last_line[sizeof(last_line) - 1] = '\0'; // ensure null termination
    }
 
-   fclose(fp);
+   if (fclose(fp) != 0) {
+      ERROR("failed to close file");
+      return rec;
+   }
 
    if (last_line[0] == '\0') {
       ERROR("file '%s' is empty or unreadable", filename);
@@ -60,9 +63,14 @@ struct record record_load_last(const char *filename)
    }
 
    char datetime_str[32];
-   snprintf(datetime_str, sizeof(datetime_str), "%s %s", date, time);
 
-   if (!str_ptime(datetime_str, "%Y-%m-%d %H:%M:%S", &rec.datetime)) {
+   int ret = snprintf(datetime_str, sizeof(datetime_str), "%s %s", date, time);
+   if (ret < 0 || (size_t)ret >= sizeof(datetime_str)) {
+      ERROR("datetime string formatting failed or was truncated");
+      return rec;
+   }
+
+   if (parse_datetime(&rec.datetime, datetime_str) != 0) {
       ERROR("cannot parse datetime '%s'", datetime_str);
       return rec;
    }
@@ -148,7 +156,10 @@ int record_append(const char *path, const struct record *r)
    if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", &r->datetime) ==
        0) {
       ERROR("cannot format datetime");
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
@@ -157,7 +168,10 @@ int record_append(const char *path, const struct record *r)
                         r->speed1, r->speed2, r->dist, r->len, r->charset);
    if (num_pr < 0) {
       ERROR("cannot write to file");
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
@@ -170,20 +184,32 @@ int record_append(const char *path, const struct record *r)
          ret = fprintf(fp, " %.3f", r->weights[i]);
       if (ret < 0) {
          ERROR("cannot write weights");
-         fclose(fp);
+         if (fclose(fp) != 0) {
+            ERROR("failed to close file");
+            return -1;
+         }
          return -1;
       }
 
       num_pr += ret;
       if (num_pr > MAX_CSV_LEN) {
          ERROR("wrote more than MAX_CSV_LEN");
-         fclose(fp);
+         if (fclose(fp) != 0) {
+            ERROR("failed to close file");
+            return -1;
+         }
          return -1;
       }
    }
 
-   fputc('\n', fp);
-   fclose(fp);
+   if (fputc('\n', fp) == EOF) {
+      ERROR("failed to write newline to file");
+   }
+
+   if (fclose(fp) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
    return 0;
 }
 
@@ -225,7 +251,7 @@ int record_scale_weights(struct record *r)
       return -1;
    }
 
-   if ((r->scale <= 0.01f) || (r->scale > 1.0f)) {
+   if ((r->scale <= 0.01F) || (r->scale > 1.0F)) {
       ERROR("scale %.3e out of range", r->scale);
       return -1;
    }

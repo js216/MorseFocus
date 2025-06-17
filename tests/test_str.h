@@ -9,8 +9,8 @@
 #define TEST_STR_H
 
 int test_str_clean(void);
-int test_str_file_len(const char *expected_content);
-int test_str_read_file(const char *expected_content);
+int test_str_file_len(const char *test_file);
+int test_str_read_file(const char *test_file);
 int test_str_prepare_test_file(const char *test_file);
 int test_str_char_to_int(void);
 int test_str_int_to_char(void);

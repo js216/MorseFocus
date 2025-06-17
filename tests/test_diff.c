@@ -28,37 +28,27 @@ static struct test_diff_case get_diff_test_case(const int i)
       tc.s1 = "abc test hey";
       tc.s2 = "abd tests hey";
       tc.expected_distance = 2;
-      tc.w_exp[str_char_to_int('c')] = 1.0f;
-      tc.w_exp[str_char_to_int('d')] = 1.0f;
-      tc.w_exp[str_char_to_int('s')] = 1.0f;
+      tc.w_exp[str_char_to_int('c')] = 1.0F;
+      tc.w_exp[str_char_to_int('d')] = 1.0F;
+      tc.w_exp[str_char_to_int('s')] = 1.0F;
    }
 
    else if (i == 1) {
       tc.s1 = "hello";
       tc.s2 = "hullo";
       tc.expected_distance = 1;
-      tc.w_exp[str_char_to_int('e')] = 1.0f;
-      tc.w_exp[str_char_to_int('u')] = 1.0f;
+      tc.w_exp[str_char_to_int('e')] = 1.0F;
+      tc.w_exp[str_char_to_int('u')] = 1.0F;
    }
 
    else if (i == 2) {
       tc.s1 = "morse code";
       tc.s2 = "horse rode";
       tc.expected_distance = 2;
-      tc.w_exp[str_char_to_int('c')] = 1.0f;
-      tc.w_exp[str_char_to_int('h')] = 1.0f;
-      tc.w_exp[str_char_to_int('m')] = 1.0f;
-      tc.w_exp[str_char_to_int('r')] = 1.0f;
-   }
-
-   else if (i == 2) {
-      tc.s1 = "morse code";
-      tc.s2 = "horse rode";
-      tc.expected_distance = 2;
-      tc.w_exp[str_char_to_int('c')] = 1.0f;
-      tc.w_exp[str_char_to_int('h')] = 1.0f;
-      tc.w_exp[str_char_to_int('m')] = 1.0f;
-      tc.w_exp[str_char_to_int('r')] = 1.0f;
+      tc.w_exp[str_char_to_int('c')] = 1.0F;
+      tc.w_exp[str_char_to_int('h')] = 1.0F;
+      tc.w_exp[str_char_to_int('m')] = 1.0F;
+      tc.w_exp[str_char_to_int('r')] = 1.0F;
    }
 
    else if (i == 3) {
@@ -71,8 +61,8 @@ static struct test_diff_case get_diff_test_case(const int i)
       tc.s1 = "a";
       tc.s2 = "b";
       tc.expected_distance = 1;
-      tc.w_exp[str_char_to_int('a')] = 1.0f;
-      tc.w_exp[str_char_to_int('b')] = 1.0f;
+      tc.w_exp[str_char_to_int('a')] = 1.0F;
+      tc.w_exp[str_char_to_int('b')] = 1.0F;
    }
 
    else if (i == 5) {
@@ -91,10 +81,10 @@ static struct test_diff_case get_diff_test_case(const int i)
 static int compare_weights(const float *actual, const float *expected,
                            size_t len, size_t case_num)
 {
-   const float EPS = 1e-6f;
+   const float eps = 1e-6F;
 
    for (size_t i = 0; i < len; ++i) {
-      if (fabsf(actual[i] - expected[i]) > EPS) {
+      if (fabsf(actual[i] - expected[i]) > eps) {
          TEST_FAIL("test %zu: mismatch at char '%c' weight[%zu] = %.6f, "
                    "expected %.6f",
                    case_num,

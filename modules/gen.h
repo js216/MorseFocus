@@ -31,7 +31,7 @@ struct WordEntry {
  * @return 0 on success, -1 on error
  */
 int gen_chars(char *s, const size_t num_char, const int min_word,
-              const int max_word, const float *warr, const char *charset);
+              const int max_word, const float *weights, const char *charset);
 
 /**
  * @brief Generate a sequence of pseudorandom words and write them to an output

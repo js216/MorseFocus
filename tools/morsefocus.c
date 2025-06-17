@@ -21,8 +21,10 @@
 #include <string.h>
 
 #define MAX_DIFF_LEN 8192
-#define TARGET_ACCURACY 0.1
-#define PID_K 1.0
+#define SEC_PER_MIN 60.0F
+#define TARGET_ACCURACY 0.1F
+#define PID_K 1.0F
+#define PROMPT_BUF_SIZE 16
 
 struct ParsedArgs {
    float min_word;
@@ -42,26 +44,29 @@ struct ArgDef {
    void *target;
 };
 
-static struct ParsedArgs args = {
-    .min_word = 2,
-    .max_word = 7,
-    .freq = 700,
-    .amp = 0.3,
-    .delay = 1.0,
+int silence_errors;
+static struct ParsedArgs args;
+
+static const struct ParsedArgs default_args = {
+    .min_word = 2.0F,
+    .max_word = 7.0F,
+    .freq = 700.0F,
+    .amp = 0.3F,
+    .delay = 1.0F,
     .file_name = NULL,
-    .rec = {.len = 250, .speed1 = 25, .speed2 = 25, .scale = 1.0},
+    .rec = {.len = 250.0F, .speed1 = 25.0F, .speed2 = 25.0F, .scale = 1.0F},
 };
 
 static const struct ArgDef arg_defs[] = {
-    {"-n", "length", 1.0f, 1000.0f, &args.rec.len},
-    {"-s", "scale", 0.001f, 1.0f, &args.rec.scale},
-    {"-1", "speed1", 1.0f, 500.0f, &args.rec.speed1},
-    {"-2", "speed2", 1.0f, 500.0f, &args.rec.speed2},
-    {"-i", "min word", 1.0f, 1000.0f, &args.min_word},
-    {"-x", "max word", 1.0f, 1000.0f, &args.max_word},
-    {"-f", "frequency", 60.0f, 10000.0f, &args.freq},
-    {"-a", "amplitude", 0.0f, 1.0f, &args.amp},
-    {"-w", "delay", 0.0f, 60.0f, &args.delay}};
+    {"-n", "length", 1.0F, 1000.0F, &args.rec.len},
+    {"-s", "scale", 0.001F, 1.0F, &args.rec.scale},
+    {"-1", "speed1", 1.0F, 500.0F, &args.rec.speed1},
+    {"-2", "speed2", 1.0F, 500.0F, &args.rec.speed2},
+    {"-i", "min word", 1.0F, 1000.0F, &args.min_word},
+    {"-x", "max word", 1.0F, 1000.0F, &args.max_word},
+    {"-f", "frequency", 60.0F, 10000.0F, &args.freq},
+    {"-a", "amplitude", 0.0F, 1.0F, &args.amp},
+    {"-w", "delay", 0.0F, 60.0F, &args.delay}};
 
 static const char *usage =
     "Usage: %s file_name [options]\n\n"
@@ -75,8 +80,6 @@ static const char *usage =
     "  -f <freq>    Tone frequency Hz (60..10000), default 700\n"
     "  -a <amp>     Amplitude (0..1), default 0.3\n"
     "  -w <wait>    Initial delay seconds (0..60), default 1\n";
-
-int silence_errors;
 
 static int check_float_range(float val, float min, float max, const char *name)
 {
@@ -107,25 +110,34 @@ static int file_has_content(const char *filename)
       return 0; // file missing or inaccessible → treat as no content
 
    if (fseek(fp, 0, SEEK_END) != 0) {
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       ERROR("fseek failed on '%s'\n", filename);
       return -1;
    }
 
    long size = ftell(fp);
    if (size == -1L) {
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       ERROR("ftell failed on '%s'\n", filename);
       return -1;
    }
 
-   fclose(fp);
+   if (fclose(fp) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
    return (size > 0) ? 1 : 0;
 }
 
 static int ask_yes_no(const char *prompt)
 {
-   char buf[16];
+   char buf[PROMPT_BUF_SIZE];
 
    while (1) {
       printf("%s (y/n): ", prompt);
@@ -148,7 +160,7 @@ static int ask_yes_no(const char *prompt)
       // Use manual lowercase conversion for portability
       for (char *p = buf; *p; p++) {
          if (*p >= 'A' && *p <= 'Z') {
-            *p = *p - 'A' + 'a';
+            *p = (char)(*p - 'A' + 'a');
          }
       }
 
@@ -165,9 +177,15 @@ static int ask_yes_no(const char *prompt)
 
 static int parse_args(int argc, char **argv)
 {
+   // assign defaults
+   args = default_args;
+
    // mandatory positional filename argument
    if (argc < 2) {
-      fprintf(stderr, usage, argv[0]);
+      if (fprintf(stderr, usage, argv[0]) < 0) {
+         ERROR("fprintf failed");
+         exit(-1);
+      }
       exit(-1);
    }
    args.file_name = argv[1];
@@ -180,8 +198,8 @@ static int parse_args(int argc, char **argv)
          return -1;
       }
 
-      const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
-      args.rec.speed2 *= (1.0f - PID_K * (err_pct / 100.0f - TARGET_ACCURACY));
+      const float err_pct = 100.0F * (float)args.rec.dist / (float)args.rec.len;
+      args.rec.speed2 *= (1.0F - PID_K * (err_pct / 100.0F - TARGET_ACCURACY));
    }
 
    // fixed fields
@@ -212,7 +230,10 @@ static int parse_args(int argc, char **argv)
       // flag found?
       if (def == NULL) {
          ERROR("unrecognized option: %s\n", arg);
-         fprintf(stderr, usage, argv[0]);
+         if (fprintf(stderr, usage, argv[0]) < 0) {
+            ERROR("fprintf failed");
+            exit(-1);
+         }
          exit(-1);
       }
 
@@ -237,7 +258,7 @@ static int parse_args(int argc, char **argv)
 
 static char *alloc_and_generate(void)
 {
-   const int len = args.rec.len + 2;
+   const int len = (int)(args.rec.len + 2);
 
    char *buf = malloc(len);
    if (!buf) {
@@ -249,8 +270,8 @@ static char *alloc_and_generate(void)
       for (int i = 0; i < MAX_CHARSET_LEN; i++)
          args.rec.weights[i] = 1;
 
-   if (gen_chars(buf, len, args.min_word, args.max_word, args.rec.weights,
-                 NULL) != 0) {
+   if (gen_chars(buf, len, (int)args.min_word, (int)args.max_word,
+                 args.rec.weights, NULL) != 0) {
       ERROR("gen_chars() failed");
       free(buf);
       return NULL;
@@ -286,7 +307,7 @@ static char *get_user_input(size_t maxlen)
    // If newline is not found, discard the rest of the line
    size_t len = strlen(buf);
    if (len > 0 && buf[len - 1] != '\n') {
-      int ch;
+      int ch = '\0';
       while ((ch = getchar()) != '\n' && ch != EOF) {
          /* discard */
       }
@@ -315,20 +336,31 @@ int main(int argc, char **argv)
    // Initial stats
    const float secs = cw_duration(gen_buf, args.rec.speed1, args.rec.speed2);
    printf("Sending %.0f characters at %.1f/%.1f wpm (~%.1f min)\r\n",
-          args.rec.len, args.rec.speed1, args.rec.speed2, secs / 60.0);
+          args.rec.len, args.rec.speed1, args.rec.speed2, secs / SEC_PER_MIN);
    printf("Received text? ");
-   fflush(stdout);
+   if (fflush(stdout) != 0) {
+      ERROR("fflush failed");
+      return -1;
+   }
+
+   // Arguments for the audio player
+   struct cw_data cw = {
+       .speed1 = args.rec.speed1,
+       .speed2 = args.rec.speed2,
+       .freq = args.freq,
+       .amp = args.amp,
+       .delay_sec = args.delay,
+   };
 
    // Play Morse code audio of generated text
-   if (cw_play(gen_buf, args.rec.speed1, args.rec.speed2, args.freq, args.amp,
-               args.delay) < 0) {
+   if (cw_play(gen_buf, &cw) < 0) {
       free(gen_buf);
       ERROR("error: playback error\n");
       return -1;
    }
 
    // Read user input
-   char *user_buf = get_user_input(args.rec.len + 1);
+   char *user_buf = get_user_input((size_t)(args.rec.len + 1));
    if (user_buf == NULL) {
       free(gen_buf);
       return -1;
@@ -336,12 +368,12 @@ int main(int argc, char **argv)
 
    // Compare and calculate accuracy
    struct record r0 = {0};
-   args.rec.dist = lev_diff(&r0, gen_buf, user_buf);
+   args.rec.dist = (float)lev_diff(&r0, gen_buf, user_buf);
    free(user_buf);
 
    // Printout stats
    printf("Expected text: %s\n", gen_buf);
-   const float err_pct = 100.0f * (float)args.rec.dist / (float)args.rec.len;
+   const float err_pct = 100.0F * (float)args.rec.dist / (float)args.rec.len;
    record_printout(&r0);
    printf("%.0f errors out of %.0f = %.1f%%\n", args.rec.dist, args.rec.len,
           err_pct);

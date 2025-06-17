@@ -11484,6 +11484,8 @@ MA_API ma_uint64 ma_sound_group_get_time_in_pcm_frames(const ma_sound_group* pGr
 #endif  /* MA_NO_ENGINE */
 /* END SECTION: miniaudio_engine.h */
 
+void ma_sleep(ma_uint32 milliseconds);
+
 #ifdef __cplusplus
 }
 #endif
@@ -11970,7 +11972,7 @@ static void ma_sleep__posix(ma_uint32 milliseconds)
 }
 #endif
 
-static MA_INLINE void ma_sleep(ma_uint32 milliseconds)
+void ma_sleep(ma_uint32 milliseconds)
 {
 #ifdef MA_WIN32
     ma_sleep__win32(milliseconds);

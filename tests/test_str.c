@@ -39,7 +39,7 @@ int test_str_clean(void)
             return -1;
          }
       } else {
-         if (c_out != (char)tolower(c_in)) {
+         if (c_out != (unsigned char)tolower(c_in)) {
             TEST_FAIL("non-alphanum character is not a space");
             return -1;
          }
@@ -95,29 +95,35 @@ int test_str_prepare_test_file(const char *test_file)
    const size_t ret = fwrite(test_content, 1, strlen(test_content), f);
    if (ret != strlen(test_content)) {
       TEST_FAIL("failed to write to test file");
-      fclose(f);
+      if (fclose(f) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
    TEST_SUCCESS();
-   fclose(f);
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
    return 0;
 }
 
 int test_str_char_to_int(void)
 {
-   for (char ch = '0'; ch <= '9'; ch++) {
+   for (int ch = '0'; ch <= '9'; ch++) {
       int expected = ch - '0';
-      int result = str_char_to_int(ch);
+      int result = str_char_to_int((char)ch);
       if (result != expected) {
          TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
          return -1;
       }
    }
 
-   for (char ch = 'a'; ch <= 'z'; ch++) {
+   for (int ch = 'a'; ch <= 'z'; ch++) {
       int expected = 10 + (ch - 'a');
-      int result = str_char_to_int(ch);
+      int result = str_char_to_int((char)ch);
       if (result != expected) {
          TEST_FAIL("'%c' -> %d, expected %d", ch, result, expected);
          return -1;
@@ -150,7 +156,7 @@ int test_str_char_to_int(void)
 int test_str_int_to_char(void)
 {
    for (int i = 0; i <= 9; i++) {
-      char expected = '0' + i;
+      char expected = (char)('0' + i);
       char result = str_int_to_char(i);
       if (result != expected) {
          TEST_FAIL("%d -> '%c', expected '%c'", i, result, expected);
@@ -159,7 +165,7 @@ int test_str_int_to_char(void)
    }
 
    for (int i = 10; i <= 35; i++) {
-      char expected = 'a' + (i - 10);
+      char expected = (char)('a' + (i - 10));
       char result = str_int_to_char(i);
       if (result != expected) {
          TEST_FAIL("%d -> '%c', expected '%c'", i, result, expected);

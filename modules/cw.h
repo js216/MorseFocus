@@ -8,6 +8,29 @@
 #ifndef CW_H
 #define CW_H
 
+struct cw_data {
+   const char *morse; // pointer to expanded Morse code string
+   int pos;           // current character position in Morse string
+
+   int tone_samples; // number of samples left in current tone
+   int tone_len;     // duration of current tone in samples
+   int gap_samples;  // number of samples left in current gap
+
+   int dot_len;   // duration of a dot in samples
+   int intra_gap; // duration of intra-character gap in samples
+   int inter_gap; // duration of inter-character/word gap in samples
+
+   float freq;       // tone frequency in Hz
+   float amp;        // tone amplitude from 0 to 1
+   int delay_frames; // initial delay, in frames
+
+   float delay_sec; // initial delay, in seconds
+   float speed1;    // Farnsworth speed 1 (WPM)
+   float speed2;    // Farnsworth speed 2 (WPM)
+
+   unsigned long long total_samples; // total number of samples played
+};
+
 /**
  * @brief Convert an ASCII string to an expanded Morse code string.
  *
@@ -43,15 +66,16 @@ int count_units(const char *morse);
  * @brief Play a Morse code string as audio using miniaudio.
  *
  * @param str Null-terminated input string to transmit (ASCII).
- * @param speed1 Character speed in words per minute (WPM).
- * @param speed2 Farnsworth speed in WPM (<= speed1).
- * @param freq Audio tone frequency in Hz.
- * @param amp Audio tone amplitude from 0 to 1.
- * @param delay Initial delay in seconds.
+ * @param cw Pointer to a configured cw_data struct with playback parameters:
+ *           - freq: Audio tone frequency in Hz.
+ *           - amp: Audio tone amplitude from 0 to 1.
+ *           - delay_sec: Initial delay in seconds.
+ *           - speed1: Character speed in words per minute (WPM).
+ *           - speed2: Farnsworth speed in WPM (<= speed1).
+ *           - morse: (will be set internally)
  * @return Total playback duration in milliseconds, or -1 on error.
  */
-int cw_play(const char *str, const float speed1, const float speed2,
-            const float freq, const float amp, const float delay);
+int cw_play(const char *str, struct cw_data *cw);
 
 /**
  * @brief Compute the CW transmission duration in seconds.

@@ -19,9 +19,8 @@
 #define TEST_MAX_WORDS 1000
 #define TEST_EPS 0.25
 
-extern int silence_errors;
-
-static const char *charset_def = "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
+static const char *const charset_def =
+    "kmuresnaptlwi.jz=foy,vg5/q92h38b?47c1d60x";
 
 /**
  * @brief Generate character frequency table based on str_int_to_char mapping.
@@ -51,7 +50,7 @@ static void test_gen_freq(float *freq, const char *s)
          }
       }
 
-      freq[i] = count;
+      freq[i] = (float)count;
    }
 }
 
@@ -71,7 +70,8 @@ static void test_gen_freq(float *freq, const char *s)
  */
 static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
 {
-   float sum1 = 0.0f, sum2 = 0.0f;
+   float sum1 = 0.0F;
+   float sum2 = 0.0F;
 
    for (int i = 0; i < MAX_CHARSET_LEN; i++) {
       sum1 += f1[i];
@@ -79,12 +79,12 @@ static int test_gen_check_freq(const float *f1, const float *f2, const float ep)
    }
 
    for (int i = 0; i < MAX_CHARSET_LEN; i++) {
-      float v1 = (sum1 > 0.0f) ? f1[i] / sum1 : 0.0f;
-      float v2 = (sum2 > 0.0f) ? f2[i] / sum2 : 0.0f;
-      float avg = (v1 + v2) / 2.0f;
+      float v1 = (sum1 > 0.0F) ? f1[i] / sum1 : 0.0F;
+      float v2 = (sum2 > 0.0F) ? f2[i] / sum2 : 0.0F;
+      float avg = (v1 + v2) / 2.0F;
 
-      if (avg == 0.0f) {
-         if (v1 != 0.0f || v2 != 0.0f) {
+      if (avg == 0.0F) {
+         if (v1 != 0.0F || v2 != 0.0F) {
             TEST_FAIL("index %d (ASCII '%c'), one is zero, one is not "
                       "(%.6f vs %.6f)",
                       i, str_int_to_char(i), v1, v2);
@@ -199,7 +199,7 @@ int test_gen_create_weights(float *w, const char *charset)
    }
 
    for (int i = 0; i < MAX_CHARSET_LEN; i++)
-      w[i] = 0.0f;
+      w[i] = 0.0F;
 
    for (size_t i = 0; i < len; i++) {
       int offset = str_char_to_int(charset[i]);
@@ -209,7 +209,7 @@ int test_gen_create_weights(float *w, const char *charset)
          return -1;
       }
 
-      w[offset] = 1.000f;
+      w[offset] = 1.000F;
    }
 
    return 0;
@@ -273,9 +273,9 @@ int test_free_entries(void)
 
 int test_compute_total_weight(void)
 {
-   struct WordEntry entries[3] = {{"a", 1.0}, {"b", 2.5}, {"c", 0.5}};
+   struct WordEntry entries[3] = {{"a", 1.0F}, {"b", 2.5F}, {"c", 0.5F}};
    float total = compute_total_weight(entries, 3);
-   if (total < 3.99 || total > 4.01) {
+   if (total < 3.99F || total > 4.01F) {
       TEST_FAIL("total weight incorrect");
       return -1;
    }
@@ -285,15 +285,17 @@ int test_compute_total_weight(void)
 
 int test_select_random_word(void)
 {
-   struct WordEntry entries[3] = {{"zero", 0.0f}, {"one", 1.0f}, {"two", 2.0f}};
+   struct WordEntry entries[3] = {{"zero", 0.0F}, {"one", 1.0F}, {"two", 2.0F}};
    float total = compute_total_weight(entries, 3);
 
-   if (total < 2.99f || total > 3.01f) {
+   if (total < 2.99F || total > 3.01F) {
       TEST_FAIL("unexpected total weight");
       return -1;
    }
 
-   int count_zero = 0, count_one = 0, count_two = 0;
+   int count_zero = 0;
+   int count_one = 0;
+   int count_two = 0;
    const int trials = 10000;
 
    for (int i = 0; i < trials; ++i) {
@@ -321,7 +323,7 @@ int test_select_random_word(void)
    }
 
    float ratio = (float)count_two / (float)count_one;
-   if (ratio < 1.8f || ratio > 2.2f) {
+   if (ratio < 1.8F || ratio > 2.2F) {
       TEST_FAIL("selection ratio not approximately 2:1");
       return -1;
    }
@@ -333,7 +335,7 @@ int test_select_random_word(void)
 int test_write_words(const char *test_file)
 {
    struct WordEntry entries[3] = {
-       {"alpha", 1.0f}, {"beta", 1.0f}, {"gamma", 1.0f}};
+       {"alpha", 1.0F}, {"beta", 1.0F}, {"gamma", 1.0F}};
 
    int nw = 5;
    float total_weight = compute_total_weight(entries, 3);
@@ -346,32 +348,45 @@ int test_write_words(const char *test_file)
 
    if (write_words(fp, entries, 3, nw, total_weight) != 0) {
       TEST_FAIL("write_words returned failure");
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
    // rewind
    if (fseek(fp, 0, SEEK_SET) != 0) {
       TEST_FAIL("fseek failed");
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
    // rewind and read output
    char buffer[256] = {0};
    if (!fgets(buffer, sizeof(buffer), fp)) {
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       TEST_FAIL("failed to read back output");
       return -1;
    }
 
-   fclose(fp);
+   if (fclose(fp) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    // count words in output
    int word_count = 0;
    char *tok = strtok(buffer, " \n");
    while (tok) {
-      if (strcmp(tok, "alpha") && strcmp(tok, "beta") && strcmp(tok, "gamma")) {
+      if ((strcmp(tok, "alpha") != 0) && (strcmp(tok, "beta") != 0) &&
+          (strcmp(tok, "gamma") != 0)) {
          TEST_FAIL("unexpected word in output");
          return -1;
       }
@@ -397,29 +412,68 @@ int test_is_line_too_long(const char *test_file)
       return -1;
    }
 
-   fputs("short\nlonglonglonglong\n", fp);
-
-   if (fseek(fp, 0, SEEK_SET) != 0) {
-      TEST_FAIL("fseek failed");
-      fclose(fp);
+   if (fputs("short\nlonglonglonglong\n", fp) == EOF) {
+      ERROR("failed to write to file");
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
-   fgets(line, sizeof(line), fp);
+   if (fseek(fp, 0, SEEK_SET) != 0) {
+      TEST_FAIL("fseek failed");
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
+      return -1;
+   }
+
+   if (fgets(line, sizeof(line), fp) == NULL) {
+      if (feof(fp)) {
+         // End of file reached
+      } else {
+         ERROR("failed to read line from file");
+         if (fclose(fp) != 0) {
+            ERROR("failed to close file");
+            return -1;
+         }
+         return -1;
+      }
+   }
+
    if (is_line_too_long(fp, line)) {
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       TEST_FAIL("misdetected short line");
       return -1;
    }
 
-   fgets(line, sizeof(line), fp);
+   if (fgets(line, sizeof(line), fp) == NULL) {
+      if (feof(fp)) {
+         // End of file reached
+      } else {
+         ERROR("failed to read line from file");
+         return -1;
+      }
+   }
+
    if (!is_line_too_long(fp, line)) {
-      fclose(fp);
+      if (fclose(fp) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       TEST_FAIL("did not detect long line");
       return -1;
    }
 
-   fclose(fp);
+   if (fclose(fp) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
    TEST_SUCCESS();
    return 0;
 }
@@ -449,8 +503,8 @@ int test_validate_word(void)
 
 int test_parse_line(void)
 {
-   char *word;
-   float w;
+   char *word = NULL;
+   float w = 0.0F;
    int hw = -1;
 
    char line1[] = "testword 1.5"; // writable buffer
@@ -459,7 +513,7 @@ int test_parse_line(void)
       return -1;
    }
 
-   if (strcmp(word, "testword") != 0 || w != 1.5f || hw != 1) {
+   if (strcmp(word, "testword") != 0 || w != 1.5F || hw != 1) {
       free(word);
       TEST_FAIL("parsed data incorrect");
       return -1;
@@ -474,7 +528,7 @@ int test_parse_line(void)
       return -1;
    }
 
-   if (strcmp(word, "simpleword") != 0 || w != 0.0f || hw != 0) {
+   if (strcmp(word, "simpleword") != 0 || w != 0.0F || hw != 0) {
       free(word);
       TEST_FAIL("parsed simple word incorrect");
       return -1;
@@ -508,12 +562,25 @@ int test_parse_word_file(const char *test_file)
       return -1;
    }
 
-   fputs("apple 1.0\nbanana 2.0\ncherry 0.5\n", f);
-   fclose(f);
+   if (fputs("apple 1.0\nbanana 2.0\ncherry 0.5\n", f) == EOF) {
+      ERROR("failed to write to file");
+      if (fclose(f) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
+      return -1;
+   }
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    struct WordEntry *entries = NULL;
    int count = parse_word_file(test_file, &entries, 3);
-   remove(test_file);
+   if (remove(test_file) != 0) {
+      ERROR("failed to remove file '%s'", test_file);
+      return -1;
+   }
    if (count != 3) {
       TEST_FAIL("wrong count");
       return -1;
@@ -565,11 +632,21 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
       TEST_FAIL("Failed to create test word file");
       return -1;
    }
-   fprintf(f, "alpha 0.5\nbeta 1.0\ngamma 0.0\n");
-   fclose(f);
+   if (fprintf(f, "alpha 0.5\nbeta 1.0\ngamma 0.0\n") < 0) {
+      ERROR("failed to write to file");
+      if (fclose(f) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
+      return -1;
+   }
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    // case 1: valid file, output to file (should succeed)
-   int ret;
+   int ret = -1;
    ret = gen_words(temp_out_file, valid_word_file, TEST_MAX_WORDS, 3);
    if (ret != 0) {
       TEST_FAIL("gen_words failed on valid file with file output");
@@ -583,11 +660,17 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
    }
    char buffer[256];
    if (!fgets(buffer, sizeof(buffer), f)) {
-      fclose(f);
+      if (fclose(f) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       TEST_FAIL("Output file is empty");
       return -1;
    }
-   fclose(f);
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    // testing malformed input
    silence_errors = 1;
@@ -612,8 +695,10 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
    silence_errors = 0;
 
    // cleanup test files
-   remove(valid_word_file);
-   remove(temp_out_file);
+   if (remove(valid_word_file) != 0)
+      ERROR("failed to remove file '%s'", valid_word_file);
+   if (remove(temp_out_file) != 0)
+      ERROR("failed to remove file '%s'", temp_out_file);
 
    TEST_SUCCESS();
    return 0;

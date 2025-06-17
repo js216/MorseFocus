@@ -8,6 +8,7 @@
 #include "str.h"
 #include "debug.h"
 #include <ctype.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,8 +16,7 @@
 
 int str_clean(char *s1, const char *s2, size_t len)
 {
-   size_t i;
-   for (i = 0; i < len; ++i) {
+   for (size_t i = 0; i < len; ++i) {
       unsigned char ch = (unsigned char)s2[i];
       if (ch >= 32 && ch <= 126)
          s1[i] = (char)tolower(ch);
@@ -33,12 +33,18 @@ int str_file_len(const char *fname)
       return -1;
 
    if (fseek(f, 0, SEEK_END) != 0) {
-      fclose(f);
+      if (fclose(f) != 0) {
+         ERROR("failed to close file");
+         return -1;
+      }
       return -1;
    }
 
    long size = ftell(f);
-   fclose(f);
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    if (size < 0)
       return -1;
@@ -56,7 +62,10 @@ int str_read_file(char *buf, const char *fname, const size_t max_len)
       return -1;
 
    size_t read_len = fread(buf, 1, max_len - 1, f);
-   fclose(f);
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
 
    buf[read_len] = '\0'; // ensure null termination
    return (int)read_len;
@@ -100,7 +109,7 @@ char str_int_to_char(const int i)
 
 char *str_tok(char *str, const char *delim, char **saveptr)
 {
-   char *start;
+   char *start = NULL;
    if (str)
       start = str;
    else if (*saveptr)
@@ -127,29 +136,71 @@ char *str_tok(char *str, const char *delim, char **saveptr)
    return start;
 }
 
-char *str_ptime(const char *s, const char *format, struct tm *tm)
+static int parse_int(const char **p, int width, int *out)
 {
-   int year, mon, mday, hour, min, sec;
+   char buf[12]; // enough for any int substring
+   strncpy(buf, *p, width);
+   buf[width] = '\0';
 
-   // Only support exact format "%Y-%m-%d %H:%M:%S"
-   if (format == NULL || strcmp(format, "%Y-%m-%d %H:%M:%S") != 0)
-      return NULL;
+   char *endptr = NULL;
+   long val = strtol(buf, &endptr, 10);
+   if (endptr != buf + width || val < INT_MIN || val > INT_MAX)
+      return -1;
 
-   int ret = sscanf(s, "%4d-%2d-%2d %2d:%2d:%2d", &year, &mon, &mday, &hour,
-                    &min, &sec);
-   if (ret != 6)
-      return NULL;
+   *out = (int)val;
+   *p += width;
+   return 0;
+}
 
-   tm->tm_year = year - 1900; // years since 1900
-   tm->tm_mon = mon - 1;      // months since January [0-11]
-   tm->tm_mday = mday;
-   tm->tm_hour = hour;
-   tm->tm_min = min;
-   tm->tm_sec = sec;
-   tm->tm_isdst = -1; // Not known
+int parse_datetime(struct tm *tm, const char *s)
+{
+   if (!tm || !s)
+      return -1;
 
-   // Return pointer after the matched datetime (fixed length = 19 chars)
-   return (char *)(s + 19);
+   memset(tm, 0, sizeof(*tm));
+   const char *p = s;
+
+   if (parse_int(&p, 4, &tm->tm_year) != 0 || *p != '-')
+      return -1;
+   p++; // skip '-'
+
+   if (parse_int(&p, 2, &tm->tm_mon) != 0 || *p != '-')
+      return -1;
+   p++; // skip '-'
+
+   if (parse_int(&p, 2, &tm->tm_mday) != 0 || *p != ' ')
+      return -1;
+   p++; // skip ' '
+
+   if (parse_int(&p, 2, &tm->tm_hour) != 0 || *p != ':')
+      return -1;
+   p++; // skip ':'
+
+   if (parse_int(&p, 2, &tm->tm_min) != 0 || *p != ':')
+      return -1;
+   p++; // skip ':'
+
+   if (parse_int(&p, 2, &tm->tm_sec) != 0)
+      return -1;
+
+   if (*p != '\0') // must be end of string here
+      return -1;
+
+   if (tm->tm_mon < 1 || tm->tm_mon > 12)
+      return -1;
+   if (tm->tm_mday < 1 || tm->tm_mday > 31)
+      return -1;
+   if (tm->tm_hour < 0 || tm->tm_hour > 23)
+      return -1;
+   if (tm->tm_min < 0 || tm->tm_min > 59)
+      return -1;
+   if (tm->tm_sec < 0 || tm->tm_sec > 60) // leap second allowed
+      return -1;
+
+   tm->tm_year -= 1900;
+   tm->tm_mon -= 1;
+
+   return 0;
 }
 
 int str_is_clean(const char *s)
@@ -219,7 +270,7 @@ int str_file_lines(const char *filename)
    }
 
    int lines = 0;
-   int c;
+   int c = 0;
 
    while ((c = fgetc(f)) != EOF) {
       if (c == '\n') {
@@ -230,14 +281,21 @@ int str_file_lines(const char *filename)
    // If the file does not end with a newline but is not empty,
    // count the last line as well
    if (lines > 0) {
-      fseek(f, -1, SEEK_END);
+      if (fseek(f, -1, SEEK_END) != 0) {
+         ERROR("fseek failed");
+         return -1;
+      }
+
       c = fgetc(f);
       if (c != '\n') {
          lines++;
       }
    }
 
-   fclose(f);
+   if (fclose(f) != 0) {
+      ERROR("failed to close file");
+      return -1;
+   }
    return lines;
 }
 
