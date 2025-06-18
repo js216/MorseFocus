@@ -140,7 +140,7 @@ static int ask_yes_no(const char *prompt)
    char buf[PROMPT_BUF_SIZE];
 
    while (1) {
-      printf("%s (y/n): ", prompt);
+      printf("%s (Y/n): ", prompt);
 
       if (fgets(buf, sizeof(buf), stdin) == NULL) {
          if (feof(stdin)) {
@@ -152,6 +152,10 @@ static int ask_yes_no(const char *prompt)
          }
          return -1;
       }
+
+      // Newline means yes
+      if (buf[0] == '\n')
+         return 1;
 
       // Remove trailing newline if present
       buf[strcspn(buf, "\n")] = '\0';
