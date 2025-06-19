@@ -7,6 +7,7 @@
 
 #include "diff.h"
 #include "debug.h"
+#include "record.h"
 #include "str.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@
 
 static int **alloc_matrix(size_t rows, size_t cols)
 {
-   int **matrix = calloc(rows, sizeof(int *));
+   int **matrix = (int **)calloc(rows, sizeof(int *));
    if (!matrix)
       return NULL;
 
@@ -23,7 +24,7 @@ static int **alloc_matrix(size_t rows, size_t cols)
       if (!matrix[i]) {
          for (size_t k = 0; k < i; ++k)
             free(matrix[k]);
-         free(matrix);
+         free((void *)matrix);
          return NULL;
       }
    }
@@ -34,7 +35,7 @@ static void free_matrix(int **matrix, size_t rows)
 {
    for (size_t i = 0; i < rows; ++i)
       free(matrix[i]);
-   free(matrix);
+   free((void *)matrix);
 }
 
 static void init_matrix(int **dp, size_t len1, size_t len2)

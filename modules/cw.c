@@ -62,7 +62,7 @@ void ascii_to_morse_expanded(const char *in, char *out)
          continue;
       }
 
-      c = toupper((unsigned char)c);
+      c = toupper(c);
 
       const int tbl_size = sizeof(morse_table) / sizeof(morse_table[0]);
       const char *mc = (c < tbl_size) ? morse_table[c] : NULL;
@@ -108,6 +108,9 @@ int count_units(const char *morse)
          if (p[1] != '\0')
             units += WORD_BREAK;
          break;
+      default:
+         ERROR("invalid case");
+         return -1;
       }
       p++;
    }
@@ -201,7 +204,7 @@ static void data_callback(ma_device *pDevice, void *pOutput, const void *pInput,
       }
 
       out[i * 2] = sample;
-      out[i * 2 + 1] = sample;
+      out[(i * 2) + 1] = sample;
       cw->total_samples++;
    }
 }
@@ -246,7 +249,7 @@ static int setup_audio_device(struct cw_data *cw, ma_device *dev)
 
 static char *prepare_morse(const char *str)
 {
-   char *morse = malloc(strlen(str) * 10 + 1);
+   char *morse = malloc((strlen(str) * 10) + 1);
    if (!morse) {
       ERROR("out of memory");
       return NULL;
@@ -313,7 +316,7 @@ float cw_duration(const char *str, const float speed1, const float speed2)
       return -1.0F;
 
    size_t len = strlen(str);
-   char *morse = malloc(len * 10 + 1);
+   char *morse = malloc((len * 10) + 1);
    if (!morse)
       return -1.0F;
 
@@ -344,6 +347,9 @@ float cw_duration(const char *str, const float speed1, const float speed2)
          if (p[1] != '\0')
             total += 7 * gap_dur;
          break;
+      default:
+         free(morse);
+         return -1.0F;
       }
       p++;
    }

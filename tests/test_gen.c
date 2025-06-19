@@ -7,7 +7,6 @@
 
 #include "debug.h"
 #include "gen.h"
-#include "record.h"
 #include "str.h"
 #include <ctype.h>
 #include <math.h>

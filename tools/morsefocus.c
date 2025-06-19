@@ -15,10 +15,10 @@
 #include "gen.h"
 #include "record.h"
 #include "str.h"
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_DIFF_LEN 8192
 #define SEC_PER_MIN 60.0F
@@ -202,7 +202,7 @@ static int parse_args(int argc, char **argv)
          return -1;
       }
 
-      const float err_pct = 100.0F * (float)args.rec.dist / (float)args.rec.len;
+      const float err_pct = 100.0F * args.rec.dist / args.rec.len;
       args.rec.speed2 *= (1.0F - PID_K * (err_pct / 100.0F - TARGET_ACCURACY));
    }
 
@@ -339,6 +339,8 @@ int main(int argc, char **argv)
 
    // Initial stats
    const float secs = cw_duration(gen_buf, args.rec.speed1, args.rec.speed2);
+   if (secs < 0)
+      return -1;
    printf("Sending %.0f characters at %.1f/%.1f wpm (~%.1f min)\r\n",
           args.rec.len, args.rec.speed1, args.rec.speed2, secs / SEC_PER_MIN);
    printf("Received text? ");
@@ -377,7 +379,7 @@ int main(int argc, char **argv)
 
    // Printout stats
    printf("Expected text: %s\n", gen_buf);
-   const float err_pct = 100.0F * (float)args.rec.dist / (float)args.rec.len;
+   const float err_pct = 100.0F * args.rec.dist / args.rec.len;
    record_printout(&r0);
    printf("%.0f errors out of %.0f = %.1f%%\n", args.rec.dist, args.rec.len,
           err_pct);

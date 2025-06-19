@@ -7,12 +7,9 @@
 
 #include "gen.h"
 #include "debug.h"
-#include "record.h"
 #include "str.h"
 #include "xorshift32.h"
-#include <ctype.h>
 #include <limits.h>
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

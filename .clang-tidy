@@ -12,10 +12,11 @@ Checks: >
   -*-braces-around-statements,
   -cppcoreguidelines-avoid-non-const-global-variables,
   -readability-identifier-length,
-  -readability-function-cognitive-complexity,
+  -cppcoreguidelines-macro-to-enum,
+  -modernize-macro-to-enum,
   -bugprone-easily-swappable-parameters,
-  -*-avoid-magic-numbers,
   -*-magic-numbers,
+  -readability-function-cognitive-complexity,
 
 WarningsAsErrors: '*'
 
