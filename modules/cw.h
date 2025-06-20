@@ -58,7 +58,8 @@ void ascii_to_morse_expanded(const char *in, char *out);
  * - '/' for word gap
  *
  * @param[in] morse Null-terminated expanded Morse code string.
- * @return Total number of time units for transmitting the Morse code.
+ * @return Total number of time units for transmitting the Morse code, or -1 on
+ * error.
  */
 int count_units(const char *morse);
 

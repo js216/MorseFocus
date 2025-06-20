@@ -9,7 +9,6 @@
 #include "debug.h"
 #include "record.h"
 #include "str.h"
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

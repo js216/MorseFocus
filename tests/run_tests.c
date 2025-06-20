@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "debug.h"
-#include "str.h"
 
 #include "test_cw.h"
 #include "test_diff.h"

@@ -10,6 +10,7 @@
 #include "record.h"
 #include "str.h"
 #include <math.h>
+#include <stddef.h>
 
 #define TEST_DIFF_NUM 6
 
