@@ -5,9 +5,9 @@
  * @author Jakob Kastelic
  */
 
-#include "debug.h"
-#include "gen.h"
-#include "str.h"
+#include "modules/debug.h"
+#include "modules/gen.h"
+#include "modules/str.h"
 #include <ctype.h>
 #include <math.h>
 #include <stddef.h>

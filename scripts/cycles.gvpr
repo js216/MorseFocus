@@ -1,0 +1,42 @@
+/*
+ * Detect directed cycles 
+ *
+ * Usage: gvpr -cf cycleColor.gvpr in.dot > out.dot
+*/
+
+BEG_G{
+  int      cnt, i;
+  node_t   tp, hp;
+  node_t   stack[node_t];
+  edge_t   anEdge;
+  string   Tail[], Head[];
+  $tvtype = TV_prepostfwd;
+  $tvroot = fstnode($);
+}
+
+N {
+  if (stack[$]) {
+    stack[$] = NULL;
+  } else if ($tvedge == NULL) { /* current root */
+    stack[$] = $;
+  } else {
+    stack[$] = $tvedge.tail;
+  }
+}
+
+E {
+  if (stack[$.head]) {
+    tp = $.tail;
+    hp = $.head;
+    $.color="red";
+    tp.color="green";
+    while (tp != $.head) {
+      tp.color="green";
+      hp.color="green";
+      hp = tp;
+      tp = stack[tp];
+      anEdge=isEdge(tp, hp, "");
+      anEdge.color="red";
+    }
+  }
+}

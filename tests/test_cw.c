@@ -5,8 +5,8 @@
  * @author Jakob Kastelic
  */
 
-#include "cw.h"
-#include "debug.h"
+#include "modules/cw.h"
+#include "modules/debug.h"
 #include <string.h>
 
 int test_ascii_to_morse_expanded(void)

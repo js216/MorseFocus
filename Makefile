@@ -2,7 +2,7 @@ CC = gcc
 INTERCEPT = intercept-build-14
 SCAN = scan-build-14
 
-INCLUDE = -Imodules -Ilib
+INCLUDE = -I.
 CFLAGS = -std=c99 -Wall -Wextra -Werror -pedantic -fanalyzer -MMD -MP $(INCLUDE)
 CFLAGS_LIBS = -std=c99 -Wall -Wextra -pedantic -MMD -MP $(INCLUDE)
 LDFLAGS = -lm

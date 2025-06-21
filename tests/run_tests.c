@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "debug.h"
+#include "modules/debug.h"
 
 #include "test_cw.h"
 #include "test_diff.h"

@@ -8,7 +8,7 @@
 #ifndef LEV_DIFF_H
 #define LEV_DIFF_H
 
-#include "record.h"
+#include "modules/record.h"
 #include <stddef.h>
 
 /**
