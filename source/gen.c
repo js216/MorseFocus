@@ -195,13 +195,11 @@ int gen_chars(char *s, const size_t num_char, const int min_word,
          wlen = (int)(num_char - 1 - written);
 
       for (int i = 0; i < wlen && written < num_char - 2; i++) {
-         char ch = '\0';
          if (!weights) {
-            ch = pick_random_char(charset);
+            s[written++] = pick_random_char(charset);
          } else {
-            ch = pick_weighted_char(charset, cdf);
+            s[written++] = pick_weighted_char(charset, cdf);
          }
-         s[written++] = ch;
       }
 
       if (written < num_char - 2)

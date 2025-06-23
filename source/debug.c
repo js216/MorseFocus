@@ -15,6 +15,7 @@ void debug_set_silent(bool silent)
    silence_errors = silent;
 }
 
+// cppcheck-suppress unusedFunction
 bool debug_is_silent(void)
 {
    return silence_errors;

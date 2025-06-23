@@ -2,7 +2,7 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic -fanalyzer -MMD -MP -Iinclude -I.
 OBJS = $(patsubst %.c, build/%.o, $(wildcard lib/*.c source/*.c))
 TEST = $(patsubst %.c, build/%.o, $(wildcard tests/*.c))
 
-.PHONY: test clean check check-format check-tidy check-scan
+.PHONY: test clean check format cppcheck tidy scan
 -include $(wildcard build/*.d)
 
 # Main program
@@ -30,20 +30,26 @@ test: build/prog/run_tests build/prog/morsefocus
 build/prog/run_tests: build/prog/run_tests.o $(OBJS) $(TEST)
 	$(CC) $^ -o $@ -lm
 
-check-format:
+format:
 	find . -path ./lib -prune -o \( -name '*.c' -o -name '*.h' \) -print \
 		| xargs clang-format --dry-run -Werror
 
-check-tidy: | build
+cppcheck:
+	perl scripts/colorize.pl --enable=all --inconclusive \
+		--std=c99 --force --quiet --inline-suppr --error-exitcode=1 \
+		--suppress=missingInclude \
+		$(wildcard source/*.c tests/*.c prog/*.c include/*.h)
+
+tidy: | build
 	$(MAKE) clean
 	intercept-build-14 --cdb build/compile_commands.json $(MAKE) test
 	sed -i 's/-fanalyzer//g' build/compile_commands.json
 	jq -r '.[].file' build/compile_commands.json | xargs clang-tidy \
 		-p build -system-headers -warnings-as-errors=*
 
-check-scan: | build
+scan: | build
 	$(MAKE) clean
 	scan-build-14 --status-bugs $(MAKE) test \
 		CFLAGS="$(filter-out -fanalyzer,$(CFLAGS))"
 
-check: test check-format check-tidy check-scan
+check: test format cppcheck tidy scan

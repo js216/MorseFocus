@@ -310,9 +310,8 @@ static char *get_user_input(size_t maxlen)
    // If newline is not found, discard the rest of the line
    size_t len = strlen(buf);
    if (len > 0 && buf[len - 1] != '\n') {
-      int ch = '\0';
-      while ((ch = getchar()) != '\n' && ch != EOF) {
-         /* discard */
+      for (int ch = getchar(); ch != '\n' && ch != EOF; ch = getchar()) {
+         // discard
       }
    } else {
       // Remove newline

@@ -261,46 +261,4 @@ char *str_dup(const char *s)
    return dup;
 }
 
-int str_file_lines(const char *filename)
-{
-   FILE *f = fopen(filename, "r");
-   if (!f) {
-      ERROR("could not open file");
-      return -1;
-   }
-
-   int lines = 0;
-   int c = 0;
-
-   while ((c = fgetc(f)) != EOF) {
-      if (c == '\n') {
-         lines++;
-      }
-   }
-
-   // If the file does not end with a newline but is not empty,
-   // count the last line as well
-   if (lines > 0) {
-      if (fseek(f, -1, SEEK_END) != 0) {
-         ERROR("fseek failed");
-         if (fclose(f) != 0) {
-            ERROR("failed to close file");
-            return -1;
-         }
-         return -1;
-      }
-
-      c = fgetc(f);
-      if (c != '\n') {
-         lines++;
-      }
-   }
-
-   if (fclose(f) != 0) {
-      ERROR("failed to close file");
-      return -1;
-   }
-   return lines;
-}
-
 // end file str.c
