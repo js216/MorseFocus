@@ -185,13 +185,19 @@ static int parse_args(int argc, char **argv)
 
    // mandatory positional filename argument
    if (argc < 2) {
-      if (fprintf(stderr, usage, argv[0]) < 0) {
+      if (fprintf(stderr, usage, argv[0]) < 0)
          ERROR("fprintf failed");
-         exit(-1);
-      }
       exit(-1);
    }
    args.file_name = argv[1];
+
+   // check a flag isn't taken for a filename
+   if (args.file_name[0] == '-') {
+      ERROR("invalid filename: %s", args.file_name);
+      if (fprintf(stderr, usage, argv[0]) < 0)
+         ERROR("fprintf failed");
+      exit(-1);
+   }
 
    // read values from file, if it has any content
    if (file_has_content(args.file_name)) {
@@ -392,6 +398,8 @@ int main(int argc, char **argv)
          ERROR("writing record to file: %s", args.file_name);
          return -1;
       }
+
+      printf("Written to %s.\r\n", args.file_name);
    }
 
    return 0;
