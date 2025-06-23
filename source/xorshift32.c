@@ -8,7 +8,7 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/xorshift32.h"
+#include "xorshift32.h"
 #include <stdint.h>
 #include <time.h>
 

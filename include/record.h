@@ -8,7 +8,7 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include "modules/str.h"
+#include "str.h"
 #include <time.h>
 
 struct record {

@@ -5,8 +5,8 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/str.h"
-#include "modules/debug.h"
+#include "str.h"
+#include "debug.h"
 #include <ctype.h>
 #include <limits.h>
 #include <stdio.h>

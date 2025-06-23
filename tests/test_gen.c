@@ -5,11 +5,12 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/debug.h"
-#include "modules/gen.h"
-#include "modules/str.h"
+#include "debug.h"
+#include "gen.h"
+#include "str.h"
 #include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -485,16 +486,16 @@ int test_validate_word(void)
    }
 
    // testing malformed input
-   silence_errors = 1;
+   debug_set_silent(true);
 
    if (!validate_word("inv@lid")) {
+      debug_set_silent(false);
       TEST_FAIL("invalid word accepted");
-      silence_errors = 0;
       return -1;
    }
 
    // resume printing errors
-   silence_errors = 0;
+   debug_set_silent(false);
 
    TEST_SUCCESS();
    return 0;
@@ -536,18 +537,18 @@ int test_parse_line(void)
    free(word);
 
    // testing malformed input
-   silence_errors = 1;
+   debug_set_silent(true);
 
    char line3[] = "bad line 1.0 2.0"; // writable buffer
    if (parse_line(line3, &word, &w, &hw) == 0) {
       free(word);
+      debug_set_silent(false);
       TEST_FAIL("accepted malformed input");
-      silence_errors = 0;
       return -1;
    }
 
    // resume printing errors
-   silence_errors = 0;
+   debug_set_silent(false);
 
    TEST_SUCCESS();
    return 0;
@@ -672,26 +673,26 @@ int test_gen_words(const char *tf1, const char *tf2, const char *tf3)
    }
 
    // testing malformed input
-   silence_errors = 1;
+   debug_set_silent(true);
 
    // case 2: non-existent word file (should fail)
    ret = gen_words(NULL, nonexistent_file, 2, 2);
    if (ret == 0) {
+      debug_set_silent(false);
       TEST_FAIL("gen_words succeeded with nonexistent word file");
-      silence_errors = 0;
       return -1;
    }
 
    // case 3: nl > number of lines in file (should fail)
    ret = gen_words(NULL, valid_word_file, 2, 10);
    if (ret == 0) {
+      debug_set_silent(false);
       TEST_FAIL("gen_words succeeded with nl > lines in file");
-      silence_errors = 0;
       return -1;
    }
 
    // resume printing errors
-   silence_errors = 0;
+   debug_set_silent(false);
 
    // cleanup test files
    if (remove(valid_word_file) != 0)

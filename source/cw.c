@@ -5,9 +5,9 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/cw.h"
+#include "cw.h"
+#include "debug.h"
 #include "lib/miniaudio.h"
-#include "modules/debug.h"
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>

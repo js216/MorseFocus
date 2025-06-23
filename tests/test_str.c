@@ -6,8 +6,8 @@
  */
 
 #include "test_str.h"
-#include "modules/debug.h"
-#include "modules/str.h"
+#include "debug.h"
+#include "str.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

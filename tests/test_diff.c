@@ -5,10 +5,10 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/debug.h"
-#include "modules/diff.h"
-#include "modules/record.h"
-#include "modules/str.h"
+#include "debug.h"
+#include "diff.h"
+#include "record.h"
+#include "str.h"
 #include <math.h>
 #include <stddef.h>
 

@@ -5,10 +5,10 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/gen.h"
-#include "modules/debug.h"
-#include "modules/str.h"
-#include "modules/xorshift32.h"
+#include "gen.h"
+#include "debug.h"
+#include "str.h"
+#include "xorshift32.h"
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>

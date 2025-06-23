@@ -8,19 +8,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "modules/debug.h"
+#include "debug.h"
 
-#include "test_cw.h"
-#include "test_diff.h"
-#include "test_gen.h"
-#include "test_record.h"
-#include "test_str.h"
+#include "tests/test_cw.h"
+#include "tests/test_diff.h"
+#include "tests/test_gen.h"
+#include "tests/test_record.h"
+#include "tests/test_str.h"
 
 #define TEST_FILE1 "test_file.txt"
 #define TEST_FILE2 "test_file1.txt"
 #define TEST_FILE3 "test_file2.txt"
-
-int silence_errors;
 
 static int test_files_check(const char *tf1, const char *tf2, const char *tf3)
 {

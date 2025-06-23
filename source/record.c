@@ -5,9 +5,9 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/record.h"
-#include "modules/debug.h"
-#include "modules/str.h"
+#include "record.h"
+#include "debug.h"
+#include "str.h"
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>

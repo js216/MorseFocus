@@ -9,12 +9,12 @@
  * @author Jakob Kastelic
  */
 
-#include "modules/cw.h"
-#include "modules/debug.h"
-#include "modules/diff.h"
-#include "modules/gen.h"
-#include "modules/record.h"
-#include "modules/str.h"
+#include "cw.h"
+#include "debug.h"
+#include "diff.h"
+#include "gen.h"
+#include "record.h"
+#include "str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +44,6 @@ struct ArgDef {
    void *target;
 };
 
-int silence_errors;
 static struct ParsedArgs args;
 
 static const struct ParsedArgs default_args = {
